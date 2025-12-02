@@ -4,11 +4,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-// Lien vers le .exe partagé (à remplacer par votre lien OneDrive/Google Drive/GitHub Release)
-const DOWNLOAD_URL = "#"; // Remplacez par votre lien de téléchargement
+// Liens de téléchargement (à remplacer par vos liens OneDrive/Google Drive/GitHub Release)
+const DOWNLOAD_URL = "#"; // Lien pour nouvelle installation
+const UPDATE_URL = "#";   // Lien pour mise à jour (peut être le même fichier)
+const APP_VERSION = "0.1.0";
 
 export default function LandingPage() {
   const [downloading, setDownloading] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
   const handleDownload = () => {
     if (DOWNLOAD_URL === "#") {
@@ -18,6 +21,16 @@ export default function LandingPage() {
     setDownloading(true);
     window.location.href = DOWNLOAD_URL;
     setTimeout(() => setDownloading(false), 3000);
+  };
+
+  const handleUpdate = () => {
+    if (UPDATE_URL === "#") {
+      alert("Le lien de mise à jour sera bientôt disponible. Contactez l'administrateur.");
+      return;
+    }
+    setUpdating(true);
+    window.location.href = UPDATE_URL;
+    setTimeout(() => setUpdating(false), 3000);
   };
 
   return (
@@ -41,7 +54,7 @@ export default function LandingPage() {
               </div>
               <span className="text-xl font-bold">Security Scanner</span>
             </div>
-            <span className="text-sm text-slate-400">v0.1.0</span>
+            <span className="text-sm text-slate-400">v{APP_VERSION}</span>
           </div>
         </header>
 
@@ -66,14 +79,14 @@ export default function LandingPage() {
 
             {/* Subtitle */}
             <p className="text-xl text-slate-400 mb-4 max-w-2xl mx-auto">
-              Analysez la sécurité de votre système Windows en quelques clics
+              Analysez la sécurité de votre système en quelques clics
             </p>
             <p className="text-sm text-slate-500 mb-12">
               Basé sur les recommandations Microsoft Security Baselines & CIS Benchmarks
             </p>
 
             {/* Download Button */}
-            <div className="mb-12">
+            <div className="mb-8">
               <Button
                 onClick={handleDownload}
                 disabled={downloading}
@@ -92,12 +105,42 @@ export default function LandingPage() {
                     <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Télécharger pour Windows
+                    Télécharger l'application
                   </>
                 )}
               </Button>
               <p className="mt-4 text-sm text-slate-500">
-                Windows 10/11 • 64-bit • ~190 MB
+                Windows • macOS • Linux • 64-bit
+              </p>
+            </div>
+
+            {/* Update Button */}
+            <div className="mb-12">
+              <Button
+                onClick={handleUpdate}
+                disabled={updating}
+                variant="outline"
+                className="px-6 py-4 text-base border-slate-600 hover:border-emerald-500 hover:bg-emerald-500/10 text-slate-300 hover:text-emerald-400 rounded-xl transition-all"
+              >
+                {updating ? (
+                  <>
+                    <svg className="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Téléchargement...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Mettre à jour (déjà installé)
+                  </>
+                )}
+              </Button>
+              <p className="mt-2 text-xs text-slate-600">
+                Téléchargez et lancez le fichier pour mettre à jour votre installation existante
               </p>
             </div>
 
@@ -121,7 +164,7 @@ export default function LandingPage() {
                   </svg>
                 </div>
                 <h3 className="text-lg font-semibold mb-2">Auto-détection</h3>
-                <p className="text-sm text-slate-400">S'adapte automatiquement à Windows Home, Pro ou Enterprise</p>
+                <p className="text-sm text-slate-400">S'adapte automatiquement à votre OS : Windows, macOS ou Linux</p>
               </div>
 
               <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
