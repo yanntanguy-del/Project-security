@@ -1,0 +1,147 @@
+{
+  "metadata": {
+    "name": "CIS Debian 12 Bookworm Benchmark",
+    "version": "1.0.0",
+    "description": "Baseline de sécurité pour Debian 12 basé sur CIS Benchmarks",
+    "os": "Linux",
+    "distro": "Debian",
+    "distroVersion": "12",
+    "source": "CIS Benchmarks + ANSSI Guidelines",
+    "lastUpdated": "2025-01-15"
+  },
+  "variants": {
+    "Server": {
+      "additionalFindings": [
+        {
+          "id": "DEB-SRV001",
+          "category": "Server Hardening",
+          "name": "Fail2ban Service",
+          "method": "command",
+          "command": "systemctl is-active fail2ban 2>/dev/null || echo 'inactive'",
+          "severity": "High",
+          "recommendedValue": "active",
+          "description": "Fail2ban protège contre les attaques par force brute"
+        }
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "DEB1001",
+      "category": "System Integrity",
+      "name": "AIDE Installed",
+      "method": "command",
+      "command": "dpkg -l aide 2>/dev/null | grep -c '^ii' || echo '0'",
+      "severity": "High",
+      "recommendedValue": "1",
+      "description": "AIDE (Advanced Intrusion Detection Environment) doit être installé",
+      "remediation": {
+        "default": "apt install aide && aideinit"
+      }
+    },
+    {
+      "id": "DEB2001",
+      "category": "Boot Security",
+      "name": "GRUB Password",
+      "method": "file",
+      "path": "/boot/grub/grub.cfg",
+      "pattern": "password_pbkdf2",
+      "severity": "High",
+      "description": "Mot de passe GRUB pour protéger le bootloader",
+      "remediation": {
+        "default": "grub-mkpasswd-pbkdf2 et configurer dans /etc/grub.d/40_custom"
+      }
+    },
+    {
+      "id": "DEB3001",
+      "category": "Mandatory Access Control",
+      "name": "AppArmor Status",
+      "method": "command",
+      "command": "aa-status --enabled 2>/dev/null && echo 'enabled' || echo 'disabled'",
+      "severity": "High",
+      "recommendedValue": "enabled",
+      "description": "AppArmor doit être activé pour le contrôle d'accès obligatoire",
+      "remediation": {
+        "default": "apt install apparmor apparmor-utils && systemctl enable apparmor"
+      }
+    },
+    {
+      "id": "DEB4001",
+      "category": "SSH",
+      "name": "SSH Root Login",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i permitrootlogin | awk '{print $2}'",
+      "severity": "High",
+      "recommendedValue": "no",
+      "description": "Désactiver la connexion root par SSH",
+      "remediation": {
+        "default": "PermitRootLogin no dans /etc/ssh/sshd_config"
+      }
+    },
+    {
+      "id": "DEB4002",
+      "category": "SSH",
+      "name": "SSH Password Auth",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i passwordauthentication | awk '{print $2}'",
+      "severity": "Medium",
+      "recommendedValue": "no",
+      "description": "Préférer l'authentification par clé",
+      "remediation": {
+        "default": "PasswordAuthentication no (après configuration des clés)"
+      }
+    },
+    {
+      "id": "DEB5001",
+      "category": "Firewall",
+      "name": "nftables Status",
+      "method": "command",
+      "command": "systemctl is-active nftables 2>/dev/null || echo 'inactive'",
+      "severity": "High",
+      "recommendedValue": "active",
+      "description": "nftables est le pare-feu par défaut de Debian 12",
+      "remediation": {
+        "default": "apt install nftables && systemctl enable --now nftables"
+      }
+    },
+    {
+      "id": "DEB6001",
+      "category": "Kernel",
+      "name": "ASLR",
+      "method": "sysctl",
+      "key": "kernel.randomize_va_space",
+      "severity": "High",
+      "recommendedValue": "2",
+      "description": "ASLR doit être activé",
+      "remediation": {
+        "default": "sysctl -w kernel.randomize_va_space=2"
+      }
+    },
+    {
+      "id": "DEB7001",
+      "category": "Updates",
+      "name": "Unattended Upgrades",
+      "method": "command",
+      "command": "dpkg -l unattended-upgrades 2>/dev/null | grep -c '^ii' || echo '0'",
+      "severity": "High",
+      "recommendedValue": "1",
+      "description": "Les mises à jour automatiques doivent être configurées",
+      "remediation": {
+        "default": "apt install unattended-upgrades && dpkg-reconfigure -plow unattended-upgrades"
+      }
+    },
+    {
+      "id": "DEB8001",
+      "category": "Logging",
+      "name": "Auditd",
+      "method": "command",
+      "command": "systemctl is-active auditd 2>/dev/null || echo 'inactive'",
+      "severity": "High",
+      "recommendedValue": "active",
+      "description": "Auditd doit être actif pour la traçabilité",
+      "remediation": {
+        "default": "apt install auditd && systemctl enable --now auditd"
+      }
+    }
+  ]
+}

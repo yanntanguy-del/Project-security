@@ -36,6 +36,20 @@ yarn-error.log*
 # vercel
 .vercel
 
+# HardeningKitty local installation
+/HardeningKitty
+HardeningKitty.zip
+
+# HardeningKitty reports
+/reports
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/app/generated/prisma
+
+.vercel
+
+# Electron build output
+/dist

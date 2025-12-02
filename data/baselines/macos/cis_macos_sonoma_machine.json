@@ -1,0 +1,701 @@
+{
+  "metadata": {
+    "name": "CIS Apple macOS 14 Sonoma Benchmark",
+    "version": "1.0.0",
+    "description": "Baseline de sécurité basé sur CIS Benchmarks pour macOS Sonoma",
+    "os": "macOS",
+    "osVersion": "14",
+    "minVersion": "14.0",
+    "maxVersion": "14.99",
+    "source": "CIS Benchmarks + Apple Security Guidelines",
+    "lastUpdated": "2025-01-15"
+  },
+  "variants": {
+    "Apple Silicon": {
+      "additionalFindings": [
+        {
+          "id": "MAC-AS001",
+          "category": "Apple Silicon Security",
+          "name": "Secure Enclave Status",
+          "method": "command",
+          "command": "system_profiler SPiBridgeDataType 2>/dev/null | grep -q 'Secure Enclave'",
+          "severity": "Info",
+          "recommendedValue": "Available",
+          "description": "Vérifier la présence du Secure Enclave (Apple Silicon)"
+        },
+        {
+          "id": "MAC-AS002",
+          "category": "Apple Silicon Security",
+          "name": "Kernel Integrity Protection",
+          "method": "command",
+          "command": "csrutil authenticated-root status",
+          "severity": "High",
+          "recommendedValue": "enabled",
+          "description": "Protection de l'intégrité du kernel (Signed System Volume)"
+        }
+      ]
+    },
+    "Intel": {
+      "additionalFindings": [
+        {
+          "id": "MAC-INT001",
+          "category": "Intel Security",
+          "name": "T2 Security Chip",
+          "method": "command",
+          "command": "system_profiler SPiBridgeDataType 2>/dev/null | grep -q 'T2'",
+          "severity": "Info",
+          "recommendedValue": "Present",
+          "description": "Vérifier la présence de la puce T2 (Mac Intel récents)"
+        }
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "MAC1001",
+      "category": "System Integrity Protection",
+      "name": "System Integrity Protection (SIP)",
+      "method": "command",
+      "command": "csrutil status",
+      "severity": "Critical",
+      "defaultValue": "enabled",
+      "recommendedValue": "enabled",
+      "operator": "contains",
+      "description": "SIP protège les fichiers et dossiers système contre les modifications",
+      "remediation": {
+        "default": "Redémarrer en Recovery Mode (Cmd+R), ouvrir Terminal, exécuter: csrutil enable",
+        "manual": "Recovery Mode > Terminal > csrutil enable > Redémarrer"
+      }
+    },
+    {
+      "id": "MAC1002",
+      "category": "System Integrity Protection",
+      "name": "Gatekeeper Status",
+      "method": "command",
+      "command": "spctl --status",
+      "severity": "High",
+      "defaultValue": "assessments enabled",
+      "recommendedValue": "assessments enabled",
+      "operator": "contains",
+      "description": "Gatekeeper vérifie que les apps téléchargées proviennent de développeurs identifiés",
+      "remediation": {
+        "default": "sudo spctl --master-enable",
+        "gui": "Préférences Système > Confidentialité et Sécurité > Autoriser les applications téléchargées de: App Store et développeurs identifiés"
+      }
+    },
+    {
+      "id": "MAC1003",
+      "category": "System Integrity Protection",
+      "name": "XProtect Status",
+      "method": "command",
+      "command": "system_profiler SPInstallHistoryDataType | grep -A 2 'XProtect'",
+      "severity": "High",
+      "recommendedValue": "installed",
+      "description": "XProtect est l'antimalware intégré d'Apple",
+      "remediation": {
+        "default": "Installer les mises à jour système via: softwareupdate --install --all"
+      }
+    },
+    {
+      "id": "MAC1004",
+      "category": "System Integrity Protection",
+      "name": "MRT (Malware Removal Tool)",
+      "method": "command",
+      "command": "ls /Library/Apple/System/Library/CoreServices/MRT.app",
+      "severity": "Medium",
+      "recommendedValue": "present",
+      "description": "MRT supprime automatiquement les malwares connus",
+      "remediation": {
+        "default": "Installer les mises à jour système"
+      }
+    },
+    {
+      "id": "MAC2001",
+      "category": "FileVault",
+      "name": "FileVault Disk Encryption",
+      "method": "command",
+      "command": "fdesetup status",
+      "severity": "Critical",
+      "defaultValue": "Off",
+      "recommendedValue": "On",
+      "operator": "contains",
+      "description": "FileVault chiffre l'intégralité du disque pour protéger les données",
+      "remediation": {
+        "default": "sudo fdesetup enable",
+        "gui": "Préférences Système > Confidentialité et Sécurité > FileVault > Activer FileVault"
+      }
+    },
+    {
+      "id": "MAC2002",
+      "category": "FileVault",
+      "name": "FileVault Recovery Key",
+      "method": "command",
+      "command": "sudo fdesetup haspersonalrecoverykey",
+      "severity": "High",
+      "recommendedValue": "true",
+      "description": "Une clé de récupération FileVault doit être configurée",
+      "remediation": {
+        "default": "Lors de l'activation de FileVault, sauvegarder la clé de récupération"
+      }
+    },
+    {
+      "id": "MAC3001",
+      "category": "Firewall",
+      "name": "Application Firewall Status",
+      "method": "command",
+      "command": "sudo /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate",
+      "severity": "High",
+      "defaultValue": "disabled",
+      "recommendedValue": "enabled",
+      "operator": "contains",
+      "description": "Le pare-feu applicatif macOS doit être activé",
+      "remediation": {
+        "default": "sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on",
+        "gui": "Préférences Système > Réseau > Pare-feu > Activer"
+      }
+    },
+    {
+      "id": "MAC3002",
+      "category": "Firewall",
+      "name": "Firewall Stealth Mode",
+      "method": "command",
+      "command": "sudo /usr/libexec/ApplicationFirewall/socketfilterfw --getstealthmode",
+      "severity": "Medium",
+      "defaultValue": "disabled",
+      "recommendedValue": "enabled",
+      "operator": "contains",
+      "description": "Le mode furtif empêche la machine de répondre aux requêtes ping et probes",
+      "remediation": {
+        "default": "sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setstealthmode on",
+        "gui": "Préférences Système > Réseau > Pare-feu > Options > Activer le mode furtif"
+      }
+    },
+    {
+      "id": "MAC3003",
+      "category": "Firewall",
+      "name": "Block All Incoming Connections",
+      "method": "command",
+      "command": "sudo /usr/libexec/ApplicationFirewall/socketfilterfw --getblockall",
+      "severity": "Low",
+      "defaultValue": "disabled",
+      "recommendedValue": "disabled",
+      "description": "Option pour bloquer toutes les connexions entrantes (mode paranoid)",
+      "remediation": {
+        "default": "sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setblockall on"
+      }
+    },
+    {
+      "id": "MAC4001",
+      "category": "Screen Lock",
+      "name": "Require Password After Sleep/Screensaver",
+      "method": "defaults",
+      "domain": "com.apple.screensaver",
+      "key": "askForPassword",
+      "severity": "High",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Exiger le mot de passe immédiatement après la mise en veille",
+      "remediation": {
+        "default": "defaults write com.apple.screensaver askForPassword -int 1",
+        "gui": "Préférences Système > Écran de verrouillage > Exiger le mot de passe"
+      }
+    },
+    {
+      "id": "MAC4002",
+      "category": "Screen Lock",
+      "name": "Password Delay After Sleep",
+      "method": "defaults",
+      "domain": "com.apple.screensaver",
+      "key": "askForPasswordDelay",
+      "severity": "Medium",
+      "defaultValue": "300",
+      "recommendedValue": "0",
+      "operator": "<=",
+      "description": "Délai avant demande de mot de passe (0 = immédiatement)",
+      "remediation": {
+        "default": "defaults write com.apple.screensaver askForPasswordDelay -int 0"
+      }
+    },
+    {
+      "id": "MAC4003",
+      "category": "Screen Lock",
+      "name": "Auto Logout Idle Time",
+      "method": "defaults",
+      "domain": "/Library/Preferences/.GlobalPreferences",
+      "key": "com.apple.autologout.AutoLogOutDelay",
+      "severity": "Low",
+      "recommendedValue": "3600",
+      "operator": "<=",
+      "description": "Déconnexion automatique après période d'inactivité (en secondes)",
+      "remediation": {
+        "default": "sudo defaults write /Library/Preferences/.GlobalPreferences com.apple.autologout.AutoLogOutDelay -int 3600"
+      }
+    },
+    {
+      "id": "MAC5001",
+      "category": "Remote Access",
+      "name": "SSH Remote Login",
+      "method": "command",
+      "command": "sudo systemsetup -getremotelogin",
+      "severity": "Medium",
+      "defaultValue": "Off",
+      "recommendedValue": "Off",
+      "operator": "contains",
+      "description": "SSH doit être désactivé si non nécessaire",
+      "remediation": {
+        "default": "sudo systemsetup -setremotelogin off",
+        "gui": "Préférences Système > Général > Partage > Connexion à distance"
+      }
+    },
+    {
+      "id": "MAC5002",
+      "category": "Remote Access",
+      "name": "Screen Sharing",
+      "method": "command",
+      "command": "sudo launchctl list | grep -c screensharing",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Le partage d'écran doit être désactivé si non nécessaire",
+      "remediation": {
+        "default": "sudo launchctl disable system/com.apple.screensharing",
+        "gui": "Préférences Système > Général > Partage > Partage d'écran"
+      }
+    },
+    {
+      "id": "MAC5003",
+      "category": "Remote Access",
+      "name": "Remote Apple Events",
+      "method": "command",
+      "command": "sudo systemsetup -getremoteappleevents",
+      "severity": "Medium",
+      "defaultValue": "Off",
+      "recommendedValue": "Off",
+      "operator": "contains",
+      "description": "Les Apple Events distants doivent être désactivés",
+      "remediation": {
+        "default": "sudo systemsetup -setremoteappleevents off"
+      }
+    },
+    {
+      "id": "MAC5004",
+      "category": "Remote Access",
+      "name": "Remote Management (ARD)",
+      "method": "command",
+      "command": "sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -configure -clientopts -getoption -deny",
+      "severity": "Medium",
+      "recommendedValue": "disabled",
+      "description": "Apple Remote Desktop doit être désactivé si non utilisé",
+      "remediation": {
+        "default": "sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -deactivate -stop"
+      }
+    },
+    {
+      "id": "MAC6001",
+      "category": "Privacy",
+      "name": "Location Services",
+      "method": "command",
+      "command": "sudo defaults read /var/db/locationd/Library/Preferences/ByHost/com.apple.locationd.plist LocationServicesEnabled 2>/dev/null || echo 'not set'",
+      "severity": "Low",
+      "recommendedValue": "0",
+      "description": "Services de localisation - à désactiver si non nécessaire",
+      "remediation": {
+        "gui": "Préférences Système > Confidentialité et Sécurité > Services de localisation"
+      }
+    },
+    {
+      "id": "MAC6002",
+      "category": "Privacy",
+      "name": "Diagnostic Data Sharing",
+      "method": "defaults",
+      "domain": "/Library/Application Support/CrashReporter/DiagnosticMessagesHistory.plist",
+      "key": "AutoSubmit",
+      "severity": "Low",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "description": "Limiter le partage de données de diagnostic avec Apple",
+      "remediation": {
+        "gui": "Préférences Système > Confidentialité et Sécurité > Analyses et améliorations"
+      }
+    },
+    {
+      "id": "MAC6003",
+      "category": "Privacy",
+      "name": "Siri Data Collection",
+      "method": "defaults",
+      "domain": "com.apple.assistant.support",
+      "key": "Assistant Enabled",
+      "severity": "Low",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "description": "Désactiver Siri réduit la collecte de données vocales",
+      "remediation": {
+        "default": "defaults write com.apple.assistant.support 'Assistant Enabled' -bool false",
+        "gui": "Préférences Système > Siri et Spotlight > Désactiver Siri"
+      }
+    },
+    {
+      "id": "MAC7001",
+      "category": "Software Updates",
+      "name": "Automatic Updates Check",
+      "method": "defaults",
+      "domain": "/Library/Preferences/com.apple.SoftwareUpdate",
+      "key": "AutomaticCheckEnabled",
+      "severity": "High",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "La vérification automatique des mises à jour doit être activée",
+      "remediation": {
+        "default": "sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticCheckEnabled -bool true"
+      }
+    },
+    {
+      "id": "MAC7002",
+      "category": "Software Updates",
+      "name": "Download Updates Automatically",
+      "method": "defaults",
+      "domain": "/Library/Preferences/com.apple.SoftwareUpdate",
+      "key": "AutomaticDownload",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Le téléchargement automatique des mises à jour doit être activé",
+      "remediation": {
+        "default": "sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownload -bool true"
+      }
+    },
+    {
+      "id": "MAC7003",
+      "category": "Software Updates",
+      "name": "Install System Data Files",
+      "method": "defaults",
+      "domain": "/Library/Preferences/com.apple.SoftwareUpdate",
+      "key": "ConfigDataInstall",
+      "severity": "High",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Installer automatiquement les fichiers de données système et de sécurité",
+      "remediation": {
+        "default": "sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate ConfigDataInstall -bool true"
+      }
+    },
+    {
+      "id": "MAC7004",
+      "category": "Software Updates",
+      "name": "Install Security Responses",
+      "method": "defaults",
+      "domain": "/Library/Preferences/com.apple.SoftwareUpdate",
+      "key": "CriticalUpdateInstall",
+      "severity": "Critical",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Installer automatiquement les Rapid Security Responses",
+      "remediation": {
+        "default": "sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate CriticalUpdateInstall -bool true"
+      }
+    },
+    {
+      "id": "MAC8001",
+      "category": "Safari Security",
+      "name": "Safari Fraudulent Sites Warning",
+      "method": "defaults",
+      "domain": "com.apple.Safari",
+      "key": "WarnAboutFraudulentWebsites",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Safari doit avertir des sites frauduleux",
+      "remediation": {
+        "default": "defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true"
+      }
+    },
+    {
+      "id": "MAC8002",
+      "category": "Safari Security",
+      "name": "Safari JavaScript",
+      "method": "defaults",
+      "domain": "com.apple.Safari",
+      "key": "WebKitJavaScriptEnabled",
+      "severity": "Info",
+      "recommendedValue": "1",
+      "description": "JavaScript dans Safari (désactiver réduit la surface d'attaque mais casse beaucoup de sites)",
+      "remediation": {
+        "default": "defaults write com.apple.Safari WebKitJavaScriptEnabled -bool false"
+      }
+    },
+    {
+      "id": "MAC8003",
+      "category": "Safari Security",
+      "name": "Safari Autofill Passwords",
+      "method": "defaults",
+      "domain": "com.apple.Safari",
+      "key": "AutoFillPasswords",
+      "severity": "Low",
+      "recommendedValue": "0",
+      "description": "Désactiver le remplissage automatique des mots de passe dans Safari",
+      "remediation": {
+        "default": "defaults write com.apple.Safari AutoFillPasswords -bool false"
+      }
+    },
+    {
+      "id": "MAC8004",
+      "category": "Safari Security",
+      "name": "Safari Open Safe Files",
+      "method": "defaults",
+      "domain": "com.apple.Safari",
+      "key": "AutoOpenSafeDownloads",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Ne pas ouvrir automatiquement les fichiers 'sûrs' téléchargés",
+      "remediation": {
+        "default": "defaults write com.apple.Safari AutoOpenSafeDownloads -bool false"
+      }
+    },
+    {
+      "id": "MAC9001",
+      "category": "Network Security",
+      "name": "Bluetooth Status",
+      "method": "command",
+      "command": "defaults read /Library/Preferences/com.apple.Bluetooth.plist ControllerPowerState 2>/dev/null || echo '1'",
+      "severity": "Low",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "description": "Désactiver Bluetooth quand non utilisé réduit la surface d'attaque",
+      "remediation": {
+        "default": "sudo defaults write /Library/Preferences/com.apple.Bluetooth.plist ControllerPowerState -int 0",
+        "gui": "Préférences Système > Bluetooth > Désactiver"
+      }
+    },
+    {
+      "id": "MAC9002",
+      "category": "Network Security",
+      "name": "Bluetooth Discoverability",
+      "method": "defaults",
+      "domain": "/Library/Preferences/com.apple.Bluetooth",
+      "key": "DiscoverableMode",
+      "severity": "Medium",
+      "recommendedValue": "0",
+      "description": "La machine ne doit pas être détectable en Bluetooth",
+      "remediation": {
+        "default": "sudo defaults write /Library/Preferences/com.apple.Bluetooth DiscoverableMode -bool false"
+      }
+    },
+    {
+      "id": "MAC9003",
+      "category": "Network Security",
+      "name": "AirDrop Mode",
+      "method": "defaults",
+      "domain": "com.apple.sharingd",
+      "key": "DiscoverableMode",
+      "severity": "Medium",
+      "defaultValue": "Everyone",
+      "recommendedValue": "Off",
+      "description": "AirDrop doit être désactivé ou limité aux contacts uniquement",
+      "remediation": {
+        "default": "defaults write com.apple.sharingd DiscoverableMode -string 'Off'",
+        "gui": "Finder > AirDrop > Me rendre détectable par: Personne"
+      }
+    },
+    {
+      "id": "MAC9004",
+      "category": "Network Security",
+      "name": "Wi-Fi Auto Join Hotspot",
+      "method": "defaults",
+      "domain": "/Library/Preferences/SystemConfiguration/com.apple.wifi.message-tracer",
+      "key": "AutoJoin Hotspot 2.0 Enabled",
+      "severity": "Medium",
+      "recommendedValue": "0",
+      "description": "Désactiver la connexion automatique aux hotspots",
+      "remediation": {
+        "gui": "Préférences Système > Wi-Fi > Décocher 'Rejoindre automatiquement les réseaux'"
+      }
+    },
+    {
+      "id": "MAC10001",
+      "category": "User Account Security",
+      "name": "Guest Account Status",
+      "method": "command",
+      "command": "sudo dscl . read /Users/Guest AuthenticationAuthority 2>/dev/null | grep -c 'DisabledUser' || echo 'enabled'",
+      "severity": "Medium",
+      "recommendedValue": "disabled",
+      "description": "Le compte invité doit être désactivé",
+      "remediation": {
+        "default": "sudo dscl . create /Users/Guest AuthenticationAuthority ';DisabledUser;'",
+        "gui": "Préférences Système > Utilisateurs et groupes > Invité > Décocher 'Autoriser les invités'"
+      }
+    },
+    {
+      "id": "MAC10002",
+      "category": "User Account Security",
+      "name": "Login Window Show Full Name",
+      "method": "defaults",
+      "domain": "/Library/Preferences/com.apple.loginwindow",
+      "key": "SHOWFULLNAME",
+      "severity": "Low",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "description": "Afficher nom et mot de passe au lieu de la liste d'utilisateurs",
+      "remediation": {
+        "default": "sudo defaults write /Library/Preferences/com.apple.loginwindow SHOWFULLNAME -bool true"
+      }
+    },
+    {
+      "id": "MAC10003",
+      "category": "User Account Security",
+      "name": "Disable Password Hints",
+      "method": "defaults",
+      "domain": "/Library/Preferences/com.apple.loginwindow",
+      "key": "RetriesUntilHint",
+      "severity": "Medium",
+      "defaultValue": "3",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Désactiver les indices de mot de passe",
+      "remediation": {
+        "default": "sudo defaults write /Library/Preferences/com.apple.loginwindow RetriesUntilHint -int 0"
+      }
+    },
+    {
+      "id": "MAC10004",
+      "category": "User Account Security",
+      "name": "Secure Empty Trash",
+      "method": "defaults",
+      "domain": "com.apple.finder",
+      "key": "EmptyTrashSecurely",
+      "severity": "Low",
+      "recommendedValue": "1",
+      "description": "Vider la corbeille de manière sécurisée (obsolète sur SSD avec TRIM)",
+      "remediation": {
+        "default": "defaults write com.apple.finder EmptyTrashSecurely -bool true"
+      }
+    },
+    {
+      "id": "MAC11001",
+      "category": "Time Machine",
+      "name": "Time Machine Encryption",
+      "method": "command",
+      "command": "tmutil destinationinfo 2>/dev/null | grep -c 'Encrypted: true' || echo '0'",
+      "severity": "High",
+      "recommendedValue": "1",
+      "description": "Les sauvegardes Time Machine doivent être chiffrées",
+      "remediation": {
+        "gui": "Préférences Système > Time Machine > Chiffrer les sauvegardes"
+      }
+    },
+    {
+      "id": "MAC11002",
+      "category": "Time Machine",
+      "name": "Time Machine Automatic Backup",
+      "method": "defaults",
+      "domain": "/Library/Preferences/com.apple.TimeMachine",
+      "key": "AutoBackup",
+      "severity": "Medium",
+      "recommendedValue": "1",
+      "description": "Les sauvegardes automatiques Time Machine doivent être activées",
+      "remediation": {
+        "default": "sudo defaults write /Library/Preferences/com.apple.TimeMachine AutoBackup -bool true"
+      }
+    },
+    {
+      "id": "MAC12001",
+      "category": "Kernel Extensions",
+      "name": "Allow User-Approved Kernel Extensions",
+      "method": "command",
+      "command": "spctl kext-consent status 2>/dev/null",
+      "severity": "Medium",
+      "recommendedValue": "enabled",
+      "description": "Les extensions kernel doivent nécessiter une approbation utilisateur",
+      "remediation": {
+        "default": "Activer Secure Boot en mode Full Security dans les paramètres de démarrage"
+      }
+    },
+    {
+      "id": "MAC12002",
+      "category": "Secure Boot",
+      "name": "Secure Boot Level",
+      "method": "command",
+      "command": "nvram 94B73556-2197-4702-82A8-3E1337DAFBFB:AppleSecureBootPolicy 2>/dev/null || echo 'not available'",
+      "severity": "High",
+      "recommendedValue": "02",
+      "description": "Secure Boot doit être en mode Full Security",
+      "remediation": {
+        "manual": "Démarrer en Recovery Mode > Startup Security Utility > Full Security"
+      }
+    },
+    {
+      "id": "MAC13001",
+      "category": "Application Security",
+      "name": "App Sandbox",
+      "method": "info",
+      "severity": "Info",
+      "description": "Les applications du Mac App Store sont sandboxées automatiquement",
+      "remediation": {
+        "info": "Préférer les applications du Mac App Store pour bénéficier du sandboxing"
+      }
+    },
+    {
+      "id": "MAC13002",
+      "category": "Application Security",
+      "name": "Notarization Check",
+      "method": "command",
+      "command": "spctl -a -v /Applications/*.app 2>&1 | head -5",
+      "severity": "Medium",
+      "description": "Les applications doivent être notarisées par Apple",
+      "remediation": {
+        "info": "N'installer que des applications notarisées ou du Mac App Store"
+      }
+    },
+    {
+      "id": "MAC14001",
+      "category": "Terminal Security",
+      "name": "Terminal Secure Keyboard Entry",
+      "method": "defaults",
+      "domain": "com.apple.Terminal",
+      "key": "SecureKeyboardEntry",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer la saisie clavier sécurisée dans Terminal",
+      "remediation": {
+        "default": "defaults write com.apple.Terminal SecureKeyboardEntry -bool true",
+        "gui": "Terminal > Menu Terminal > Sécuriser la saisie du clavier"
+      }
+    },
+    {
+      "id": "MAC15001",
+      "category": "iCloud Security",
+      "name": "iCloud Keychain",
+      "method": "defaults",
+      "domain": "MobileMeAccounts",
+      "key": "Accounts",
+      "severity": "Info",
+      "description": "Trousseau iCloud synchronise les mots de passe entre appareils Apple",
+      "remediation": {
+        "gui": "Préférences Système > Apple ID > iCloud > Trousseau"
+      }
+    },
+    {
+      "id": "MAC15002",
+      "category": "iCloud Security",
+      "name": "Find My Mac",
+      "method": "command",
+      "command": "nvram -p | grep -c 'fmm-mobileme-token-FMM'",
+      "severity": "Medium",
+      "recommendedValue": "1",
+      "description": "Localiser mon Mac permet de retrouver ou effacer l'appareil à distance",
+      "remediation": {
+        "gui": "Préférences Système > Apple ID > iCloud > Localiser mon Mac"
+      }
+    }
+  ]
+}

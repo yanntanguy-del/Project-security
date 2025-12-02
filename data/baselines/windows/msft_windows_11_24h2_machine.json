@@ -1,0 +1,1618 @@
+{
+  "metadata": {
+    "name": "Microsoft Security Baseline Windows 11 24H2",
+    "version": "24H2",
+    "source": "HardeningKitty",
+    "osVersion": "11",
+    "minBuild": 26100,
+    "lastUpdated": "2025-12-01"
+  },
+  "variants": {
+    "Home": {
+      "excludeFindings": ["10000", "10001", "10003", "10100", "10101", "10102", "10103", "10672", "10673", "10674", "10698", "10700", "10756", "10757", "10758", "10759", "10993", "ENT001", "ENT002"],
+      "description": "Windows Home n'a pas BitLocker, Device Guard, Credential Guard, LSASS PPL, Network Protection via GPO, AppLocker, Application Guard. Les politiques de mot de passe locales sont ignorées car la plupart utilisent un compte Microsoft."
+    },
+    "Pro": {
+      "excludeFindings": ["10674"],
+      "description": "Windows Pro a BitLocker mais pas Credential Guard complet"
+    },
+    "Enterprise": {
+      "additionalFindings": [
+        {
+          "id": "ENT001",
+          "category": "Enterprise Features",
+          "name": "Windows Defender Application Guard",
+          "method": "Registry",
+          "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\AppHVSI",
+          "registryItem": "AllowAppHVSI_ProviderSet",
+          "severity": "Medium",
+          "recommendedValue": "1",
+          "description": "Activer Application Guard pour Edge"
+        },
+        {
+          "id": "ENT002",
+          "category": "Enterprise Features",
+          "name": "AppLocker Executable Rules",
+          "method": "service",
+          "methodArgument": "AppIDSvc",
+          "severity": "Medium",
+          "description": "Service AppLocker pour contrôle des applications"
+        }
+      ]
+    },
+    "Dell": {
+      "additionalFindings": [
+        {
+          "id": "DELL001",
+          "category": "OEM - Dell",
+          "name": "Dell SupportAssist Service",
+          "method": "service",
+          "methodArgument": "SupportAssistAgent",
+          "severity": "Low",
+          "recommendedValue": "Disabled",
+          "description": "Service Dell SupportAssist - peut être désactivé si non utilisé",
+          "remediation": {
+            "default": "Set-Service -Name SupportAssistAgent -StartupType Disabled -ErrorAction SilentlyContinue"
+          }
+        },
+        {
+          "id": "DELL002",
+          "category": "OEM - Dell",
+          "name": "Dell Data Vault Collector",
+          "method": "service",
+          "methodArgument": "DDVCollectorSvcApi",
+          "severity": "Low",
+          "recommendedValue": "Disabled",
+          "description": "Collecteur de données Dell - désactiver pour la vie privée"
+        }
+      ]
+    },
+    "HP": {
+      "additionalFindings": [
+        {
+          "id": "HP001",
+          "category": "OEM - HP",
+          "name": "HP Support Assistant",
+          "method": "service",
+          "methodArgument": "HPSupportSolutionsFrameworkService",
+          "severity": "Low",
+          "recommendedValue": "Disabled",
+          "description": "Service HP Support Assistant - peut être désactivé"
+        },
+        {
+          "id": "HP002",
+          "category": "OEM - HP",
+          "name": "HP Telemetry",
+          "method": "service",
+          "methodArgument": "HPTelemetry",
+          "severity": "Medium",
+          "recommendedValue": "Disabled",
+          "description": "Télémétrie HP - désactiver pour la vie privée"
+        },
+        {
+          "id": "HP003",
+          "category": "OEM - HP",
+          "name": "HP Sure Click",
+          "method": "service",
+          "methodArgument": "HPSureClickService",
+          "severity": "Low",
+          "recommendedValue": "Disabled",
+          "description": "HP Sure Click - service de sécurité HP"
+        }
+      ]
+    },
+    "Lenovo": {
+      "additionalFindings": [
+        {
+          "id": "LEN001",
+          "category": "OEM - Lenovo",
+          "name": "Lenovo Vantage Service",
+          "method": "service",
+          "methodArgument": "LenovoVantageService",
+          "severity": "Low",
+          "recommendedValue": "Disabled",
+          "description": "Service Lenovo Vantage - peut être désactivé"
+        },
+        {
+          "id": "LEN002",
+          "category": "OEM - Lenovo",
+          "name": "Lenovo System Update",
+          "method": "service",
+          "methodArgument": "SUService",
+          "severity": "Low",
+          "recommendedValue": "Disabled",
+          "description": "Service Lenovo System Update"
+        },
+        {
+          "id": "LEN003",
+          "category": "OEM - Lenovo",
+          "name": "Lenovo Customer Feedback Program",
+          "method": "Registry",
+          "registryPath": "HKLM:\\SOFTWARE\\Lenovo\\CustomerFeedback",
+          "registryItem": "EnableCEIP",
+          "severity": "Medium",
+          "recommendedValue": "0",
+          "description": "Désactiver le programme de feedback Lenovo"
+        }
+      ]
+    },
+    "ASUS": {
+      "additionalFindings": [
+        {
+          "id": "ASUS001",
+          "category": "OEM - ASUS",
+          "name": "ASUS System Control Interface",
+          "method": "service",
+          "methodArgument": "AsusSystemControlInterfaceService",
+          "severity": "Low",
+          "recommendedValue": "Disabled",
+          "description": "Service ASUS System Control"
+        },
+        {
+          "id": "ASUS002",
+          "category": "OEM - ASUS",
+          "name": "ASUS Link Near",
+          "method": "service",
+          "methodArgument": "ASUSLinkNear",
+          "severity": "Low",
+          "recommendedValue": "Disabled",
+          "description": "Service ASUS Link Near - désactiver si non utilisé"
+        }
+      ]
+    },
+    "Acer": {
+      "additionalFindings": [
+        {
+          "id": "ACER001",
+          "category": "OEM - Acer",
+          "name": "Acer Quick Access Service",
+          "method": "service",
+          "methodArgument": "QuickAccess",
+          "severity": "Low",
+          "recommendedValue": "Disabled",
+          "description": "Service Acer Quick Access"
+        },
+        {
+          "id": "ACER002",
+          "category": "OEM - Acer",
+          "name": "Acer Collection",
+          "method": "service",
+          "methodArgument": "AcerCollectionService",
+          "severity": "Medium",
+          "recommendedValue": "Disabled",
+          "description": "Service de collecte Acer - désactiver pour la vie privée"
+        }
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "10000",
+      "category": "Account Policies",
+      "name": "Account lockout duration",
+      "method": "accountpolicy",
+      "severity": "Low",
+      "defaultValue": "30",
+      "recommendedValue": "10",
+      "operator": ">=",
+      "description": "Quand quelqu'un tape trop de mauvais mots de passe, le compte se bloque temporairement. Ce paramètre définit combien de temps le compte reste bloqué (en minutes).",
+      "risk": "Si la durée est trop courte, un pirate peut réessayer rapidement après chaque blocage. Une durée d'au moins 10 minutes le ralentit considérablement.",
+      "remediation": {
+        "default": "net accounts /lockoutduration:10",
+        "gpo": "Computer Configuration > Windows Settings > Security Settings > Account Policies > Account Lockout Policy",
+        "intune": "Endpoint Security > Account Protection"
+      }
+    },
+    {
+      "id": "10001",
+      "category": "Account Policies",
+      "name": "Account lockout threshold",
+      "method": "accountpolicy",
+      "severity": "Low",
+      "defaultValue": "Never",
+      "recommendedValue": "10",
+      "operator": "<=",
+      "description": "Après combien de tentatives de mot de passe incorrect le compte doit-il se bloquer ? C'est comme un coffre-fort qui se verrouille après trop d'essais ratés.",
+      "risk": "Sans limite, un pirate peut essayer des milliers de mots de passe jusqu'à trouver le bon. Avec une limite de 10 tentatives, il est bloqué avant d'avoir pu tester beaucoup de combinaisons.",
+      "remediation": {
+        "default": "net accounts /lockoutthreshold:10",
+        "gpo": "Computer Configuration > Windows Settings > Security Settings > Account Policies > Account Lockout Policy"
+      }
+    },
+    {
+      "id": "10003",
+      "category": "Account Policies",
+      "name": "Allow Administrator account lockout",
+      "method": "secedit",
+      "methodArgument": "System Access\\AllowAdministratorLockout",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Autoriser le verrouillage du compte Administrateur"
+    },
+    {
+      "id": "10100",
+      "category": "Account Policies",
+      "name": "Length of password history maintained",
+      "method": "accountpolicy",
+      "severity": "Low",
+      "defaultValue": "None",
+      "recommendedValue": "24",
+      "operator": ">=",
+      "description": "Historique des mots de passe conservés",
+      "remediation": {
+        "default": "net accounts /uniquepw:24",
+        "gpo": "Computer Configuration > Windows Settings > Security Settings > Account Policies > Password Policy"
+      }
+    },
+    {
+      "id": "10101",
+      "category": "Account Policies",
+      "name": "Minimum password length",
+      "method": "accountpolicy",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "14",
+      "operator": ">=",
+      "description": "La longueur minimale que doit avoir votre mot de passe. Plus c'est long, plus c'est difficile à deviner pour un pirate.",
+      "risk": "Un mot de passe court (moins de 14 caractères) peut être deviné en quelques heures par un ordinateur qui teste toutes les combinaisons. Avec 14 caractères ou plus, cela prendrait des siècles.",
+      "remediation": {
+        "default": "net accounts /minpwlen:14",
+        "gpo": "Computer Configuration > Windows Settings > Security Settings > Account Policies > Password Policy"
+      }
+    },
+    {
+      "id": "10102",
+      "category": "Account Policies",
+      "name": "Password must meet complexity requirements",
+      "method": "secedit",
+      "methodArgument": "System Access\\PasswordComplexity",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Ce paramètre oblige les mots de passe à contenir un mélange de majuscules, minuscules, chiffres et symboles. C'est comme demander une serrure avec plusieurs types de clés différentes.",
+      "risk": "Sans complexité, les utilisateurs choisissent souvent des mots de passe simples comme 'motdepasse123' que les pirates testent en premier. Un mot de passe complexe est beaucoup plus difficile à deviner."
+    },
+    {
+      "id": "10103",
+      "category": "Account Policies",
+      "name": "Store passwords using reversible encryption",
+      "method": "secedit",
+      "methodArgument": "System Access\\ClearTextPassword",
+      "severity": "High",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Windows peut stocker votre mot de passe de façon 'déchiffrable' (comme un coffre dont on peut récupérer la clé) ou 'non déchiffrable' (une fois fermé, impossible de retrouver le code original).",
+      "risk": "Si activé, vos mots de passe sont stockés d'une façon qui permet de les retrouver en clair. C'est comme écrire le code de votre coffre-fort sur un papier caché dans le coffre lui-même."
+    },
+    {
+      "id": "10200",
+      "category": "Security Options",
+      "name": "Accounts: Limit local account use of blank passwords to console logon only",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Control\\Lsa",
+      "registryItem": "LimitBlankPasswordUse",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Si un compte n'a pas de mot de passe, ce paramètre empêche de s'y connecter à distance (depuis un autre ordinateur). Seule une connexion directe sur la machine est autorisée.",
+      "risk": "Sans cette protection, n'importe qui sur le réseau pourrait se connecter aux comptes sans mot de passe. C'est comme laisser la porte de votre maison grande ouverte.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'LimitBlankPasswordUse' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10208",
+      "category": "Security Options",
+      "name": "Interactive logon: Machine inactivity limit",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "registryItem": "InactivityTimeoutSecs",
+      "severity": "Low",
+      "defaultValue": "0",
+      "recommendedValue": "900",
+      "operator": "=",
+      "description": "Au bout de combien de temps sans activité l'écran se verrouille-t-il automatiquement ? 900 secondes = 15 minutes.",
+      "risk": "Si vous quittez votre bureau sans verrouiller l'écran, n'importe qui peut accéder à votre session. Le verrouillage automatique protège votre ordinateur même si vous oubliez.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'InactivityTimeoutSecs' -Value 900 -Type DWord"
+      }
+    },
+    {
+      "id": "10210",
+      "category": "Security Options",
+      "name": "Microsoft network client: Digitally sign communications (always)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters",
+      "registryItem": "RequireSecuritySignature",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Quand votre PC communique avec un serveur de fichiers, ce paramètre ajoute une 'signature' à chaque message pour prouver qu'il n'a pas été modifié en route.",
+      "risk": "Sans signature, un pirate sur le même réseau peut intercepter et modifier les données échangées (attaque 'man-in-the-middle'). Il pourrait par exemple remplacer un fichier que vous téléchargez par un virus.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters' -Name 'RequireSecuritySignature' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10219",
+      "category": "Security Options",
+      "name": "Network security: Do not store LAN Manager hash value",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Control\\Lsa",
+      "registryItem": "NoLMHash",
+      "severity": "High",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Quand vous créez un mot de passe Windows, le système peut le stocker de deux façons : une méthode ancienne (LAN Manager) très facile à pirater, ou une méthode moderne et sécurisée. Ce paramètre empêche Windows de garder la version facile à pirater.",
+      "risk": "Si ce paramètre est désactivé, votre mot de passe est stocké dans un format ancien que les pirates peuvent craquer en quelques minutes avec des outils gratuits. C'est comme écrire votre code de carte bancaire sur un post-it collé à votre portefeuille.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'NoLMHash' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10220",
+      "category": "Security Options",
+      "name": "Network security: LAN Manager authentication level",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Control\\Lsa",
+      "registryItem": "LmCompatibilityLevel",
+      "severity": "Medium",
+      "defaultValue": "3",
+      "recommendedValue": "5",
+      "operator": "=",
+      "description": "Il existe plusieurs versions du protocole d'authentification Windows (LM, NTLM, NTLMv2). Les anciennes versions ont des failles connues. Ce paramètre force l'utilisation uniquement de NTLMv2, la version la plus sécurisée.",
+      "risk": "Les anciennes versions (LM et NTLM) peuvent être crackées en quelques heures. Un pirate qui capture votre authentification sur le réseau pourrait retrouver votre mot de passe et accéder à vos ressources.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'LmCompatibilityLevel' -Value 5 -Type DWord"
+      }
+    },
+    {
+      "id": "10225",
+      "category": "Security Options",
+      "name": "User Account Control: Admin Approval Mode for Built-in Administrator",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "registryItem": "FilterAdministratorToken",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Le compte 'Administrateur' intégré à Windows est un compte spécial très puissant. Par défaut, il contourne les demandes de confirmation UAC. Ce paramètre le force à demander confirmation comme les autres comptes admin.",
+      "risk": "Si un virus s'exécute sous ce compte, il aura immédiatement tous les droits sans aucune demande de confirmation. Activer ce paramètre ajoute une protection supplémentaire même pour ce compte privilégié.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'FilterAdministratorToken' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10226",
+      "category": "Security Options",
+      "name": "User Account Control: Behavior of elevation prompt for administrators",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "registryItem": "ConsentPromptBehaviorAdmin",
+      "severity": "Medium",
+      "defaultValue": "5",
+      "recommendedValue": "2",
+      "operator": "=",
+      "description": "Quand un programme demande des droits administrateur, Windows peut : demander le mot de passe (plus sûr), juste demander Oui/Non, ou ne rien demander du tout. Ce paramètre contrôle ce comportement.",
+      "risk": "Si configuré sur 'ne rien demander', un virus peut obtenir les droits admin silencieusement. Demander le mot de passe garantit que vous êtes conscient de ce qui se passe et que c'est bien vous qui autorisez.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'ConsentPromptBehaviorAdmin' -Value 2 -Type DWord"
+      }
+    },
+    {
+      "id": "10230",
+      "category": "Security Options",
+      "name": "User Account Control: Run all administrators in Admin Approval Mode",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "registryItem": "EnableLUA",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "C'est le bouton ON/OFF principal de l'UAC (la fenêtre qui demande 'Voulez-vous autoriser cette application à apporter des modifications ?'). Quand activé, même les administrateurs doivent confirmer les actions sensibles.",
+      "risk": "Désactiver l'UAC revient à donner les clés de votre maison à tous les programmes. N'importe quel virus pourrait s'installer, modifier Windows, ou voler vos données sans que vous ne voyiez jamais d'avertissement.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'EnableLUA' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10232",
+      "category": "Security Options",
+      "name": "User Account Control: Behavior for administrators with Administrator protection",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "registryItem": "ConsentPromptBehaviorEnhancedAdmin",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "2",
+      "operator": "=",
+      "description": "Nouvelle fonctionnalité de Windows 11 24H2 : une protection renforcée pour les administrateurs. Quand activée, les droits admin sont donnés temporairement uniquement pour la tâche demandée, puis retirés automatiquement.",
+      "risk": "Sans cette protection, si un virus compromet votre session, il garde les droits admin indéfiniment. Avec cette protection, même si un virus passe, ses droits expirent rapidement."
+    },
+    {
+      "id": "10233",
+      "category": "Security Options",
+      "name": "User Account Control: Configure type of Admin Approval Mode",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "registryItem": "TypeOfAdminApprovalMode",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "2",
+      "operator": "=",
+      "description": "Windows 11 24H2 propose deux modes UAC : le mode classique (comme avant) ou le nouveau mode 'Administrator Protection' plus sécurisé. La valeur 2 active le nouveau mode renforcé.",
+      "risk": "Le mode classique a des failles connues permettant de contourner l'UAC. Le nouveau mode corrige ces failles et isole mieux les droits administrateur du reste de votre session."
+    },
+    {
+      "id": "10501",
+      "category": "Windows Firewall",
+      "name": "EnableFirewall (Domain Profile)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile",
+      "registryItem": "EnableFirewall",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Le pare-feu est comme un vigile à l'entrée de votre ordinateur : il contrôle qui peut entrer et sortir. Ce paramètre l'active quand vous êtes connecté au réseau de votre entreprise.",
+      "risk": "Sans pare-feu, votre ordinateur accepte toutes les connexions entrantes. Les pirates peuvent alors facilement scanner et attaquer votre machine depuis le réseau.",
+      "remediation": {
+        "default": "Set-NetFirewallProfile -Profile Domain -Enabled True"
+      }
+    },
+    {
+      "id": "10515",
+      "category": "Windows Firewall",
+      "name": "EnableFirewall (Private Profile)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile",
+      "registryItem": "EnableFirewall",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Le pare-feu pour le profil 'Privé' s'applique quand vous êtes connecté à un réseau de confiance (comme votre Wi-Fi maison). Il filtre quand même les connexions entrantes pour bloquer les intrusions.",
+      "risk": "Même sur votre réseau personnel, d'autres appareils infectés (TV connectée, smartphone...) pourraient tenter d'attaquer votre PC. Le pare-feu empêche ces tentatives.",
+      "remediation": {
+        "default": "Set-NetFirewallProfile -Profile Private -Enabled True"
+      }
+    },
+    {
+      "id": "10529",
+      "category": "Windows Firewall",
+      "name": "EnableFirewall (Public Profile)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile",
+      "registryItem": "EnableFirewall",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Le profil 'Public' s'active quand vous êtes sur un réseau non fiable (café, aéroport, hôtel...). C'est le mode le plus restrictif car vous partagez le réseau avec des inconnus.",
+      "risk": "Sur un Wi-Fi public, n'importe qui peut scanner les appareils connectés et tenter des attaques. Sans pare-feu, votre PC est une cible facile pour les pirates présents sur le même réseau.",
+      "remediation": {
+        "default": "Set-NetFirewallProfile -Profile Public -Enabled True"
+      }
+    },
+    {
+      "id": "10621",
+      "category": "MS Security Guide",
+      "name": "Configure SMB v1 client driver",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\MrxSmb10",
+      "registryItem": "Start",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "4",
+      "operator": "=",
+      "description": "SMBv1 est un ancien protocole de partage de fichiers qui contient des failles de sécurité graves. Il n'est plus nécessaire sur les systèmes modernes.",
+      "risk": "Ce protocole peut être exploité par des virus et logiciels espions (ransomwares, malwares) pour infecter votre ordinateur à distance, sans que vous n'ayez à cliquer sur quoi que ce soit.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\MrxSmb10' -Name 'Start' -Value 4 -Type DWord"
+      }
+    },
+    {
+      "id": "10622",
+      "category": "MS Security Guide",
+      "name": "Configure SMB v1 server",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters",
+      "registryItem": "SMB1",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Ce paramètre désactive la partie 'serveur' du protocole SMBv1, empêchant d'autres ordinateurs de se connecter au vôtre via ce vieux protocole vulnérable.",
+      "risk": "Même si vous n'utilisez pas SMBv1, le laisser actif permet aux attaquants de cibler votre machine. C'est comme laisser une vieille porte derrière votre maison, même si vous ne l'utilisez jamais.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters' -Name 'SMB1' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "10625",
+      "category": "MS Security Guide",
+      "name": "WDigest Authentication",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest",
+      "registryItem": "UseLogonCredential",
+      "severity": "High",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "WDigest est une ancienne méthode d'authentification qui stocke votre mot de passe en mémoire de façon récupérable.",
+      "risk": "Si un pirate accède à votre PC, il peut extraire votre mot de passe en clair depuis la mémoire. Ce paramètre doit être désactivé pour protéger vos identifiants.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest' -Name 'UseLogonCredential' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "10650",
+      "category": "Administrative Templates: Network",
+      "name": "DNS Client: Turn off multicast name resolution (LLMNR)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient",
+      "registryItem": "EnableMulticast",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "LLMNR est un protocole qui permet de trouver des ordinateurs sur le réseau local. Problème : il répond à n'importe qui sans vérification, ce qui permet des attaques.",
+      "risk": "Un attaquant peut se faire passer pour le serveur que vous cherchez et intercepter vos identifiants. L'outil 'Responder' exploit cette faille et est très utilisé par les pentesters et pirates.",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient' -Name 'EnableMulticast' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "10669",
+      "category": "Administrative Templates: System",
+      "name": "Configure the behavior of the sudo command",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\Sudo",
+      "registryItem": "Enabled",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Windows 11 24H2 a ajouté une commande 'sudo' comme sur Linux. Elle permet d'exécuter des commandes en tant qu'admin depuis le terminal sans ouvrir une nouvelle fenêtre.",
+      "risk": "Cette fonctionnalité est nouvelle et pourrait contenir des failles non découvertes. De plus, elle facilite l'élévation de privilèges pour les scripts malveillants. Microsoft recommande de la désactiver en entreprise."
+    },
+    {
+      "id": "10672",
+      "category": "Administrative Templates: System",
+      "name": "Device Guard: Turn On Virtualization Based Security",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
+      "registryItem": "EnableVirtualizationBasedSecurity",
+      "severity": "Medium",
+      "defaultValue": "",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "VBS crée une zone isolée dans la mémoire de votre PC grâce à la virtualisation. Cette zone protégée est inaccessible même aux virus qui auraient des droits administrateur.",
+      "risk": "Sans VBS, un virus avec droits admin a accès à toute la mémoire, y compris vos mots de passe. Avec VBS, ces données sensibles restent protégées même en cas d'infection.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'EnableVirtualizationBasedSecurity' -Value 1 -Type DWord",
+        "note": "Requiert Pro/Enterprise"
+      }
+    },
+    {
+      "id": "10673",
+      "category": "Administrative Templates: System",
+      "name": "Device Guard: Virtualization Based Protection of Code Integrity",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
+      "registryItem": "HypervisorEnforcedCodeIntegrity",
+      "severity": "Medium",
+      "defaultValue": "",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "HVCI (aussi appelé 'Memory Integrity' dans les paramètres Windows) vérifie que tout code exécuté dans le noyau Windows est légitime et signé.",
+      "risk": "Les virus avancés (rootkits) essaient de s'injecter dans le cœur de Windows pour être invisibles. HVCI bloque ces tentatives en empêchant l'exécution de code non autorisé.",
+      "remediation": {
+        "note": "Requiert Pro/Enterprise"
+      }
+    },
+    {
+      "id": "10674",
+      "category": "Administrative Templates: System",
+      "name": "Device Guard: Credential Guard Configuration",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
+      "registryItem": "LsaCfgFlags",
+      "severity": "Medium",
+      "defaultValue": "",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Credential Guard isole vos identifiants Windows dans une zone protégée, inaccessible même aux programmes avec droits administrateur.",
+      "risk": "Sans cette protection, un attaquant qui accède à votre PC peut voler vos identifiants stockés en mémoire et les utiliser pour accéder à d'autres ressources.",
+      "remediation": {
+        "note": "Requiert Enterprise uniquement"
+      }
+    },
+    {
+      "id": "10698",
+      "category": "Administrative Templates: System",
+      "name": "Device Guard: Kernel-mode Hardware-enforced Stack Protection",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
+      "registryItem": "ConfigureKernelShadowStacksLaunch",
+      "severity": "Medium",
+      "defaultValue": "",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Cette protection utilise votre processeur (Intel CET ou AMD) pour empêcher les attaques de type 'Return-Oriented Programming' qui détournent le flux d'exécution des programmes.",
+      "risk": "Les attaques ROP sont très utilisées pour contourner les protections et exécuter du code malveillant. Cette protection matérielle les rend beaucoup plus difficiles à réaliser.",
+      "compatibility": "Nécessite un processeur Intel 11e génération+ (Tiger Lake) ou AMD Zen 3+ avec support CET (Control-flow Enforcement Technology). Non disponible sur les anciens processeurs.",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'ConfigureKernelShadowStacksLaunch' -Value 1 -Type DWord",
+        "gpo": "Configuration ordinateur > Modèles d'administration > Système > Device Guard > Configurer Kernel-mode Hardware-enforced Stack Protection > Activé en mode audit"
+      }
+    },
+    {
+      "id": "10700",
+      "category": "Administrative Templates: System",
+      "name": "Local Security Authority: Configures LSASS to run as a protected process",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Control\\Lsa",
+      "registryItem": "RunAsPPL",
+      "severity": "Medium",
+      "defaultValue": "",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "LSASS est le processus Windows qui gère vos identifiants. Le mode 'Protected Process Light' empêche les autres programmes de lire sa mémoire.",
+      "risk": "LSASS contient vos mots de passe et vos sessions actives. Sans cette protection, un attaquant peut extraire vos identifiants. Avec PPL activé, la mémoire de LSASS est protégée.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'RunAsPPL' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10754",
+      "category": "Administrative Templates: Windows Components",
+      "name": "AutoPlay Policies: Turn off Autoplay",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "registryItem": "NoDriveTypeAutoRun",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "255",
+      "operator": "=",
+      "description": "L'exécution automatique lance des programmes dès qu'une clé USB ou un CD est inséré. La valeur 255 désactive cette fonctionnalité pour tous les types de lecteurs.",
+      "risk": "Un virus peut se propager automatiquement via clé USB : il suffit de la brancher pour être infecté. Désactiver l'AutoRun empêche cette propagation automatique.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer' -Name 'NoDriveTypeAutoRun' -Value 255 -Type DWord"
+      }
+    },
+    {
+      "id": "10756",
+      "category": "Administrative Templates: Windows Components",
+      "name": "BitLocker: Disable new DMA devices when computer is locked",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\FVE",
+      "registryItem": "DisableExternalDMAUnderLock",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Les ports Thunderbolt/USB4 permettent un accès direct à la mémoire (DMA). Ce paramètre bloque les nouveaux périphériques DMA quand le PC est verrouillé.",
+      "risk": "Un attaquant avec un accès physique peut brancher un appareil spécial qui lit directement votre mémoire, contournant Windows et votre mot de passe. Ces attaques 'DMA' permettent de voler des clés de chiffrement.",
+      "remediation": {
+        "note": "Requiert Pro/Enterprise avec BitLocker"
+      }
+    },
+    {
+      "id": "10766",
+      "category": "Administrative Templates: Windows Components",
+      "name": "File Explorer: Configure Windows Defender SmartScreen",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+      "registryItem": "EnableSmartScreen",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "SmartScreen vérifie les fichiers téléchargés et les programmes exécutés en les comparant à une liste de menaces connues dans le cloud Microsoft.",
+      "risk": "Sans SmartScreen, vous pouvez exécuter des fichiers dangereux sans avertissement. SmartScreen bloque les virus connus et vous avertit des fichiers suspects avant qu'ils ne s'exécutent.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System' -Name 'EnableSmartScreen' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10972",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Microsoft Defender Antivirus: Configure detection for PUA",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender",
+      "registryItem": "PUAProtection",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": ">=",
+      "description": "Les PUA (Applications Potentiellement Indésirables) sont des programmes pas vraiment malveillants mais ennuyeux : barres d'outils, logiciels publicitaires, 'optimiseurs' inutiles...",
+      "risk": "Ces programmes ralentissent votre PC, affichent des pubs, collectent vos données et sont souvent installés sans votre consentement clair. Activer cette protection les bloque avant installation.",
+      "remediation": {
+        "default": "Set-MpPreference -PUAProtection Enabled"
+      }
+    },
+    {
+      "id": "10973",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Microsoft Defender Antivirus: MAPS: Join Microsoft MAPS",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Spynet",
+      "registryItem": "SpynetReporting",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "2",
+      "operator": "=",
+      "description": "MAPS (Microsoft Active Protection Service) envoie des infos sur les fichiers suspects à Microsoft pour analyse en temps réel. En retour, vous recevez une protection contre les nouvelles menaces en quelques secondes.",
+      "risk": "Sans MAPS, Defender dépend uniquement des mises à jour téléchargées. Avec MAPS, un nouveau virus détecté n'importe où dans le monde peut être bloqué chez vous en quelques minutes.",
+      "remediation": {
+        "default": "Set-MpPreference -MAPSReporting Advanced"
+      }
+    },
+    {
+      "id": "10993",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Microsoft Defender Antivirus: Network Protection",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\Network Protection",
+      "registryItem": "EnableNetworkProtection",
+      "severity": "Medium",
+      "defaultValue": "",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "La protection réseau bloque les connexions vers des sites web dangereux connus pour héberger des virus (malwares) ou des arnaques (phishing).",
+      "risk": "Sans cette protection, vous pouvez accéder à des sites dangereux et télécharger des virus. La protection réseau vous arrête AVANT d'atteindre le site dangereux.",
+      "compatibility": "Disponible sur Windows 10/11 Pro, Enterprise et Education. Nécessite Microsoft Defender Antivirus actif (pas compatible avec un antivirus tiers).",
+      "remediation": {
+        "default": "Set-MpPreference -EnableNetworkProtection Enabled"
+      }
+    },
+    {
+      "id": "11005",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Windows PowerShell: Turn on PowerShell Script Block Logging",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging",
+      "registryItem": "EnableScriptBlockLogging",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Enregistre toutes les commandes PowerShell exécutées sur le PC dans les journaux Windows. Très utile pour détecter les attaques qui utilisent PowerShell.",
+      "risk": "La majorité des attaques modernes utilisent PowerShell car il est puissant et présent partout. Sans journalisation, vous ne saurez jamais quelles commandes malveillantes ont été exécutées.",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging' -Name 'EnableScriptBlockLogging' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "11007",
+      "category": "Administrative Templates: Windows Components",
+      "name": "WinRM Client: Allow Basic authentication",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Client",
+      "registryItem": "AllowBasic",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "WinRM permet de gérer un PC à distance via PowerShell. L'authentification 'Basic' envoie le mot de passe en clair (juste encodé en Base64, pas chiffré).",
+      "risk": "Si quelqu'un intercepte le trafic réseau, il peut lire votre mot de passe directement. Il faut utiliser Kerberos ou une autre méthode sécurisée à la place.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Client' -Name 'AllowBasic' -Value 0 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "11008",
+      "category": "Administrative Templates: Windows Components",
+      "name": "WinRM Client: Allow unencrypted traffic",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Client",
+      "registryItem": "AllowUnencryptedTraffic",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Ce paramètre interdit d'utiliser WinRM (administration à distance) sans chiffrement. Toutes les communications doivent être protégées.",
+      "risk": "Sans chiffrement, toutes les commandes PowerShell et leurs résultats sont visibles sur le réseau. Un attaquant peut voir vos mots de passe, vos fichiers, tout ce que vous faites à distance.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Client' -Name 'AllowUnencryptedTraffic' -Value 0 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "10960",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Remote Desktop: Do not allow passwords to be saved",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+      "registryItem": "DisablePasswordSaving",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Empêche le client Bureau à distance d'enregistrer les mots de passe des connexions. Les utilisateurs doivent retaper leur mot de passe à chaque connexion.",
+      "risk": "Les mots de passe RDP enregistrés sont stockés dans le gestionnaire d'identifiants Windows. Un attaquant sur votre PC peut les extraire et accéder à tous les serveurs où vous vous connectez.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services' -Name 'DisablePasswordSaving' -Value 1 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "10963",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Remote Desktop: Require secure RPC communication",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+      "registryItem": "fEncryptRPCTraffic",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Force le chiffrement de toutes les communications RPC (Remote Procedure Call) utilisées par le Bureau à distance pour les opérations de gestion.",
+      "risk": "Sans chiffrement RPC, les commandes de gestion RDP passent en clair sur le réseau. Un attaquant pourrait intercepter ou modifier ces communications pour prendre le contrôle de la session.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services' -Name 'fEncryptRPCTraffic' -Value 1 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "10964",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Remote Desktop: Set client connection encryption level",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+      "registryItem": "MinEncryptionLevel",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "3",
+      "operator": "=",
+      "description": "Niveau de chiffrement élevé pour les connexions RDP",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services' -Name 'MinEncryptionLevel' -Value 3 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "11013",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Microsoft Defender: Scan all downloaded files and attachments",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
+      "registryItem": "DisableIOAVProtection",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Analyser tous les fichiers téléchargés et pièces jointes",
+      "remediation": {
+        "default": "Set-MpPreference -DisableIOAVProtection $false"
+      }
+    },
+    {
+      "id": "11014",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Microsoft Defender: Turn off real-time protection",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
+      "registryItem": "DisableRealtimeMonitoring",
+      "severity": "High",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Ne pas désactiver la protection en temps réel",
+      "remediation": {
+        "default": "Set-MpPreference -DisableRealtimeMonitoring $false"
+      }
+    },
+    {
+      "id": "11040",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Windows Defender SmartScreen: Enhanced Phishing Protection",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WTDS\\Components",
+      "registryItem": "NotifyMalicious",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Cette protection vous alerte lorsque vous entrez votre mot de passe Windows sur un site web suspect ou dans une application douteuse. Elle détecte aussi si vous réutilisez vos mots de passe.",
+      "risk": "L'hameçonnage (phishing) est l'arnaque la plus courante : un faux site ressemblant à votre banque ou à Microsoft vous demande votre mot de passe. Sans cette protection, vous ne serez pas averti et vos identifiants peuvent être volés.",
+      "compatibility": "Disponible uniquement sur Windows 11 22H2 et versions ultérieures. Non disponible sur Windows 10.",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WTDS\\Components' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WTDS\\Components' -Name 'NotifyMalicious' -Value 1 -Type DWord",
+        "gpo": "Configuration ordinateur > Modèles d'administration > Composants Windows > Windows Defender SmartScreen > Protection anti-phishing améliorée > Activé"
+      }
+    },
+    {
+      "id": "11050",
+      "category": "System Services",
+      "name": "Xbox Accessory Management Service (XboxGipSvc)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\XboxGipSvc",
+      "registryItem": "Start",
+      "severity": "Medium",
+      "defaultValue": "3",
+      "recommendedValue": "4",
+      "operator": "=",
+      "description": "Désactiver le service Xbox Accessory Management",
+      "remediation": {
+        "default": "Set-Service -Name XboxGipSvc -StartupType Disabled"
+      }
+    },
+    {
+      "id": "11052",
+      "category": "System Services",
+      "name": "Xbox Live Auth Manager (XblAuthManager)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\XblAuthManager",
+      "registryItem": "Start",
+      "severity": "Medium",
+      "defaultValue": "3",
+      "recommendedValue": "4",
+      "operator": "=",
+      "description": "Désactiver le service Xbox Live Auth Manager",
+      "remediation": {
+        "default": "Set-Service -Name XblAuthManager -StartupType Disabled"
+      }
+    },
+    {
+      "id": "11054",
+      "category": "System Services",
+      "name": "Xbox Live Game Save (XblGameSave)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\XblGameSave",
+      "registryItem": "Start",
+      "severity": "Medium",
+      "defaultValue": "3",
+      "recommendedValue": "4",
+      "operator": "=",
+      "description": "Désactiver le service Xbox Live Game Save",
+      "remediation": {
+        "default": "Set-Service -Name XblGameSave -StartupType Disabled"
+      }
+    },
+    {
+      "id": "11056",
+      "category": "System Services",
+      "name": "Xbox Live Networking Service (XboxNetApiSvc)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\XboxNetApiSvc",
+      "registryItem": "Start",
+      "severity": "Medium",
+      "defaultValue": "3",
+      "recommendedValue": "4",
+      "operator": "=",
+      "description": "Désactiver le service Xbox Live Networking",
+      "remediation": {
+        "default": "Set-Service -Name XboxNetApiSvc -StartupType Disabled"
+      }
+    },
+    {
+      "id": "ASR001",
+      "category": "Attack Surface Reduction",
+      "name": "Block executable content from email client and webmail",
+      "method": "MpPreferenceAsr",
+      "methodArgument": "be9ba2d9-53ea-4cdc-84e5-9b1eeee46550",
+      "severity": "Medium",
+      "recommendedValue": "1",
+      "description": "Bloquer le contenu exécutable des emails",
+      "remediation": {
+        "default": "Add-MpPreference -AttackSurfaceReductionRules_Ids be9ba2d9-53ea-4cdc-84e5-9b1eeee46550 -AttackSurfaceReductionRules_Actions Enabled"
+      }
+    },
+    {
+      "id": "ASR002",
+      "category": "Attack Surface Reduction",
+      "name": "Block Office applications from creating child processes",
+      "method": "MpPreferenceAsr",
+      "methodArgument": "d4f940ab-401b-4efc-aadc-ad5f3c50688a",
+      "severity": "Medium",
+      "recommendedValue": "1",
+      "description": "Bloquer Office de créer des processus enfants",
+      "remediation": {
+        "default": "Add-MpPreference -AttackSurfaceReductionRules_Ids d4f940ab-401b-4efc-aadc-ad5f3c50688a -AttackSurfaceReductionRules_Actions Enabled"
+      }
+    },
+    {
+      "id": "ASR003",
+      "category": "Attack Surface Reduction",
+      "name": "Block credential stealing from LSASS",
+      "method": "MpPreferenceAsr",
+      "methodArgument": "9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2",
+      "severity": "High",
+      "recommendedValue": "1",
+      "description": "Bloquer le vol de mots de passe depuis le processus LSASS",
+      "remediation": {
+        "default": "Add-MpPreference -AttackSurfaceReductionRules_Ids 9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2 -AttackSurfaceReductionRules_Actions Enabled"
+      }
+    },
+    {
+      "id": "ASR004",
+      "category": "Attack Surface Reduction",
+      "name": "Block JavaScript/VBScript from launching downloaded content",
+      "method": "MpPreferenceAsr",
+      "methodArgument": "d3e037e1-3eb8-44c8-a917-57927947596d",
+      "severity": "Medium",
+      "recommendedValue": "1",
+      "description": "Bloquer JS/VBScript de lancer du contenu téléchargé",
+      "remediation": {
+        "default": "Add-MpPreference -AttackSurfaceReductionRules_Ids d3e037e1-3eb8-44c8-a917-57927947596d -AttackSurfaceReductionRules_Actions Enabled"
+      }
+    },
+    {
+      "id": "ASR005",
+      "category": "Attack Surface Reduction",
+      "name": "Use advanced protection against ransomware",
+      "method": "MpPreferenceAsr",
+      "methodArgument": "c1db55ab-c21a-4637-bb3f-a12568109d35",
+      "severity": "High",
+      "recommendedValue": "1",
+      "description": "Activer la protection avancée contre les ransomwares",
+      "remediation": {
+        "default": "Add-MpPreference -AttackSurfaceReductionRules_Ids c1db55ab-c21a-4637-bb3f-a12568109d35 -AttackSurfaceReductionRules_Actions Enabled"
+      }
+    },
+    {
+      "id": "10201",
+      "category": "Security Options",
+      "name": "Audit: Force audit policy subcategory settings",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Control\\Lsa",
+      "registryItem": "SCENoApplyLegacyAuditPolicy",
+      "severity": "Low",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Force l'utilisation des paramètres d'audit avancés au lieu des anciens paramètres de catégorie.",
+      "risk": "Sans ce paramètre, les politiques d'audit modernes peuvent être ignorées, réduisant la visibilité sur les événements de sécurité.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'SCENoApplyLegacyAuditPolicy' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10212",
+      "category": "Security Options",
+      "name": "Microsoft network server: Digitally sign communications (always)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Services\\LanManServer\\Parameters",
+      "registryItem": "RequireSecuritySignature",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Quand votre PC partage des fichiers, ce paramètre ajoute une signature à chaque communication pour garantir qu'elle n'a pas été modifiée.",
+      "risk": "Sans signature, un attaquant sur le même réseau peut intercepter et modifier les fichiers que vous partagez (attaque man-in-the-middle).",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Services\\LanManServer\\Parameters' -Name 'RequireSecuritySignature' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10214",
+      "category": "Security Options",
+      "name": "Network access: Do not allow anonymous enumeration of SAM accounts",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Control\\Lsa",
+      "registryItem": "RestrictAnonymousSAM",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Empêche les utilisateurs anonymes de lister les comptes utilisateur de votre ordinateur.",
+      "risk": "Un attaquant pourrait récupérer la liste des comptes pour cibler ses attaques de mot de passe.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'RestrictAnonymousSAM' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10215",
+      "category": "Security Options",
+      "name": "Network access: Do not allow anonymous enumeration of SAM accounts and shares",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Control\\Lsa",
+      "registryItem": "RestrictAnonymous",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Empêche les utilisateurs anonymes de lister les comptes ET les partages réseau de votre PC.",
+      "risk": "Exposer ces informations aide les attaquants à cartographier votre réseau et planifier leurs attaques.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'RestrictAnonymous' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10221",
+      "category": "Security Options",
+      "name": "Network security: LDAP client signing requirements",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Services\\LDAP",
+      "registryItem": "LDAPClientIntegrity",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": ">=",
+      "description": "LDAP est un protocole utilisé pour communiquer avec Active Directory. Ce paramètre demande une signature pour garantir l'intégrité.",
+      "risk": "Sans signature, un attaquant pourrait intercepter et modifier les communications LDAP pour usurper des identités.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Services\\LDAP' -Name 'LDAPClientIntegrity' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10623",
+      "category": "MS Security Guide",
+      "name": "Enable Structured Exception Handling Overwrite Protection (SEHOP)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel",
+      "registryItem": "DisableExceptionChainValidation",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "SEHOP est une protection contre les attaques qui exploitent la gestion des erreurs de Windows.",
+      "risk": "Des attaques 'buffer overflow' peuvent détourner la gestion des erreurs pour exécuter du code malveillant. SEHOP bloque ces techniques.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel' -Name 'DisableExceptionChainValidation' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "10624",
+      "category": "MS Security Guide",
+      "name": "NetBT NodeType configuration",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NetBT\\Parameters",
+      "registryItem": "NodeType",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "2",
+      "operator": "=",
+      "description": "NetBIOS est un ancien protocole réseau. Ce paramètre configure comment votre PC résout les noms NetBIOS.",
+      "risk": "Une mauvaise configuration permet des attaques de type 'NetBIOS poisoning' où un attaquant répond à la place du vrai serveur.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NetBT\\Parameters' -Name 'NodeType' -Value 2 -Type DWord"
+      }
+    },
+    {
+      "id": "10640",
+      "category": "MSS (Legacy)",
+      "name": "MSS: DisableIPSourceRouting IPv6",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Services\\Tcpip6\\Parameters",
+      "registryItem": "DisableIPSourceRouting",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "2",
+      "operator": "=",
+      "description": "Le 'source routing' permet à un paquet réseau de spécifier son chemin. Les attaquants l'utilisent pour contourner les pare-feux.",
+      "risk": "Un attaquant peut forcer ses paquets malveillants à passer par des chemins spécifiques pour éviter la détection.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Services\\Tcpip6\\Parameters' -Name 'DisableIPSourceRouting' -Value 2 -Type DWord"
+      }
+    },
+    {
+      "id": "10641",
+      "category": "MSS (Legacy)",
+      "name": "MSS: DisableIPSourceRouting IPv4",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Services\\Tcpip\\Parameters",
+      "registryItem": "DisableIPSourceRouting",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "2",
+      "operator": "=",
+      "description": "Même protection que pour IPv6, mais pour le trafic IPv4 classique.",
+      "risk": "Permet de contourner les protections réseau en manipulant le routage des paquets.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Services\\Tcpip\\Parameters' -Name 'DisableIPSourceRouting' -Value 2 -Type DWord"
+      }
+    },
+    {
+      "id": "10642",
+      "category": "MSS (Legacy)",
+      "name": "MSS: EnableICMPRedirect - Allow ICMP redirects",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Services\\Tcpip\\Parameters",
+      "registryItem": "EnableICMPRedirect",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Les redirections ICMP permettent aux routeurs de modifier votre table de routage. C'est une fonctionnalité légitime mais exploitable.",
+      "risk": "Un attaquant peut envoyer de fausses redirections ICMP pour détourner votre trafic vers sa machine.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Services\\Tcpip\\Parameters' -Name 'EnableICMPRedirect' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "10651",
+      "category": "Administrative Templates: Network",
+      "name": "Lanman Workstation: Enable insecure guest logons",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\LanmanWorkstation",
+      "registryItem": "AllowInsecureGuestAuth",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Certains partages réseau autorisent les connexions 'invité' sans mot de passe. Ce paramètre bloque ces connexions non sécurisées.",
+      "risk": "Les connexions invité n'ont aucune authentification - n'importe qui peut s'y connecter et potentiellement récupérer des données sensibles.",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\LanmanWorkstation' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\LanmanWorkstation' -Name 'AllowInsecureGuestAuth' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "10656",
+      "category": "Administrative Templates: Network",
+      "name": "WLAN Settings: Auto-connect to suggested open hotspots",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Microsoft\\wcmsvc\\wifinetworkmanager\\config",
+      "registryItem": "AutoConnectAllowedOEM",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Windows peut se connecter automatiquement à des réseaux Wi-Fi 'suggérés' par Microsoft ou vos contacts.",
+      "risk": "Ces réseaux publics ouverts ne sont pas chiffrés et peuvent être créés par des attaquants pour intercepter votre trafic.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Microsoft\\wcmsvc\\wifinetworkmanager\\config' -Name 'AutoConnectAllowedOEM' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "10752",
+      "category": "Administrative Templates: Windows Components",
+      "name": "AutoPlay Policies: Disallow Autoplay for non-volume devices",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\Explorer",
+      "registryItem": "NoAutoplayfornonVolume",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Empêche l'exécution automatique de programmes sur les appareils comme les téléphones ou appareils photo connectés.",
+      "risk": "Un appareil malveillant pourrait exécuter automatiquement un virus dès sa connexion à votre PC.",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Explorer' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Explorer' -Name 'NoAutoplayfornonVolume' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10753",
+      "category": "Administrative Templates: Windows Components",
+      "name": "AutoPlay Policies: Set default behavior for AutoRun",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "registryItem": "NoAutorun",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Désactive l'exécution automatique des fichiers autorun.inf sur les clés USB et CD/DVD.",
+      "risk": "Les virus se propagent souvent via des clés USB infectées qui s'exécutent automatiquement quand vous les branchez.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer' -Name 'NoAutorun' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10754NEW",
+      "category": "Administrative Templates: Windows Components",
+      "name": "AutoPlay Policies: Turn off Autoplay",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "registryItem": "NoDriveTypeAutoRun",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "255",
+      "operator": "=",
+      "description": "Désactive complètement l'autoplay sur tous les types de lecteurs (USB, CD, réseau...).",
+      "risk": "L'autoplay est l'un des vecteurs d'infection les plus courants via les supports amovibles.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer' -Name 'NoDriveTypeAutoRun' -Value 255 -Type DWord"
+      }
+    },
+    {
+      "id": "10760",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Cloud Content: Turn off Microsoft consumer experiences",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\CloudContent",
+      "registryItem": "DisableWindowsConsumerFeatures",
+      "severity": "Low",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Désactive les 'expériences consommateur' comme les suggestions d'applications et le contenu sponsorisé dans le menu Démarrer.",
+      "risk": "Ces fonctionnalités peuvent installer automatiquement des applications tierces et représentent une surface d'attaque supplémentaire.",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\CloudContent' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\CloudContent' -Name 'DisableWindowsConsumerFeatures' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "11002",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Windows Installer: Allow user control over installs",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer",
+      "registryItem": "EnableUserControl",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Empêche les utilisateurs de modifier les options d'installation des programmes MSI.",
+      "risk": "Un utilisateur malveillant pourrait modifier le répertoire d'installation pour placer des fichiers dans des emplacements sensibles.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer' -Name 'EnableUserControl' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "11003",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Windows Installer: Always install with elevated privileges",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer",
+      "registryItem": "AlwaysInstallElevated",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Ce paramètre permet aux installations MSI de s'exécuter toujours avec les droits système, même pour les utilisateurs non-admin.",
+      "risk": "Si activé, n'importe quel utilisateur peut créer un MSI malveillant qui s'exécutera avec les droits SYSTEM - c'est une faille d'élévation de privilèges classique.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Installer' -Name 'AlwaysInstallElevated' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "11004",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Windows Logon Options: Disable automatic restart sign-on",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "registryItem": "DisableAutomaticRestartSignOn",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Après une mise à jour Windows, le système peut se reconnecter automatiquement à votre session. Ce paramètre le désactive.",
+      "risk": "La reconnexion automatique peut exposer votre session si quelqu'un a accès physique à votre PC après un redémarrage.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'DisableAutomaticRestartSignOn' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "11006",
+      "category": "PowerShell",
+      "name": "Turn on PowerShell Script Block Logging (Invocation)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging",
+      "registryItem": "EnableScriptBlockInvocationLogging",
+      "severity": "Low",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Journalise chaque fois qu'un bloc de script PowerShell est exécuté (en plus du contenu).",
+      "risk": "Utile pour le forensic, mais peut générer beaucoup de logs. Le paramètre recommandé évite la surcharge tout en gardant le logging de base.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging' -Name 'EnableScriptBlockInvocationLogging' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "11009",
+      "category": "Administrative Templates: Windows Components",
+      "name": "WinRM Client: Disallow Digest authentication",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Client",
+      "registryItem": "AllowDigest",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "L'authentification Digest est une méthode faible qui peut être facilement attaquée. Ce paramètre la désactive pour WinRM.",
+      "risk": "Un attaquant peut capturer et décrypter les authentifications Digest pour voler vos identifiants.",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Client' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Client' -Name 'AllowDigest' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "11010",
+      "category": "Administrative Templates: Windows Components",
+      "name": "WinRM Service: Allow Basic authentication",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Service",
+      "registryItem": "AllowBasic",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "L'authentification Basic envoie les identifiants en clair (base64). Elle ne doit jamais être utilisée.",
+      "risk": "Vos identifiants peuvent être capturés facilement par quiconque surveille le réseau.",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Service' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Service' -Name 'AllowBasic' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "11011",
+      "category": "Administrative Templates: Windows Components",
+      "name": "WinRM Service: Allow unencrypted traffic",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Service",
+      "registryItem": "AllowUnencryptedTraffic",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Force le chiffrement de toutes les communications WinRM (Windows Remote Management).",
+      "risk": "Sans chiffrement, toutes les commandes exécutées à distance et leurs résultats sont visibles en clair sur le réseau.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Service' -Name 'AllowUnencryptedTraffic' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "11012",
+      "category": "Administrative Templates: Windows Components",
+      "name": "WinRM Service: Disallow WinRM from storing RunAs credentials",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Service",
+      "registryItem": "DisableRunAs",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Empêche WinRM de stocker des identifiants 'RunAs' qui seraient utilisés automatiquement.",
+      "risk": "Les identifiants stockés peuvent être volés par un attaquant ayant accès au système.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Service' -Name 'DisableRunAs' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10620",
+      "category": "MS Security Guide",
+      "name": "Apply UAC restrictions to local accounts on network logons",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "registryItem": "LocalAccountTokenFilterPolicy",
+      "severity": "Medium",
+      "defaultValue": "",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Applique les restrictions UAC même pour les connexions réseau avec un compte local admin.",
+      "risk": "Sans ce paramètre, un attaquant avec des identifiants admin locaux peut se connecter à distance avec tous les privilèges, contournant l'UAC.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'LocalAccountTokenFilterPolicy' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "10657",
+      "category": "Administrative Templates: Network",
+      "name": "DNS Client: Configure NetBIOS settings",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient",
+      "registryItem": "EnableNetbios",
+      "severity": "Medium",
+      "defaultValue": "",
+      "recommendedValue": "2",
+      "operator": "=",
+      "description": "Configure le comportement de NetBIOS sur TCP/IP. La valeur 2 désactive NetBIOS.",
+      "risk": "NetBIOS est un protocole ancien avec plusieurs vulnérabilités connues. Il est souvent exploité pour des attaques de type 'name poisoning'.",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient' -Name 'EnableNetbios' -Value 2 -Type DWord"
+      }
+    },
+    {
+      "id": "10971",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Search: Allow indexing of encrypted files",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
+      "registryItem": "AllowIndexingEncryptedStoresOrItems",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Empêche Windows Search d'indexer le contenu des fichiers chiffrés.",
+      "risk": "Si les fichiers chiffrés sont indexés, leur contenu peut être exposé via l'index de recherche qui n'est pas toujours protégé.",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search' -Force; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search' -Name 'AllowIndexingEncryptedStoresOrItems' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "ASR006",
+      "category": "Attack Surface Reduction",
+      "name": "Block Office applications from creating executable content",
+      "method": "MpPreferenceAsr",
+      "methodArgument": "3b576869-a4ec-4529-8536-b80a7769e899",
+      "severity": "Medium",
+      "recommendedValue": "1",
+      "description": "Empêche Word, Excel et autres applications Office de créer des fichiers exécutables.",
+      "risk": "Les macros malveillantes créent souvent des fichiers .exe pour infecter le système. Cette règle bloque ce comportement.",
+      "remediation": {
+        "default": "Add-MpPreference -AttackSurfaceReductionRules_Ids 3b576869-a4ec-4529-8536-b80a7769e899 -AttackSurfaceReductionRules_Actions Enabled"
+      }
+    },
+    {
+      "id": "ASR007",
+      "category": "Attack Surface Reduction",
+      "name": "Block Office applications from injecting code into other processes",
+      "method": "MpPreferenceAsr",
+      "methodArgument": "75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84",
+      "severity": "Medium",
+      "recommendedValue": "1",
+      "description": "Empêche Office d'injecter du code dans d'autres processus en cours d'exécution.",
+      "risk": "L'injection de code est une technique utilisée par les malwares pour se cacher dans des processus légitimes.",
+      "remediation": {
+        "default": "Add-MpPreference -AttackSurfaceReductionRules_Ids 75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84 -AttackSurfaceReductionRules_Actions Enabled"
+      }
+    },
+    {
+      "id": "ASR008",
+      "category": "Attack Surface Reduction",
+      "name": "Block Win32 API calls from Office macros",
+      "method": "MpPreferenceAsr",
+      "methodArgument": "92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b",
+      "severity": "Medium",
+      "recommendedValue": "1",
+      "description": "Bloque les macros Office d'appeler directement les API Windows.",
+      "risk": "Les macros malveillantes utilisent les API Win32 pour télécharger des malwares ou modifier le système.",
+      "remediation": {
+        "default": "Add-MpPreference -AttackSurfaceReductionRules_Ids 92e97fa1-2edf-4476-bdd6-9dd0b4dddc7b -AttackSurfaceReductionRules_Actions Enabled"
+      }
+    },
+    {
+      "id": "ASR009",
+      "category": "Attack Surface Reduction",
+      "name": "Block execution of potentially obfuscated scripts",
+      "method": "MpPreferenceAsr",
+      "methodArgument": "5beb7efe-fd9a-4556-801d-275e5ffc04cc",
+      "severity": "Medium",
+      "recommendedValue": "1",
+      "description": "Détecte et bloque les scripts qui semblent être obscurcis (encodés pour cacher leur vraie fonction).",
+      "risk": "Les scripts malveillants sont souvent obscurcis pour échapper aux antivirus. Cette règle les détecte par leur structure anormale.",
+      "remediation": {
+        "default": "Add-MpPreference -AttackSurfaceReductionRules_Ids 5beb7efe-fd9a-4556-801d-275e5ffc04cc -AttackSurfaceReductionRules_Actions Enabled"
+      }
+    },
+    {
+      "id": "ASR010",
+      "category": "Attack Surface Reduction",
+      "name": "Block untrusted and unsigned processes that run from USB",
+      "method": "MpPreferenceAsr",
+      "methodArgument": "b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4",
+      "severity": "Medium",
+      "recommendedValue": "1",
+      "description": "Bloque l'exécution de fichiers non signés depuis les clés USB.",
+      "risk": "Les clés USB infectées sont un vecteur d'attaque très courant. Cette règle empêche l'exécution automatique de programmes non fiables.",
+      "remediation": {
+        "default": "Add-MpPreference -AttackSurfaceReductionRules_Ids b2b3f03d-6a65-4f7b-a9c7-1c7ef74a9ba4 -AttackSurfaceReductionRules_Actions Enabled"
+      }
+    },
+    {
+      "id": "ASR011",
+      "category": "Attack Surface Reduction",
+      "name": "Block Adobe Reader from creating child processes",
+      "method": "MpPreferenceAsr",
+      "methodArgument": "7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c",
+      "severity": "Medium",
+      "recommendedValue": "1",
+      "description": "Empêche Adobe Reader de lancer d'autres programmes.",
+      "risk": "Les PDF malveillants peuvent exploiter des failles d'Adobe Reader pour exécuter des programmes. Cette règle bloque ce vecteur d'attaque.",
+      "remediation": {
+        "default": "Add-MpPreference -AttackSurfaceReductionRules_Ids 7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c -AttackSurfaceReductionRules_Actions Enabled"
+      }
+    },
+    {
+      "id": "ASR012",
+      "category": "Attack Surface Reduction",
+      "name": "Block persistence through WMI event subscription",
+      "method": "MpPreferenceAsr",
+      "methodArgument": "e6db77e5-3df2-4cf1-b95a-636979351e5b",
+      "severity": "High",
+      "recommendedValue": "1",
+      "description": "Empêche les malwares d'utiliser WMI pour persister (se relancer automatiquement) sur le système.",
+      "risk": "WMI est souvent utilisé par les malwares avancés pour survivre aux redémarrages sans créer de fichiers visibles.",
+      "remediation": {
+        "default": "Add-MpPreference -AttackSurfaceReductionRules_Ids e6db77e5-3df2-4cf1-b95a-636979351e5b -AttackSurfaceReductionRules_Actions Enabled"
+      }
+    }
+  ]
+}

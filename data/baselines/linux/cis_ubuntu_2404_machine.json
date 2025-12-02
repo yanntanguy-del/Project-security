@@ -1,0 +1,794 @@
+{
+  "metadata": {
+    "name": "CIS Ubuntu 24.04 LTS Benchmark",
+    "version": "1.0.0",
+    "description": "Baseline de sécurité basé sur CIS Benchmarks et Lynis pour Ubuntu 24.04 LTS",
+    "os": "Linux",
+    "distro": "Ubuntu",
+    "distroVersion": "24.04",
+    "source": "CIS Benchmarks + Lynis + ANSSI Guidelines",
+    "lastUpdated": "2025-01-15"
+  },
+  "variants": {
+    "Server": {
+      "additionalFindings": [
+        {
+          "id": "LNX-SRV001",
+          "category": "Server Hardening",
+          "name": "AppArmor Profiles for Services",
+          "method": "command",
+          "command": "aa-status --enabled 2>/dev/null && aa-status | grep -c 'profiles are in enforce mode'",
+          "severity": "High",
+          "recommendedValue": ">0",
+          "description": "Les services serveur doivent avoir des profils AppArmor en mode enforce"
+        },
+        {
+          "id": "LNX-SRV002",
+          "category": "Server Hardening",
+          "name": "Fail2ban Installed",
+          "method": "command",
+          "command": "systemctl is-active fail2ban 2>/dev/null || echo 'not installed'",
+          "severity": "High",
+          "recommendedValue": "active",
+          "description": "Fail2ban protège contre les attaques par force brute"
+        }
+      ],
+      "excludeFindings": ["LNX8001"]
+    },
+    "Desktop": {
+      "additionalFindings": [
+        {
+          "id": "LNX-DSK001",
+          "category": "Desktop Security",
+          "name": "Screen Lock on Idle",
+          "method": "command",
+          "command": "gsettings get org.gnome.desktop.screensaver lock-enabled 2>/dev/null || echo 'not set'",
+          "severity": "Medium",
+          "recommendedValue": "true",
+          "description": "L'écran doit se verrouiller automatiquement"
+        },
+        {
+          "id": "LNX-DSK002",
+          "category": "Desktop Security",
+          "name": "Automatic Screen Lock Delay",
+          "method": "command",
+          "command": "gsettings get org.gnome.desktop.screensaver lock-delay 2>/dev/null || echo 'not set'",
+          "severity": "Medium",
+          "recommendedValue": "0",
+          "description": "Délai de verrouillage automatique (0 = immédiat)"
+        }
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "LNX1001",
+      "category": "Filesystem Configuration",
+      "name": "Separate /tmp partition",
+      "method": "command",
+      "command": "mount | grep -E '\\s/tmp\\s' | grep -v tmpfs || echo 'not separate'",
+      "severity": "Medium",
+      "recommendedValue": "mounted",
+      "description": "/tmp doit être sur une partition séparée avec options restrictives",
+      "remediation": {
+        "default": "Configurer /tmp sur une partition séparée avec nodev,nosuid,noexec dans /etc/fstab"
+      }
+    },
+    {
+      "id": "LNX1002",
+      "category": "Filesystem Configuration",
+      "name": "/tmp noexec option",
+      "method": "command",
+      "command": "mount | grep -E '\\s/tmp\\s' | grep -c noexec || echo '0'",
+      "severity": "Medium",
+      "recommendedValue": "1",
+      "description": "L'option noexec empêche l'exécution de binaires sur /tmp",
+      "remediation": {
+        "default": "Ajouter noexec aux options de /tmp dans /etc/fstab"
+      }
+    },
+    {
+      "id": "LNX1003",
+      "category": "Filesystem Configuration",
+      "name": "/var partition",
+      "method": "command",
+      "command": "mount | grep -E '\\s/var\\s' || echo 'not separate'",
+      "severity": "Low",
+      "recommendedValue": "mounted",
+      "description": "/var doit être sur une partition séparée",
+      "remediation": {
+        "default": "Configurer /var sur une partition séparée"
+      }
+    },
+    {
+      "id": "LNX1004",
+      "category": "Filesystem Configuration",
+      "name": "/home partition",
+      "method": "command",
+      "command": "mount | grep -E '\\s/home\\s' || echo 'not separate'",
+      "severity": "Low",
+      "recommendedValue": "mounted",
+      "description": "/home doit être sur une partition séparée pour le quota et les sauvegardes",
+      "remediation": {
+        "default": "Configurer /home sur une partition séparée"
+      }
+    },
+    {
+      "id": "LNX2001",
+      "category": "Boot Security",
+      "name": "GRUB Password",
+      "method": "file",
+      "path": "/boot/grub/grub.cfg",
+      "pattern": "password",
+      "severity": "High",
+      "recommendedValue": "configured",
+      "description": "Un mot de passe GRUB empêche les modifications de démarrage non autorisées",
+      "remediation": {
+        "default": "grub-mkpasswd-pbkdf2 puis ajouter le hash dans /etc/grub.d/40_custom"
+      }
+    },
+    {
+      "id": "LNX2002",
+      "category": "Boot Security",
+      "name": "Secure Boot Status",
+      "method": "command",
+      "command": "mokutil --sb-state 2>/dev/null || echo 'not available'",
+      "severity": "Medium",
+      "recommendedValue": "SecureBoot enabled",
+      "description": "Secure Boot vérifie l'intégrité du bootloader",
+      "remediation": {
+        "default": "Activer Secure Boot dans le BIOS/UEFI"
+      }
+    },
+    {
+      "id": "LNX2003",
+      "category": "Boot Security",
+      "name": "Root Account Boot Access",
+      "method": "file",
+      "path": "/etc/securetty",
+      "severity": "Medium",
+      "description": "Limiter les TTY sur lesquels root peut se connecter",
+      "remediation": {
+        "default": "Vider ou limiter /etc/securetty"
+      }
+    },
+    {
+      "id": "LNX3001",
+      "category": "Mandatory Access Control",
+      "name": "AppArmor Enabled",
+      "method": "command",
+      "command": "aa-status --enabled 2>/dev/null && echo 'enabled' || echo 'disabled'",
+      "severity": "High",
+      "defaultValue": "disabled",
+      "recommendedValue": "enabled",
+      "description": "AppArmor fournit un contrôle d'accès obligatoire",
+      "remediation": {
+        "default": "sudo apt install apparmor apparmor-utils && sudo systemctl enable apparmor"
+      }
+    },
+    {
+      "id": "LNX3002",
+      "category": "Mandatory Access Control",
+      "name": "AppArmor Profiles Status",
+      "method": "command",
+      "command": "aa-status 2>/dev/null | grep 'profiles are in enforce mode' || echo '0 profiles'",
+      "severity": "Medium",
+      "recommendedValue": ">0",
+      "description": "Les profils AppArmor doivent être en mode enforce",
+      "remediation": {
+        "default": "aa-enforce /etc/apparmor.d/*"
+      }
+    },
+    {
+      "id": "LNX4001",
+      "category": "User Accounts",
+      "name": "Password Minimum Length",
+      "method": "command",
+      "command": "grep -E '^minlen' /etc/security/pwquality.conf 2>/dev/null || echo 'not set'",
+      "severity": "High",
+      "recommendedValue": "14",
+      "operator": ">=",
+      "description": "Longueur minimale du mot de passe",
+      "remediation": {
+        "default": "echo 'minlen = 14' >> /etc/security/pwquality.conf"
+      }
+    },
+    {
+      "id": "LNX4002",
+      "category": "User Accounts",
+      "name": "Password Complexity",
+      "method": "command",
+      "command": "grep -E '^(minclass|dcredit|ucredit|lcredit|ocredit)' /etc/security/pwquality.conf 2>/dev/null | wc -l",
+      "severity": "Medium",
+      "recommendedValue": "4",
+      "operator": ">=",
+      "description": "Exigences de complexité du mot de passe",
+      "remediation": {
+        "default": "Configurer dcredit=-1 ucredit=-1 lcredit=-1 ocredit=-1 dans /etc/security/pwquality.conf"
+      }
+    },
+    {
+      "id": "LNX4003",
+      "category": "User Accounts",
+      "name": "Password Max Days",
+      "method": "command",
+      "command": "grep -E '^PASS_MAX_DAYS' /etc/login.defs | awk '{print $2}'",
+      "severity": "Medium",
+      "defaultValue": "99999",
+      "recommendedValue": "365",
+      "operator": "<=",
+      "description": "Durée maximale de validité du mot de passe",
+      "remediation": {
+        "default": "sed -i 's/PASS_MAX_DAYS.*/PASS_MAX_DAYS 365/' /etc/login.defs"
+      }
+    },
+    {
+      "id": "LNX4004",
+      "category": "User Accounts",
+      "name": "Password Min Days",
+      "method": "command",
+      "command": "grep -E '^PASS_MIN_DAYS' /etc/login.defs | awk '{print $2}'",
+      "severity": "Low",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": ">=",
+      "description": "Durée minimale entre changements de mot de passe",
+      "remediation": {
+        "default": "sed -i 's/PASS_MIN_DAYS.*/PASS_MIN_DAYS 1/' /etc/login.defs"
+      }
+    },
+    {
+      "id": "LNX4005",
+      "category": "User Accounts",
+      "name": "Inactive Account Lock",
+      "method": "command",
+      "command": "useradd -D | grep INACTIVE | cut -d= -f2",
+      "severity": "Medium",
+      "defaultValue": "-1",
+      "recommendedValue": "30",
+      "operator": "<=",
+      "description": "Verrouiller les comptes inactifs après 30 jours",
+      "remediation": {
+        "default": "useradd -D -f 30"
+      }
+    },
+    {
+      "id": "LNX4006",
+      "category": "User Accounts",
+      "name": "Root Login Shell",
+      "method": "command",
+      "command": "grep '^root:' /etc/passwd | cut -d: -f7",
+      "severity": "Info",
+      "recommendedValue": "/bin/bash",
+      "description": "Shell de connexion root",
+      "remediation": {
+        "default": "Ne pas changer sauf si vous savez ce que vous faites"
+      }
+    },
+    {
+      "id": "LNX4007",
+      "category": "User Accounts",
+      "name": "Empty Password Accounts",
+      "method": "command",
+      "command": "awk -F: '($2 == \"\" ) { print $1 }' /etc/shadow 2>/dev/null | wc -l",
+      "severity": "Critical",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Aucun compte ne doit avoir un mot de passe vide",
+      "remediation": {
+        "default": "passwd -l <username> pour verrouiller les comptes sans mot de passe"
+      }
+    },
+    {
+      "id": "LNX4008",
+      "category": "User Accounts",
+      "name": "UID 0 Accounts",
+      "method": "command",
+      "command": "awk -F: '($3 == 0 && $1 != \"root\") { print $1 }' /etc/passwd | wc -l",
+      "severity": "Critical",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Seul root doit avoir l'UID 0",
+      "remediation": {
+        "default": "Supprimer ou modifier les comptes non-root avec UID 0"
+      }
+    },
+    {
+      "id": "LNX5001",
+      "category": "SSH Configuration",
+      "name": "SSH Protocol Version",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'protocol' || echo 'default (2)'",
+      "severity": "Critical",
+      "recommendedValue": "2",
+      "description": "SSH doit utiliser uniquement le protocole 2",
+      "remediation": {
+        "default": "Protocol 2 dans /etc/ssh/sshd_config"
+      }
+    },
+    {
+      "id": "LNX5002",
+      "category": "SSH Configuration",
+      "name": "SSH Root Login",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'permitrootlogin' | awk '{print $2}'",
+      "severity": "High",
+      "defaultValue": "prohibit-password",
+      "recommendedValue": "no",
+      "description": "La connexion root SSH doit être désactivée",
+      "remediation": {
+        "default": "PermitRootLogin no dans /etc/ssh/sshd_config"
+      }
+    },
+    {
+      "id": "LNX5003",
+      "category": "SSH Configuration",
+      "name": "SSH Password Authentication",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'passwordauthentication' | awk '{print $2}'",
+      "severity": "Medium",
+      "defaultValue": "yes",
+      "recommendedValue": "no",
+      "description": "Désactiver l'authentification par mot de passe (utiliser les clés)",
+      "remediation": {
+        "default": "PasswordAuthentication no dans /etc/ssh/sshd_config (après avoir configuré les clés)"
+      }
+    },
+    {
+      "id": "LNX5004",
+      "category": "SSH Configuration",
+      "name": "SSH Empty Passwords",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'permitemptypasswords' | awk '{print $2}'",
+      "severity": "Critical",
+      "defaultValue": "no",
+      "recommendedValue": "no",
+      "description": "Les mots de passe vides doivent être interdits",
+      "remediation": {
+        "default": "PermitEmptyPasswords no dans /etc/ssh/sshd_config"
+      }
+    },
+    {
+      "id": "LNX5005",
+      "category": "SSH Configuration",
+      "name": "SSH X11 Forwarding",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'x11forwarding' | awk '{print $2}'",
+      "severity": "Low",
+      "defaultValue": "yes",
+      "recommendedValue": "no",
+      "description": "Désactiver le forwarding X11 sauf si nécessaire",
+      "remediation": {
+        "default": "X11Forwarding no dans /etc/ssh/sshd_config"
+      }
+    },
+    {
+      "id": "LNX5006",
+      "category": "SSH Configuration",
+      "name": "SSH Max Auth Tries",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'maxauthtries' | awk '{print $2}'",
+      "severity": "Medium",
+      "defaultValue": "6",
+      "recommendedValue": "4",
+      "operator": "<=",
+      "description": "Nombre maximum de tentatives d'authentification",
+      "remediation": {
+        "default": "MaxAuthTries 4 dans /etc/ssh/sshd_config"
+      }
+    },
+    {
+      "id": "LNX5007",
+      "category": "SSH Configuration",
+      "name": "SSH Login Grace Time",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'logingracetime' | awk '{print $2}'",
+      "severity": "Low",
+      "defaultValue": "120",
+      "recommendedValue": "60",
+      "operator": "<=",
+      "description": "Temps maximum pour s'authentifier",
+      "remediation": {
+        "default": "LoginGraceTime 60 dans /etc/ssh/sshd_config"
+      }
+    },
+    {
+      "id": "LNX5008",
+      "category": "SSH Configuration",
+      "name": "SSH Client Alive Interval",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'clientaliveinterval' | awk '{print $2}'",
+      "severity": "Low",
+      "defaultValue": "0",
+      "recommendedValue": "300",
+      "operator": "<=",
+      "description": "Intervalle de vérification des clients SSH inactifs",
+      "remediation": {
+        "default": "ClientAliveInterval 300 dans /etc/ssh/sshd_config"
+      }
+    },
+    {
+      "id": "LNX6001",
+      "category": "Firewall",
+      "name": "UFW Status",
+      "method": "command",
+      "command": "ufw status 2>/dev/null | grep -i 'status:' | awk '{print $2}'",
+      "severity": "High",
+      "defaultValue": "inactive",
+      "recommendedValue": "active",
+      "description": "Le pare-feu UFW doit être activé",
+      "remediation": {
+        "default": "sudo ufw enable"
+      }
+    },
+    {
+      "id": "LNX6002",
+      "category": "Firewall",
+      "name": "UFW Default Incoming",
+      "method": "command",
+      "command": "ufw status verbose 2>/dev/null | grep 'Default:' | grep -o 'incoming.*' | awk '{print $2}'",
+      "severity": "High",
+      "recommendedValue": "deny",
+      "description": "La politique par défaut doit refuser les connexions entrantes",
+      "remediation": {
+        "default": "sudo ufw default deny incoming"
+      }
+    },
+    {
+      "id": "LNX6003",
+      "category": "Firewall",
+      "name": "iptables Installed",
+      "method": "command",
+      "command": "which iptables >/dev/null 2>&1 && echo 'installed' || echo 'not installed'",
+      "severity": "Medium",
+      "recommendedValue": "installed",
+      "description": "iptables doit être installé",
+      "remediation": {
+        "default": "sudo apt install iptables"
+      }
+    },
+    {
+      "id": "LNX7001",
+      "category": "Services",
+      "name": "Unnecessary Services",
+      "method": "command",
+      "command": "systemctl list-unit-files --type=service --state=enabled | grep -E '(avahi|cups|bluetooth)' | wc -l",
+      "severity": "Low",
+      "recommendedValue": "0",
+      "description": "Désactiver les services non nécessaires (avahi, cups, bluetooth)",
+      "remediation": {
+        "default": "sudo systemctl disable --now avahi-daemon cups bluetooth"
+      }
+    },
+    {
+      "id": "LNX7002",
+      "category": "Services",
+      "name": "xinetd Service",
+      "method": "command",
+      "command": "systemctl is-active xinetd 2>/dev/null || echo 'inactive'",
+      "severity": "Medium",
+      "recommendedValue": "inactive",
+      "description": "xinetd doit être désactivé (service legacy)",
+      "remediation": {
+        "default": "sudo systemctl disable --now xinetd"
+      }
+    },
+    {
+      "id": "LNX7003",
+      "category": "Services",
+      "name": "rsh Services",
+      "method": "command",
+      "command": "dpkg -l | grep -E '(rsh-server|rsh-client)' | wc -l",
+      "severity": "High",
+      "recommendedValue": "0",
+      "description": "Les services rsh doivent être désinstallés (non sécurisés)",
+      "remediation": {
+        "default": "sudo apt purge rsh-server rsh-client"
+      }
+    },
+    {
+      "id": "LNX7004",
+      "category": "Services",
+      "name": "telnet Server",
+      "method": "command",
+      "command": "dpkg -l | grep -E 'telnetd' | wc -l",
+      "severity": "Critical",
+      "recommendedValue": "0",
+      "description": "Le serveur telnet doit être désinstallé (non sécurisé)",
+      "remediation": {
+        "default": "sudo apt purge telnetd"
+      }
+    },
+    {
+      "id": "LNX8001",
+      "category": "Desktop Environment",
+      "name": "GNOME Auto-mount",
+      "method": "command",
+      "command": "gsettings get org.gnome.desktop.media-handling automount 2>/dev/null || echo 'not available'",
+      "severity": "Low",
+      "recommendedValue": "false",
+      "description": "Désactiver le montage automatique des périphériques",
+      "remediation": {
+        "default": "gsettings set org.gnome.desktop.media-handling automount false"
+      }
+    },
+    {
+      "id": "LNX9001",
+      "category": "Kernel Hardening",
+      "name": "ASLR Status",
+      "method": "sysctl",
+      "key": "kernel.randomize_va_space",
+      "severity": "High",
+      "defaultValue": "2",
+      "recommendedValue": "2",
+      "operator": "=",
+      "description": "Address Space Layout Randomization doit être activé",
+      "remediation": {
+        "default": "sysctl -w kernel.randomize_va_space=2"
+      }
+    },
+    {
+      "id": "LNX9002",
+      "category": "Kernel Hardening",
+      "name": "Kernel Pointer Hiding",
+      "method": "sysctl",
+      "key": "kernel.kptr_restrict",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "2",
+      "operator": ">=",
+      "description": "Cacher les pointeurs kernel aux utilisateurs non-root",
+      "remediation": {
+        "default": "echo 'kernel.kptr_restrict = 2' >> /etc/sysctl.conf && sysctl -p"
+      }
+    },
+    {
+      "id": "LNX9003",
+      "category": "Kernel Hardening",
+      "name": "Dmesg Restrictions",
+      "method": "sysctl",
+      "key": "kernel.dmesg_restrict",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Restreindre l'accès à dmesg aux utilisateurs non-root",
+      "remediation": {
+        "default": "echo 'kernel.dmesg_restrict = 1' >> /etc/sysctl.conf && sysctl -p"
+      }
+    },
+    {
+      "id": "LNX9004",
+      "category": "Kernel Hardening",
+      "name": "SYN Flood Protection",
+      "method": "sysctl",
+      "key": "net.ipv4.tcp_syncookies",
+      "severity": "High",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Protection contre les attaques SYN flood",
+      "remediation": {
+        "default": "echo 'net.ipv4.tcp_syncookies = 1' >> /etc/sysctl.conf && sysctl -p"
+      }
+    },
+    {
+      "id": "LNX9005",
+      "category": "Kernel Hardening",
+      "name": "IP Forwarding",
+      "method": "sysctl",
+      "key": "net.ipv4.ip_forward",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Le forwarding IP doit être désactivé sauf si routeur",
+      "remediation": {
+        "default": "echo 'net.ipv4.ip_forward = 0' >> /etc/sysctl.conf && sysctl -p"
+      }
+    },
+    {
+      "id": "LNX9006",
+      "category": "Kernel Hardening",
+      "name": "ICMP Redirect Accept",
+      "method": "sysctl",
+      "key": "net.ipv4.conf.all.accept_redirects",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Ne pas accepter les redirections ICMP",
+      "remediation": {
+        "default": "echo 'net.ipv4.conf.all.accept_redirects = 0' >> /etc/sysctl.conf && sysctl -p"
+      }
+    },
+    {
+      "id": "LNX9007",
+      "category": "Kernel Hardening",
+      "name": "Source Route Packets",
+      "method": "sysctl",
+      "key": "net.ipv4.conf.all.accept_source_route",
+      "severity": "High",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Ne pas accepter les paquets source-routed",
+      "remediation": {
+        "default": "echo 'net.ipv4.conf.all.accept_source_route = 0' >> /etc/sysctl.conf && sysctl -p"
+      }
+    },
+    {
+      "id": "LNX9008",
+      "category": "Kernel Hardening",
+      "name": "Log Martian Packets",
+      "method": "sysctl",
+      "key": "net.ipv4.conf.all.log_martians",
+      "severity": "Low",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Logger les paquets avec adresses impossibles",
+      "remediation": {
+        "default": "echo 'net.ipv4.conf.all.log_martians = 1' >> /etc/sysctl.conf && sysctl -p"
+      }
+    },
+    {
+      "id": "LNX10001",
+      "category": "File Permissions",
+      "name": "/etc/passwd Permissions",
+      "method": "command",
+      "command": "stat -c '%a' /etc/passwd",
+      "severity": "High",
+      "recommendedValue": "644",
+      "operator": "<=",
+      "description": "Permissions de /etc/passwd",
+      "remediation": {
+        "default": "chmod 644 /etc/passwd"
+      }
+    },
+    {
+      "id": "LNX10002",
+      "category": "File Permissions",
+      "name": "/etc/shadow Permissions",
+      "method": "command",
+      "command": "stat -c '%a' /etc/shadow",
+      "severity": "Critical",
+      "recommendedValue": "640",
+      "operator": "<=",
+      "description": "Permissions de /etc/shadow",
+      "remediation": {
+        "default": "chmod 640 /etc/shadow"
+      }
+    },
+    {
+      "id": "LNX10003",
+      "category": "File Permissions",
+      "name": "/etc/gshadow Permissions",
+      "method": "command",
+      "command": "stat -c '%a' /etc/gshadow",
+      "severity": "High",
+      "recommendedValue": "640",
+      "operator": "<=",
+      "description": "Permissions de /etc/gshadow",
+      "remediation": {
+        "default": "chmod 640 /etc/gshadow"
+      }
+    },
+    {
+      "id": "LNX10004",
+      "category": "File Permissions",
+      "name": "SUID Files Audit",
+      "method": "command",
+      "command": "find / -type f -perm -4000 2>/dev/null | wc -l",
+      "severity": "Info",
+      "description": "Nombre de fichiers avec le bit SUID",
+      "remediation": {
+        "default": "Auditer régulièrement: find / -type f -perm -4000 -exec ls -l {} \\;"
+      }
+    },
+    {
+      "id": "LNX10005",
+      "category": "File Permissions",
+      "name": "World-Writable Files",
+      "method": "command",
+      "command": "find / -type f -perm -0002 -not -path '/proc/*' -not -path '/sys/*' 2>/dev/null | wc -l",
+      "severity": "Medium",
+      "recommendedValue": "0",
+      "description": "Fichiers accessibles en écriture par tous",
+      "remediation": {
+        "default": "Identifier et corriger: find / -type f -perm -0002 -exec chmod o-w {} \\;"
+      }
+    },
+    {
+      "id": "LNX11001",
+      "category": "Logging",
+      "name": "Rsyslog Installed",
+      "method": "command",
+      "command": "systemctl is-active rsyslog 2>/dev/null || echo 'inactive'",
+      "severity": "High",
+      "recommendedValue": "active",
+      "description": "Le service de journalisation rsyslog doit être actif",
+      "remediation": {
+        "default": "sudo apt install rsyslog && sudo systemctl enable --now rsyslog"
+      }
+    },
+    {
+      "id": "LNX11002",
+      "category": "Logging",
+      "name": "Journald Persistent Storage",
+      "method": "command",
+      "command": "cat /etc/systemd/journald.conf 2>/dev/null | grep -E '^Storage=' | cut -d= -f2 || echo 'auto'",
+      "severity": "Medium",
+      "recommendedValue": "persistent",
+      "description": "Les journaux systemd doivent être persistants",
+      "remediation": {
+        "default": "Ajouter Storage=persistent dans /etc/systemd/journald.conf"
+      }
+    },
+    {
+      "id": "LNX11003",
+      "category": "Logging",
+      "name": "Auditd Service",
+      "method": "command",
+      "command": "systemctl is-active auditd 2>/dev/null || echo 'inactive'",
+      "severity": "High",
+      "recommendedValue": "active",
+      "description": "Le service d'audit auditd doit être actif",
+      "remediation": {
+        "default": "sudo apt install auditd && sudo systemctl enable --now auditd"
+      }
+    },
+    {
+      "id": "LNX12001",
+      "category": "Updates",
+      "name": "Automatic Security Updates",
+      "method": "command",
+      "command": "cat /etc/apt/apt.conf.d/20auto-upgrades 2>/dev/null | grep -c 'Unattended-Upgrade \"1\"' || echo '0'",
+      "severity": "High",
+      "recommendedValue": "1",
+      "description": "Les mises à jour de sécurité automatiques doivent être activées",
+      "remediation": {
+        "default": "sudo apt install unattended-upgrades && sudo dpkg-reconfigure -plow unattended-upgrades"
+      }
+    },
+    {
+      "id": "LNX12002",
+      "category": "Updates",
+      "name": "Package Signature Verification",
+      "method": "command",
+      "command": "apt-config dump | grep -c 'APT::Get::AllowUnauthenticated \"false\"' || echo 'default (false)'",
+      "severity": "High",
+      "recommendedValue": "false",
+      "description": "Les packages doivent être vérifiés par signature GPG",
+      "remediation": {
+        "default": "Ne jamais utiliser --allow-unauthenticated"
+      }
+    },
+    {
+      "id": "LNX13001",
+      "category": "Cron",
+      "name": "Crontab Permissions",
+      "method": "command",
+      "command": "stat -c '%a' /etc/crontab",
+      "severity": "Medium",
+      "recommendedValue": "600",
+      "operator": "<=",
+      "description": "Permissions restrictives sur /etc/crontab",
+      "remediation": {
+        "default": "chmod 600 /etc/crontab"
+      }
+    },
+    {
+      "id": "LNX13002",
+      "category": "Cron",
+      "name": "At Daemon Access",
+      "method": "command",
+      "command": "ls /etc/at.deny 2>/dev/null && echo 'exists' || echo 'not exists'",
+      "severity": "Low",
+      "description": "Contrôler l'accès à la commande at",
+      "remediation": {
+        "default": "Créer /etc/at.allow avec uniquement les utilisateurs autorisés"
+      }
+    }
+  ]
+}

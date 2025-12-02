@@ -1,0 +1,145 @@
+{
+  "metadata": {
+    "name": "CIS Fedora 40 Benchmark",
+    "version": "1.0.0",
+    "description": "Baseline de sécurité pour Fedora 40 basé sur CIS et meilleures pratiques",
+    "os": "Linux",
+    "distro": "Fedora",
+    "distroVersion": "40",
+    "source": "CIS Benchmarks + Red Hat Security Guide",
+    "lastUpdated": "2025-01-15"
+  },
+  "variants": {
+    "Workstation": {
+      "additionalFindings": [
+        {
+          "id": "FED-WS001",
+          "category": "Desktop Security",
+          "name": "GNOME Screen Lock",
+          "method": "command",
+          "command": "gsettings get org.gnome.desktop.screensaver lock-enabled 2>/dev/null",
+          "severity": "Medium",
+          "recommendedValue": "true"
+        }
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "FED1001",
+      "category": "SELinux",
+      "name": "SELinux Status",
+      "method": "command",
+      "command": "getenforce 2>/dev/null || echo 'not available'",
+      "severity": "Critical",
+      "defaultValue": "Enforcing",
+      "recommendedValue": "Enforcing",
+      "description": "SELinux doit être en mode Enforcing",
+      "remediation": {
+        "default": "setenforce 1 && sed -i 's/SELINUX=.*/SELINUX=enforcing/' /etc/selinux/config"
+      }
+    },
+    {
+      "id": "FED1002",
+      "category": "SELinux",
+      "name": "SELinux Policy",
+      "method": "command",
+      "command": "sestatus 2>/dev/null | grep 'Loaded policy' | awk -F: '{print $2}' | tr -d ' '",
+      "severity": "High",
+      "recommendedValue": "targeted",
+      "description": "La politique SELinux targeted doit être chargée",
+      "remediation": {
+        "default": "Configurer SELINUXTYPE=targeted dans /etc/selinux/config"
+      }
+    },
+    {
+      "id": "FED2001",
+      "category": "Boot",
+      "name": "Secure Boot",
+      "method": "command",
+      "command": "mokutil --sb-state 2>/dev/null || echo 'not available'",
+      "severity": "Medium",
+      "recommendedValue": "SecureBoot enabled",
+      "description": "Secure Boot doit être activé"
+    },
+    {
+      "id": "FED3001",
+      "category": "SSH",
+      "name": "SSH Root Login",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep permitrootlogin | awk '{print $2}'",
+      "severity": "High",
+      "recommendedValue": "no",
+      "description": "Root SSH doit être désactivé",
+      "remediation": {
+        "default": "PermitRootLogin no dans /etc/ssh/sshd_config.d/*.conf"
+      }
+    },
+    {
+      "id": "FED4001",
+      "category": "Firewall",
+      "name": "Firewalld Status",
+      "method": "command",
+      "command": "systemctl is-active firewalld 2>/dev/null || echo 'inactive'",
+      "severity": "High",
+      "recommendedValue": "active",
+      "description": "firewalld doit être actif",
+      "remediation": {
+        "default": "systemctl enable --now firewalld"
+      }
+    },
+    {
+      "id": "FED4002",
+      "category": "Firewall",
+      "name": "Firewalld Default Zone",
+      "method": "command",
+      "command": "firewall-cmd --get-default-zone 2>/dev/null || echo 'not set'",
+      "severity": "Medium",
+      "recommendedValue": "public",
+      "description": "Zone par défaut restrictive"
+    },
+    {
+      "id": "FED5001",
+      "category": "Updates",
+      "name": "DNF Automatic",
+      "method": "command",
+      "command": "systemctl is-enabled dnf-automatic.timer 2>/dev/null || echo 'disabled'",
+      "severity": "High",
+      "recommendedValue": "enabled",
+      "description": "Mises à jour automatiques via dnf-automatic",
+      "remediation": {
+        "default": "dnf install dnf-automatic && systemctl enable --now dnf-automatic.timer"
+      }
+    },
+    {
+      "id": "FED6001",
+      "category": "Kernel",
+      "name": "ASLR",
+      "method": "sysctl",
+      "key": "kernel.randomize_va_space",
+      "severity": "High",
+      "recommendedValue": "2",
+      "description": "ASLR activé"
+    },
+    {
+      "id": "FED7001",
+      "category": "Accounts",
+      "name": "Password Policy",
+      "method": "command",
+      "command": "grep -E '^minlen' /etc/security/pwquality.conf 2>/dev/null | cut -d= -f2 | tr -d ' '",
+      "severity": "Medium",
+      "recommendedValue": "14",
+      "description": "Longueur minimale du mot de passe"
+    },
+    {
+      "id": "FED8001",
+      "category": "Logging",
+      "name": "Auditd",
+      "method": "command",
+      "command": "systemctl is-active auditd 2>/dev/null || echo 'inactive'",
+      "severity": "High",
+      "recommendedValue": "active",
+      "description": "Service d'audit actif"
+    }
+  ]
+}

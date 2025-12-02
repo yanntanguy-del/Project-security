@@ -1,0 +1,742 @@
+{
+  "metadata": {
+    "name": "Microsoft Security Baseline - Windows 11 22H2",
+    "version": "22H2",
+    "osFamily": "Windows",
+    "osVersion": "11",
+    "build": "22621",
+    "source": "HardeningKitty/0x6d69636b",
+    "lastUpdated": "2024-01-15"
+  },
+  "findings": [
+    {
+      "id": "10000",
+      "category": "Account Policies",
+      "name": "Account lockout duration",
+      "method": "accountpolicy",
+      "severity": "Low",
+      "defaultValue": "30",
+      "recommendedValue": "10",
+      "operator": ">=",
+      "description": "Durée de verrouillage du compte après échecs de connexion",
+      "remediation": {
+        "default": "Set-LocalSecurityPolicy -Policy 'Account lockout duration' -Value 10",
+        "gpo": "Computer Configuration > Windows Settings > Security Settings > Account Policies > Account Lockout Policy",
+        "intune": "Endpoint Security > Account Protection"
+      }
+    },
+    {
+      "id": "10001",
+      "category": "Account Policies",
+      "name": "Account lockout threshold",
+      "method": "accountpolicy",
+      "severity": "Low",
+      "defaultValue": "Never",
+      "recommendedValue": "10",
+      "operator": "<=",
+      "description": "Nombre de tentatives de connexion avant verrouillage",
+      "remediation": {
+        "default": "Set-LocalSecurityPolicy -Policy 'Account lockout threshold' -Value 10",
+        "gpo": "Computer Configuration > Windows Settings > Security Settings > Account Policies > Account Lockout Policy"
+      }
+    },
+    {
+      "id": "10003",
+      "category": "Account Policies",
+      "name": "Allow Administrator account lockout",
+      "method": "secedit",
+      "methodArgument": "System Access\\AllowAdministratorLockout",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Autoriser le verrouillage du compte Administrateur",
+      "remediation": {
+        "default": "secedit /export /cfg c:\\secpol.cfg; (Get-Content c:\\secpol.cfg) -replace 'AllowAdministratorLockout.*', 'AllowAdministratorLockout = 1' | Set-Content c:\\secpol.cfg; secedit /configure /db c:\\windows\\security\\local.sdb /cfg c:\\secpol.cfg"
+      }
+    },
+    {
+      "id": "10100",
+      "category": "Account Policies",
+      "name": "Length of password history maintained",
+      "method": "accountpolicy",
+      "severity": "Low",
+      "defaultValue": "None",
+      "recommendedValue": "24",
+      "operator": ">=",
+      "description": "Historique des mots de passe conservés",
+      "remediation": {
+        "default": "net accounts /uniquepw:24",
+        "gpo": "Computer Configuration > Windows Settings > Security Settings > Account Policies > Password Policy"
+      }
+    },
+    {
+      "id": "10101",
+      "category": "Account Policies",
+      "name": "Minimum password length",
+      "method": "accountpolicy",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "14",
+      "operator": ">=",
+      "description": "Longueur minimale du mot de passe",
+      "remediation": {
+        "default": "net accounts /minpwlen:14",
+        "gpo": "Computer Configuration > Windows Settings > Security Settings > Account Policies > Password Policy"
+      }
+    },
+    {
+      "id": "10102",
+      "category": "Account Policies",
+      "name": "Password must meet complexity requirements",
+      "method": "secedit",
+      "methodArgument": "System Access\\PasswordComplexity",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Le mot de passe doit respecter les exigences de complexité",
+      "remediation": {
+        "default": "secedit /export /cfg c:\\secpol.cfg; (Get-Content c:\\secpol.cfg) -replace 'PasswordComplexity.*', 'PasswordComplexity = 1' | Set-Content c:\\secpol.cfg; secedit /configure /db c:\\windows\\security\\local.sdb /cfg c:\\secpol.cfg"
+      }
+    },
+    {
+      "id": "10103",
+      "category": "Account Policies",
+      "name": "Store passwords using reversible encryption",
+      "method": "secedit",
+      "methodArgument": "System Access\\ClearTextPassword",
+      "severity": "High",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Ne pas stocker les mots de passe avec chiffrement réversible",
+      "remediation": {
+        "default": "secedit /export /cfg c:\\secpol.cfg; (Get-Content c:\\secpol.cfg) -replace 'ClearTextPassword.*', 'ClearTextPassword = 0' | Set-Content c:\\secpol.cfg; secedit /configure /db c:\\windows\\security\\local.sdb /cfg c:\\secpol.cfg"
+      }
+    },
+    {
+      "id": "10200",
+      "category": "Security Options",
+      "name": "Accounts: Limit local account use of blank passwords to console logon only",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Control\\Lsa",
+      "registryItem": "LimitBlankPasswordUse",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Limiter l'utilisation de mots de passe vides aux connexions console uniquement",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'LimitBlankPasswordUse' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10208",
+      "category": "Security Options",
+      "name": "Interactive logon: Machine inactivity limit",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "registryItem": "InactivityTimeoutSecs",
+      "severity": "Low",
+      "defaultValue": "",
+      "recommendedValue": "900",
+      "operator": "=",
+      "description": "Limite d'inactivité de la machine (15 minutes)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'InactivityTimeoutSecs' -Value 900 -Type DWord"
+      }
+    },
+    {
+      "id": "10210",
+      "category": "Security Options",
+      "name": "Microsoft network client: Digitally sign communications (always)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters",
+      "registryItem": "RequireSecuritySignature",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Signer numériquement les communications réseau (toujours)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters' -Name 'RequireSecuritySignature' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10219",
+      "category": "Security Options",
+      "name": "Network security: Do not store LAN Manager hash value on next password change",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Control\\Lsa",
+      "registryItem": "NoLMHash",
+      "severity": "High",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Ne pas stocker la valeur de hachage LAN Manager",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'NoLMHash' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10220",
+      "category": "Security Options",
+      "name": "Network security: LAN Manager authentication level",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Control\\Lsa",
+      "registryItem": "LmCompatibilityLevel",
+      "severity": "Medium",
+      "defaultValue": "3",
+      "recommendedValue": "5",
+      "operator": "=",
+      "description": "Niveau d'authentification LAN Manager - NTLMv2 uniquement",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'LmCompatibilityLevel' -Value 5 -Type DWord"
+      }
+    },
+    {
+      "id": "10225",
+      "category": "Security Options",
+      "name": "User Account Control: Admin Approval Mode for the Built-in Administrator account",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "registryItem": "FilterAdministratorToken",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Mode d'approbation administrateur pour le compte Administrateur intégré",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'FilterAdministratorToken' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10226",
+      "category": "Security Options",
+      "name": "User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "registryItem": "ConsentPromptBehaviorAdmin",
+      "severity": "Medium",
+      "defaultValue": "5",
+      "recommendedValue": "2",
+      "operator": "=",
+      "description": "Comportement de l'invite d'élévation pour les administrateurs",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'ConsentPromptBehaviorAdmin' -Value 2 -Type DWord"
+      }
+    },
+    {
+      "id": "10230",
+      "category": "Security Options",
+      "name": "User Account Control: Run all administrators in Admin Approval Mode",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "registryItem": "EnableLUA",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Exécuter tous les administrateurs en mode d'approbation administrateur (UAC)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'EnableLUA' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10501",
+      "category": "Windows Firewall",
+      "name": "EnableFirewall (Domain Profile, Policy)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile",
+      "registryItem": "EnableFirewall",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer le pare-feu Windows pour le profil Domaine",
+      "remediation": {
+        "default": "Set-NetFirewallProfile -Profile Domain -Enabled True"
+      }
+    },
+    {
+      "id": "10515",
+      "category": "Windows Firewall",
+      "name": "EnableFirewall (Private Profile, Policy)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile",
+      "registryItem": "EnableFirewall",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer le pare-feu Windows pour le profil Privé",
+      "remediation": {
+        "default": "Set-NetFirewallProfile -Profile Private -Enabled True"
+      }
+    },
+    {
+      "id": "10529",
+      "category": "Windows Firewall",
+      "name": "EnableFirewall (Public Profile, Policy)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile",
+      "registryItem": "EnableFirewall",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer le pare-feu Windows pour le profil Public",
+      "remediation": {
+        "default": "Set-NetFirewallProfile -Profile Public -Enabled True"
+      }
+    },
+    {
+      "id": "10621",
+      "category": "MS Security Guide",
+      "name": "Configure SMB v1 client driver",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\MrxSmb10",
+      "registryItem": "Start",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "4",
+      "operator": "=",
+      "description": "Désactiver le pilote client SMBv1 (vulnérable)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\MrxSmb10' -Name 'Start' -Value 4 -Type DWord"
+      }
+    },
+    {
+      "id": "10622",
+      "category": "MS Security Guide",
+      "name": "Configure SMB v1 server",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters",
+      "registryItem": "SMB1",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Désactiver le serveur SMBv1 (vulnérable)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters' -Name 'SMB1' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "10625",
+      "category": "MS Security Guide",
+      "name": "WDigest Authentication",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest",
+      "registryItem": "UseLogonCredential",
+      "severity": "High",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Désactiver l'authentification WDigest (prévient le vol de credentials)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest' -Name 'UseLogonCredential' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "10650",
+      "category": "Administrative Templates: Network",
+      "name": "DNS Client: Turn off multicast name resolution (LLMNR)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient",
+      "registryItem": "EnableMulticast",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Désactiver LLMNR (vulnérable aux attaques de type responder)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient' -Name 'EnableMulticast' -Value 0 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "10672",
+      "category": "Administrative Templates: System",
+      "name": "Device Guard: Turn On Virtualization Based Security (Policy)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
+      "registryItem": "EnableVirtualizationBasedSecurity",
+      "severity": "Medium",
+      "defaultValue": "",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer la sécurité basée sur la virtualisation (VBS)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'EnableVirtualizationBasedSecurity' -Value 1 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "10673",
+      "category": "Administrative Templates: System",
+      "name": "Device Guard: Virtualization Based Protection of Code Integrity (Policy)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
+      "registryItem": "HypervisorEnforcedCodeIntegrity",
+      "severity": "Medium",
+      "defaultValue": "",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer HVCI (Hypervisor-protected Code Integrity)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'HypervisorEnforcedCodeIntegrity' -Value 1 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "10674",
+      "category": "Administrative Templates: System",
+      "name": "Device Guard: Credential Guard Configuration (Policy)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
+      "registryItem": "LsaCfgFlags",
+      "severity": "Medium",
+      "defaultValue": "",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer Credential Guard",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'LsaCfgFlags' -Value 1 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "10700",
+      "category": "Administrative Templates: System",
+      "name": "Local Security Authority: Configures LSASS to run as a protected process",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Control\\Lsa",
+      "registryItem": "RunAsPPL",
+      "severity": "Medium",
+      "defaultValue": "",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Exécuter LSASS en tant que processus protégé (PPL)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'RunAsPPL' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10754",
+      "category": "Administrative Templates: Windows Components",
+      "name": "AutoPlay Policies: Turn off Autoplay",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "registryItem": "NoDriveTypeAutoRun",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "255",
+      "operator": "=",
+      "description": "Désactiver l'exécution automatique sur tous les lecteurs",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer' -Name 'NoDriveTypeAutoRun' -Value 255 -Type DWord"
+      }
+    },
+    {
+      "id": "10766",
+      "category": "Administrative Templates: Windows Components",
+      "name": "File Explorer: Configure Windows Defender SmartScreen",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+      "registryItem": "EnableSmartScreen",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer Windows Defender SmartScreen",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System' -Name 'EnableSmartScreen' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10972",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Microsoft Defender Antivirus: Configure detection for potentially unwanted applications",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender",
+      "registryItem": "PUAProtection",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": ">=",
+      "description": "Activer la détection des applications potentiellement indésirables (PUA)",
+      "remediation": {
+        "default": "Set-MpPreference -PUAProtection Enabled"
+      }
+    },
+    {
+      "id": "10973",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Microsoft Defender Antivirus: MAPS: Join Microsoft MAPS",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Spynet",
+      "registryItem": "SpynetReporting",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "2",
+      "operator": "=",
+      "description": "Rejoindre Microsoft MAPS (cloud protection avancée)",
+      "remediation": {
+        "default": "Set-MpPreference -MAPSReporting Advanced"
+      }
+    },
+    {
+      "id": "10993",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Microsoft Defender Antivirus: Microsoft Defender Exploit Guard: Network Protection: Prevent users and apps from accessing dangerous websites",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\Network Protection",
+      "registryItem": "EnableNetworkProtection",
+      "severity": "Medium",
+      "defaultValue": "",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer la protection réseau contre les sites dangereux",
+      "remediation": {
+        "default": "Set-MpPreference -EnableNetworkProtection Enabled"
+      }
+    },
+    {
+      "id": "11013",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Microsoft Defender Antivirus: Real-time Protection: Scan all downloaded files and attachments",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
+      "registryItem": "DisableIOAVProtection",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Analyser tous les fichiers téléchargés et pièces jointes",
+      "remediation": {
+        "default": "Set-MpPreference -DisableIOAVProtection $false"
+      }
+    },
+    {
+      "id": "11014",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Microsoft Defender Antivirus: Real-time Protection: Turn off real-time protection",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
+      "registryItem": "DisableRealtimeMonitoring",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Ne pas désactiver la protection en temps réel",
+      "remediation": {
+        "default": "Set-MpPreference -DisableRealtimeMonitoring $false"
+      }
+    },
+    {
+      "id": "11005",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Windows PowerShell: Turn on PowerShell Script Block Logging",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging",
+      "registryItem": "EnableScriptBlockLogging",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer la journalisation des blocs de script PowerShell",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging' -Name 'EnableScriptBlockLogging' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "11007",
+      "category": "Administrative Templates: Windows Components",
+      "name": "WinRM Client: Allow Basic authentication",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Client",
+      "registryItem": "AllowBasic",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Ne pas autoriser l'authentification basique WinRM",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Client' -Name 'AllowBasic' -Value 0 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "11008",
+      "category": "Administrative Templates: Windows Components",
+      "name": "WinRM Client: Allow unencrypted traffic",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Client",
+      "registryItem": "AllowUnencryptedTraffic",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Ne pas autoriser le trafic WinRM non chiffré",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Client' -Name 'AllowUnencryptedTraffic' -Value 0 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "10960",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Remote Desktop Connection Client: Do not allow passwords to be saved",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+      "registryItem": "DisablePasswordSaving",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Ne pas autoriser l'enregistrement des mots de passe RDP",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services' -Name 'DisablePasswordSaving' -Value 1 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "10963",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Remote Desktop Session Host: Security: Require secure RPC communication",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+      "registryItem": "fEncryptRPCTraffic",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Exiger une communication RPC sécurisée pour RDP",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services' -Name 'fEncryptRPCTraffic' -Value 1 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "10964",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Remote Desktop Session Host: Security: Set client connection encryption level",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services",
+      "registryItem": "MinEncryptionLevel",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "3",
+      "operator": "=",
+      "description": "Niveau de chiffrement élevé pour les connexions RDP",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services' -Name 'MinEncryptionLevel' -Value 3 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "11050",
+      "category": "System Services",
+      "name": "Xbox Accessory Management Service (XboxGipSvc)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\XboxGipSvc",
+      "registryItem": "Start",
+      "severity": "Medium",
+      "defaultValue": "3",
+      "recommendedValue": "4",
+      "operator": "=",
+      "description": "Désactiver le service Xbox Accessory Management",
+      "remediation": {
+        "default": "Set-Service -Name XboxGipSvc -StartupType Disabled"
+      }
+    },
+    {
+      "id": "11052",
+      "category": "System Services",
+      "name": "Xbox Live Auth Manager (XblAuthManager)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\XblAuthManager",
+      "registryItem": "Start",
+      "severity": "Medium",
+      "defaultValue": "3",
+      "recommendedValue": "4",
+      "operator": "=",
+      "description": "Désactiver le service Xbox Live Auth Manager",
+      "remediation": {
+        "default": "Set-Service -Name XblAuthManager -StartupType Disabled"
+      }
+    }
+  ],
+  "variants": {
+    "Dell": {
+      "description": "Paramètres spécifiques pour les machines Dell",
+      "additionalFindings": [
+        {
+          "id": "DELL001",
+          "category": "OEM - Dell",
+          "name": "Dell SupportAssist Service",
+          "method": "service",
+          "methodArgument": "SupportAssistAgent",
+          "severity": "Low",
+          "description": "Service Dell SupportAssist - peut être désactivé si non utilisé",
+          "remediation": {
+            "default": "Set-Service -Name SupportAssistAgent -StartupType Disabled -ErrorAction SilentlyContinue"
+          }
+        }
+      ]
+    },
+    "HP": {
+      "description": "Paramètres spécifiques pour les machines HP",
+      "additionalFindings": [
+        {
+          "id": "HP001",
+          "category": "OEM - HP",
+          "name": "HP Support Assistant Service",
+          "method": "service",
+          "methodArgument": "HPSupportSolutionsFrameworkService",
+          "severity": "Low",
+          "description": "Service HP Support Assistant - peut être désactivé si non utilisé",
+          "remediation": {
+            "default": "Set-Service -Name HPSupportSolutionsFrameworkService -StartupType Disabled -ErrorAction SilentlyContinue"
+          }
+        }
+      ]
+    },
+    "Lenovo": {
+      "description": "Paramètres spécifiques pour les machines Lenovo",
+      "additionalFindings": [
+        {
+          "id": "LEN001",
+          "category": "OEM - Lenovo",
+          "name": "Lenovo Vantage Service",
+          "method": "service",
+          "methodArgument": "LenovoVantageService",
+          "severity": "Low",
+          "description": "Service Lenovo Vantage - peut être désactivé si non utilisé",
+          "remediation": {
+            "default": "Set-Service -Name LenovoVantageService -StartupType Disabled -ErrorAction SilentlyContinue"
+          }
+        }
+      ]
+    },
+    "Home": {
+      "description": "Ajustements pour Windows 11 Home (certaines fonctionnalités non disponibles)",
+      "excludeFindings": ["10674", "10673", "10672"],
+      "notes": "Device Guard, Credential Guard et HVCI ne sont pas disponibles sur Windows Home"
+    },
+    "Pro": {
+      "description": "Configuration complète pour Windows 11 Pro",
+      "notes": "Toutes les fonctionnalités de sécurité sont disponibles"
+    },
+    "Enterprise": {
+      "description": "Configuration étendue pour Windows 11 Enterprise",
+      "additionalFindings": [
+        {
+          "id": "ENT001",
+          "category": "Enterprise - AppLocker",
+          "name": "AppLocker Service",
+          "method": "service",
+          "methodArgument": "AppIDSvc",
+          "severity": "Medium",
+          "description": "Activer le service AppLocker pour le contrôle des applications",
+          "remediation": {
+            "default": "Set-Service -Name AppIDSvc -StartupType Automatic; Start-Service AppIDSvc"
+          }
+        }
+      ]
+    }
+  }
+}

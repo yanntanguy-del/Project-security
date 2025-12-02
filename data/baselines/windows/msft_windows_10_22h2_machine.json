@@ -1,0 +1,315 @@
+{
+  "metadata": {
+    "name": "Microsoft Security Baseline - Windows 10 22H2",
+    "version": "22H2",
+    "osFamily": "Windows",
+    "osVersion": "10",
+    "build": "19045",
+    "source": "HardeningKitty/0x6d69636b",
+    "lastUpdated": "2024-01-15"
+  },
+  "findings": [
+    {
+      "id": "10000",
+      "category": "Account Policies",
+      "name": "Account lockout duration",
+      "method": "accountpolicy",
+      "severity": "Low",
+      "defaultValue": "30",
+      "recommendedValue": "10",
+      "operator": ">=",
+      "description": "Durée de verrouillage du compte après échecs de connexion",
+      "remediation": {
+        "default": "net accounts /lockoutduration:10"
+      }
+    },
+    {
+      "id": "10001",
+      "category": "Account Policies",
+      "name": "Account lockout threshold",
+      "method": "accountpolicy",
+      "severity": "Low",
+      "defaultValue": "Never",
+      "recommendedValue": "10",
+      "operator": "<=",
+      "description": "Nombre de tentatives de connexion avant verrouillage",
+      "remediation": {
+        "default": "net accounts /lockoutthreshold:10"
+      }
+    },
+    {
+      "id": "10100",
+      "category": "Account Policies",
+      "name": "Length of password history maintained",
+      "method": "accountpolicy",
+      "severity": "Low",
+      "defaultValue": "None",
+      "recommendedValue": "24",
+      "operator": ">=",
+      "description": "Historique des mots de passe conservés",
+      "remediation": {
+        "default": "net accounts /uniquepw:24"
+      }
+    },
+    {
+      "id": "10101",
+      "category": "Account Policies",
+      "name": "Minimum password length",
+      "method": "accountpolicy",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "14",
+      "operator": ">=",
+      "description": "Longueur minimale du mot de passe",
+      "remediation": {
+        "default": "net accounts /minpwlen:14"
+      }
+    },
+    {
+      "id": "10200",
+      "category": "Security Options",
+      "name": "Accounts: Limit local account use of blank passwords to console logon only",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Control\\Lsa",
+      "registryItem": "LimitBlankPasswordUse",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Limiter l'utilisation de mots de passe vides aux connexions console uniquement",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'LimitBlankPasswordUse' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10220",
+      "category": "Security Options",
+      "name": "Network security: LAN Manager authentication level",
+      "method": "Registry",
+      "registryPath": "HKLM:\\System\\CurrentControlSet\\Control\\Lsa",
+      "registryItem": "LmCompatibilityLevel",
+      "severity": "Medium",
+      "defaultValue": "3",
+      "recommendedValue": "5",
+      "operator": "=",
+      "description": "Niveau d'authentification LAN Manager - NTLMv2 uniquement",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'LmCompatibilityLevel' -Value 5 -Type DWord"
+      }
+    },
+    {
+      "id": "10230",
+      "category": "Security Options",
+      "name": "User Account Control: Run all administrators in Admin Approval Mode",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+      "registryItem": "EnableLUA",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Exécuter tous les administrateurs en mode d'approbation administrateur (UAC)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'EnableLUA' -Value 1 -Type DWord"
+      }
+    },
+    {
+      "id": "10501",
+      "category": "Windows Firewall",
+      "name": "EnableFirewall (Domain Profile)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile",
+      "registryItem": "EnableFirewall",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer le pare-feu Windows pour le profil Domaine",
+      "remediation": {
+        "default": "Set-NetFirewallProfile -Profile Domain -Enabled True"
+      }
+    },
+    {
+      "id": "10515",
+      "category": "Windows Firewall",
+      "name": "EnableFirewall (Private Profile)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile",
+      "registryItem": "EnableFirewall",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer le pare-feu Windows pour le profil Privé",
+      "remediation": {
+        "default": "Set-NetFirewallProfile -Profile Private -Enabled True"
+      }
+    },
+    {
+      "id": "10529",
+      "category": "Windows Firewall",
+      "name": "EnableFirewall (Public Profile)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile",
+      "registryItem": "EnableFirewall",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer le pare-feu Windows pour le profil Public",
+      "remediation": {
+        "default": "Set-NetFirewallProfile -Profile Public -Enabled True"
+      }
+    },
+    {
+      "id": "10621",
+      "category": "MS Security Guide",
+      "name": "Configure SMB v1 client driver",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\MrxSmb10",
+      "registryItem": "Start",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "4",
+      "operator": "=",
+      "description": "Désactiver le pilote client SMBv1 (vulnérable)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\MrxSmb10' -Name 'Start' -Value 4 -Type DWord"
+      }
+    },
+    {
+      "id": "10622",
+      "category": "MS Security Guide",
+      "name": "Configure SMB v1 server",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters",
+      "registryItem": "SMB1",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Désactiver le serveur SMBv1 (vulnérable)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters' -Name 'SMB1' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "10625",
+      "category": "MS Security Guide",
+      "name": "WDigest Authentication",
+      "method": "Registry",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest",
+      "registryItem": "UseLogonCredential",
+      "severity": "High",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Désactiver l'authentification WDigest (prévient le vol de credentials)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest' -Name 'UseLogonCredential' -Value 0 -Type DWord"
+      }
+    },
+    {
+      "id": "10650",
+      "category": "Administrative Templates: Network",
+      "name": "DNS Client: Turn off multicast name resolution (LLMNR)",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient",
+      "registryItem": "EnableMulticast",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Désactiver LLMNR (vulnérable aux attaques de type responder)",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient' -Name 'EnableMulticast' -Value 0 -Type DWord -Force"
+      }
+    },
+    {
+      "id": "10754",
+      "category": "Administrative Templates: Windows Components",
+      "name": "AutoPlay Policies: Turn off Autoplay",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "registryItem": "NoDriveTypeAutoRun",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "255",
+      "operator": "=",
+      "description": "Désactiver l'exécution automatique sur tous les lecteurs",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer' -Name 'NoDriveTypeAutoRun' -Value 255 -Type DWord"
+      }
+    },
+    {
+      "id": "10972",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Microsoft Defender Antivirus: Configure detection for potentially unwanted applications",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender",
+      "registryItem": "PUAProtection",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": ">=",
+      "description": "Activer la détection des applications potentiellement indésirables (PUA)",
+      "remediation": {
+        "default": "Set-MpPreference -PUAProtection Enabled"
+      }
+    },
+    {
+      "id": "11014",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Microsoft Defender Antivirus: Real-time Protection: Turn off real-time protection",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
+      "registryItem": "DisableRealtimeMonitoring",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Ne pas désactiver la protection en temps réel",
+      "remediation": {
+        "default": "Set-MpPreference -DisableRealtimeMonitoring $false"
+      }
+    },
+    {
+      "id": "11005",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Windows PowerShell: Turn on PowerShell Script Block Logging",
+      "method": "Registry",
+      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging",
+      "registryItem": "EnableScriptBlockLogging",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Activer la journalisation des blocs de script PowerShell",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging' -Name 'EnableScriptBlockLogging' -Value 1 -Type DWord"
+      }
+    }
+  ],
+  "variants": {
+    "Dell": {
+      "description": "Paramètres spécifiques pour les machines Dell",
+      "additionalFindings": []
+    },
+    "HP": {
+      "description": "Paramètres spécifiques pour les machines HP",
+      "additionalFindings": []
+    },
+    "Lenovo": {
+      "description": "Paramètres spécifiques pour les machines Lenovo",
+      "additionalFindings": []
+    },
+    "Home": {
+      "description": "Ajustements pour Windows 10 Home",
+      "notes": "Certaines fonctionnalités avancées non disponibles sur Home"
+    },
+    "Pro": {
+      "description": "Configuration complète pour Windows 10 Pro",
+      "notes": "Toutes les fonctionnalités de sécurité Pro sont disponibles"
+    }
+  }
+}
