@@ -1,195 +1,396 @@
-// app/page.tsx
+// app/page.tsx - Interface principale avec style violet original
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 
-// Liens de téléchargement (à remplacer par vos liens OneDrive/Google Drive/GitHub Release)
-const DOWNLOAD_URL = "#"; // Lien pour nouvelle installation
-const UPDATE_URL = "#";   // Lien pour mise à jour (peut être le même fichier)
 const APP_VERSION = "0.1.0";
 
-export default function LandingPage() {
-  const [downloading, setDownloading] = useState(false);
-  const [updating, setUpdating] = useState(false);
+interface Finding {
+  id: string;
+  name: string;
+  category: string;
+  method: string;
+  recommendedValue?: string;
+  currentValue?: string;
+  status: "pass" | "fail" | "unknown";
+  severity: string;
+  description?: string;
+  risk?: string;
+  compatibility?: string;
+  skipReason?: string;
+  defaultValue?: string;
+  remediation?: string | {
+    default?: string;
+    gpo?: string;
+    intune?: string;
+    manual?: string;
+  };
+}
 
-  const handleDownload = () => {
-    if (DOWNLOAD_URL === "#") {
-      alert("Le lien de téléchargement sera bientôt disponible. Contactez l'administrateur.");
-      return;
+interface SystemInfo {
+  osFamily: string;
+  osName: string;
+  osVersion: string;
+  osEdition?: string;
+  buildNumber?: string;
+  manufacturer?: string;
+  model?: string;
+}
+
+interface ScanResult {
+  system: SystemInfo;
+  baseline: string;
+  totalFindings: number;
+  findings: Finding[];
+  scannedAt: string;
+}
+
+type AppState = "welcome" | "scanning" | "results";
+
+// Fonction pour expliquer pourquoi une analyse n'a pas pu être faite
+const getUnknownReason = (finding: Finding): { reason: string; solution: string; icon: string } => {
+  if (finding.skipReason) {
+    switch (finding.skipReason) {
+      case "edition_incompatible":
+        return {
+          reason: "Cette fonctionnalité n'est pas disponible sur votre version de Windows (Home)",
+          solution: "Cette protection n'est disponible que sur Windows Pro ou Enterprise.",
+          icon: "🏠"
+        };
+      case "admin_required":
+        return {
+          reason: "Ce paramètre nécessite des droits administrateur pour être lu",
+          solution: "Exécutez l'application en tant qu'administrateur.",
+          icon: "🔐"
+        };
+      case "manual_check":
+        return {
+          reason: "Cette vérification doit être faite manuellement",
+          solution: "Vérifiez ce paramètre vous-même dans les paramètres Windows.",
+          icon: "👤"
+        };
     }
-    setDownloading(true);
-    window.location.href = DOWNLOAD_URL;
-    setTimeout(() => setDownloading(false), 3000);
+  }
+  return {
+    reason: "La valeur n'a pas pu être déterminée",
+    solution: "Essayez de relancer le scan ou vérifiez manuellement",
+    icon: "❓"
+  };
+};
+
+export default function HomePage() {
+  const [appState, setAppState] = useState<AppState>("welcome");
+  const [scanResult, setScanResult] = useState<ScanResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"all" | "pass" | "fail" | "unknown">("all");
+  const [expandedFinding, setExpandedFinding] = useState<string | null>(null);
+
+  const startScan = async () => {
+    setAppState("scanning");
+    setError(null);
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) throw new Error("Erreur lors de l'analyse");
+      const data = await res.json();
+      setScanResult(data);
+      setAppState("results");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Erreur inconnue");
+      setAppState("welcome");
+    }
   };
 
-  const handleUpdate = () => {
-    if (UPDATE_URL === "#") {
-      alert("Le lien de mise à jour sera bientôt disponible. Contactez l'administrateur.");
-      return;
-    }
-    setUpdating(true);
-    window.location.href = UPDATE_URL;
-    setTimeout(() => setUpdating(false), 3000);
+  const resetScan = () => {
+    setAppState("welcome");
+    setScanResult(null);
+    setFilter("all");
+    setExpandedFinding(null);
   };
 
-  return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
-      {/* Background effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-      </div>
+  const visibleFindings = scanResult?.findings || [];
+  const filteredFindings = visibleFindings.filter((f) => filter === "all" || f.status === filter);
+  const passCount = visibleFindings.filter(f => f.status === "pass").length;
+  const failCount = visibleFindings.filter(f => f.status === "fail").length;
+  const unknownCount = visibleFindings.filter(f => f.status === "unknown").length;
 
-      {/* Content */}
-      <div className="relative min-h-screen flex flex-col">
-        {/* Header */}
-        <header className="p-6">
-          <div className="container mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <span className="text-xl font-bold">Security Scanner</span>
-            </div>
-            <span className="text-sm text-slate-400">v{APP_VERSION}</span>
-          </div>
-        </header>
-
-        {/* Hero Section */}
-        <section className="flex-1 flex items-center justify-center px-6 py-12">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Icon */}
+  // Page d'accueil
+  if (appState === "welcome") {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <div className="fixed inset-0 bg-gradient-to-br from-violet-950/40 via-black to-purple-950/30 pointer-events-none" />
+        
+        <div className="relative min-h-screen flex flex-col items-center justify-center px-6">
+          <div className="text-center max-w-2xl">
             <div className="mb-8">
-              <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 border border-emerald-500/30">
-                <svg className="w-12 h-12 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
+              <span className="text-7xl">🛡️</span>
             </div>
-
-            {/* Title */}
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-emerald-400 via-emerald-300 to-teal-400 bg-clip-text text-transparent">
-                Security Scanner
-              </span>
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-xl text-slate-400 mb-4 max-w-2xl mx-auto">
+            <h1 className="text-5xl font-bold mb-4 text-violet-400">Security Scanner</h1>
+            <p className="text-xl text-gray-400 mb-2">
               Analysez la sécurité de votre système en quelques clics
             </p>
-            <p className="text-sm text-slate-500 mb-12">
-              Basé sur les recommandations Microsoft Security Baselines & CIS Benchmarks
+            <p className="text-sm text-gray-500 mb-12">
+              Basé sur Microsoft Security Baselines & CIS Benchmarks
             </p>
 
-            {/* Download Button */}
-            <div className="mb-8">
-              <Button
-                onClick={handleDownload}
-                disabled={downloading}
-                className="px-8 py-6 text-lg bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-2xl shadow-lg shadow-emerald-500/25 transition-all hover:scale-105 hover:shadow-emerald-500/40 disabled:opacity-70"
-              >
-                {downloading ? (
-                  <>
-                    <svg className="animate-spin w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Téléchargement...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Télécharger l'application
-                  </>
-                )}
-              </Button>
-              <p className="mt-4 text-sm text-slate-500">
-                Windows • macOS • Linux • 64-bit
-              </p>
-            </div>
-
-            {/* Update Button */}
-            <div className="mb-12">
-              <Button
-                onClick={handleUpdate}
-                disabled={updating}
-                variant="outline"
-                className="px-6 py-4 text-base border-slate-600 hover:border-emerald-500 hover:bg-emerald-500/10 text-slate-300 hover:text-emerald-400 rounded-xl transition-all"
-              >
-                {updating ? (
-                  <>
-                    <svg className="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Téléchargement...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Mettre à jour (déjà installé)
-                  </>
-                )}
-              </Button>
-              <p className="mt-2 text-xs text-slate-600">
-                Téléchargez et lancez le fichier pour mettre à jour votre installation existante
-              </p>
-            </div>
-
-            {/* Features Grid */}
-            <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-              <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-4 mx-auto">
-                  <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold mb-2">100+ Vérifications</h3>
-                <p className="text-sm text-slate-400">Analyse complète du registre Windows et des paramètres de sécurité</p>
+            {error && (
+              <div className="mb-6 p-4 bg-red-900/30 border border-red-500/30 rounded-xl text-red-400">
+                ❌ {error}
               </div>
+            )}
 
-              <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-4 mx-auto">
-                  <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold mb-2">Auto-détection</h3>
-                <p className="text-sm text-slate-400">S'adapte automatiquement à votre OS : Windows, macOS ou Linux</p>
-              </div>
+            <button
+              onClick={startScan}
+              className="px-8 py-4 text-lg bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl transition-all hover:scale-105 shadow-lg shadow-violet-500/25"
+            >
+              🔍 Lancer l'analyse de sécurité
+            </button>
 
-              <div className="p-6 rounded-2xl bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
-                <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-4 mx-auto">
-                  <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold mb-2">Guide Intégré</h3>
-                <p className="text-sm text-slate-400">Instructions détaillées pour corriger chaque vulnérabilité</p>
-              </div>
-            </div>
+            <p className="mt-8 text-xs text-gray-600">v{APP_VERSION}</p>
           </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="p-6 border-t border-slate-800">
-          <div className="container mx-auto text-center text-sm text-slate-500">
-            <p>Application privée • Accès restreint</p>
-            <p className="mt-1 text-xs text-slate-600">
-              Basé sur HardeningKitty & Microsoft Security Baselines
-            </p>
-          </div>
-        </footer>
+        </div>
       </div>
-    </main>
+    );
+  }
+
+  // Page de scan en cours
+  if (appState === "scanning") {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="fixed inset-0 bg-gradient-to-br from-violet-950/40 via-black to-purple-950/30 pointer-events-none" />
+        <div className="relative text-center">
+          <div className="w-16 h-16 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin mb-4 mx-auto" />
+          <h2 className="text-2xl font-bold mb-2 text-violet-400">Analyse en cours...</h2>
+          <p className="text-gray-400">Vérification des paramètres de sécurité</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Page des résultats
+  return (
+    <div className="min-h-screen bg-black text-white">
+      <div className="fixed inset-0 bg-gradient-to-br from-violet-950/40 via-black to-purple-950/30 pointer-events-none" />
+      
+      {/* Header */}
+      <header className="relative border-b border-violet-500/20 bg-black/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🛡️</span>
+            <span className="text-xl font-bold text-violet-400">Security Scanner</span>
+          </div>
+          <button
+            onClick={resetScan}
+            className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium transition"
+          >
+            🔄 Nouvelle analyse
+          </button>
+        </div>
+      </header>
+
+      <main className="relative container mx-auto px-6 py-8">
+        {/* System Info */}
+        <div className="mb-6 p-4 rounded-xl bg-violet-900/20 border border-violet-500/30">
+          <div className="grid md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <span className="text-gray-400">Système : </span>
+              <span className="text-white font-medium">{scanResult?.system.osName}</span>
+            </div>
+            <div>
+              <span className="text-gray-400">Édition : </span>
+              <span className="text-white font-medium">{scanResult?.system.osEdition || "N/A"}</span>
+            </div>
+            <div>
+              <span className="text-gray-400">Machine : </span>
+              <span className="text-white font-medium">{scanResult?.system.manufacturer} {scanResult?.system.model}</span>
+            </div>
+            <div>
+              <span className="text-gray-400">Baseline : </span>
+              <span className="text-violet-400 font-medium">{scanResult?.baseline}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="p-4 rounded-xl bg-violet-900/20 border border-violet-500/30">
+            <p className="text-gray-400 text-sm">Total</p>
+            <p className="text-2xl font-bold text-white">{visibleFindings.length}</p>
+          </div>
+          <div className="p-4 rounded-xl bg-green-900/20 border border-green-500/30">
+            <p className="text-gray-400 text-sm">Conformes</p>
+            <p className="text-2xl font-bold text-green-400">{passCount}</p>
+          </div>
+          <div className="p-4 rounded-xl bg-red-900/20 border border-red-500/30">
+            <p className="text-gray-400 text-sm">Non conformes</p>
+            <p className="text-2xl font-bold text-red-400">{failCount}</p>
+          </div>
+          <div className="p-4 rounded-xl bg-yellow-900/20 border border-yellow-500/30">
+            <p className="text-gray-400 text-sm">Non vérifiés</p>
+            <p className="text-2xl font-bold text-yellow-400">{unknownCount}</p>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {[
+            { key: "all", label: "Tous", count: visibleFindings.length },
+            { key: "pass", label: "✓ Conformes", count: passCount },
+            { key: "fail", label: "✗ Non conformes", count: failCount },
+            { key: "unknown", label: "? Non vérifiés", count: unknownCount },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setFilter(tab.key as typeof filter)}
+              className={`px-4 py-2 rounded-lg font-medium transition ${
+                filter === tab.key
+                  ? "bg-violet-600 text-white"
+                  : "bg-violet-900/30 text-gray-400 hover:bg-violet-900/50"
+              }`}
+            >
+              {tab.label} ({tab.count})
+            </button>
+          ))}
+        </div>
+
+        {/* Findings List */}
+        <div className="space-y-3">
+          {filteredFindings.map((finding) => (
+            <div
+              key={finding.id}
+              className={`rounded-xl border transition-all ${
+                finding.status === "pass" 
+                  ? "bg-green-900/10 border-green-500/30" 
+                  : finding.status === "fail"
+                  ? "bg-red-900/10 border-red-500/30"
+                  : "bg-yellow-900/10 border-yellow-500/30"
+              }`}
+            >
+              <button
+                onClick={() => setExpandedFinding(expandedFinding === finding.id ? null : finding.id)}
+                className="w-full p-4 flex items-center gap-4 text-left"
+              >
+                {/* Status Icon */}
+                <span className={`text-xl ${
+                  finding.status === "pass" ? "text-green-400" :
+                  finding.status === "fail" ? "text-red-400" : "text-yellow-400"
+                }`}>
+                  {finding.status === "pass" ? "✓" : finding.status === "fail" ? "✗" : "?"}
+                </span>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="text-xs font-mono text-gray-500">{finding.id}</span>
+                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                      finding.severity === "Critical" ? "bg-red-500/20 text-red-400" :
+                      finding.severity === "High" ? "bg-orange-500/20 text-orange-400" :
+                      finding.severity === "Medium" ? "bg-yellow-500/20 text-yellow-400" :
+                      "bg-blue-500/20 text-blue-400"
+                    }`}>
+                      {finding.severity || "Medium"}
+                    </span>
+                  </div>
+                  <p className="font-medium text-white truncate">{finding.name}</p>
+                </div>
+
+                {/* Arrow */}
+                <span className={`text-gray-500 transition-transform ${expandedFinding === finding.id ? "rotate-180" : ""}`}>
+                  ▼
+                </span>
+              </button>
+
+              {/* Expanded Content */}
+              {expandedFinding === finding.id && (
+                <div className="px-4 pb-4 pt-0 border-t border-white/10 mt-2">
+                  {/* Explication pour les non vérifiés */}
+                  {finding.status === "unknown" && (
+                    <div className="mt-4 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+                      <p className="text-xs text-yellow-400 mb-2 font-semibold">
+                        {getUnknownReason(finding).icon} Pourquoi cette analyse n'a pas pu être réalisée ?
+                      </p>
+                      <p className="text-sm text-gray-300 mb-2">
+                        <strong>Raison :</strong> {getUnknownReason(finding).reason}
+                      </p>
+                      <p className="text-sm text-gray-300">
+                        <strong>Solution :</strong> {getUnknownReason(finding).solution}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Description */}
+                  {finding.description && (
+                    <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                      <p className="text-xs text-blue-400 mb-2 font-semibold">💡 C'est quoi ?</p>
+                      <p className="text-sm text-gray-300">{finding.description}</p>
+                    </div>
+                  )}
+
+                  {/* Risque */}
+                  {finding.status === "fail" && finding.risk && (
+                    <div className="mt-4 p-3 rounded-lg bg-orange-500/10 border border-orange-500/30">
+                      <p className="text-xs text-orange-400 mb-2 font-semibold">⚠️ Risque</p>
+                      <p className="text-sm text-gray-300">{finding.risk}</p>
+                    </div>
+                  )}
+
+                  {/* Valeurs */}
+                  <div className="grid md:grid-cols-2 gap-4 mt-4">
+                    <div className="p-3 rounded-lg bg-green-500/10">
+                      <p className="text-xs text-green-400 mb-1">✓ Valeur recommandée</p>
+                      <code className="text-sm text-white">{finding.recommendedValue ?? "N/A"}</code>
+                    </div>
+                    <div className={`p-3 rounded-lg ${finding.status === "pass" ? "bg-green-500/10" : "bg-red-500/10"}`}>
+                      <p className={`text-xs mb-1 ${finding.status === "pass" ? "text-green-400" : "text-red-400"}`}>
+                        {finding.status === "pass" ? "✓" : "✗"} Valeur actuelle
+                      </p>
+                      <code className="text-sm text-white">{finding.currentValue ?? "Non définie"}</code>
+                    </div>
+                  </div>
+
+                  {/* Remédiation */}
+                  {finding.remediation && finding.status === "fail" && (
+                    <div className="mt-4 p-3 rounded-lg bg-violet-500/10 border border-violet-500/30">
+                      <p className="text-xs text-violet-400 mb-3 font-semibold">🔧 Comment corriger ?</p>
+                      {typeof finding.remediation === "string" ? (
+                        <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono bg-black/30 p-2 rounded">
+                          {finding.remediation}
+                        </pre>
+                      ) : (
+                        <div className="space-y-3">
+                          {finding.remediation.default && (
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">💻 Commande PowerShell :</p>
+                              <pre className="text-sm text-green-300 whitespace-pre-wrap font-mono bg-black/30 p-2 rounded">
+                                {finding.remediation.default}
+                              </pre>
+                            </div>
+                          )}
+                          {finding.remediation.gpo && scanResult?.system.osEdition !== "Home" && (
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">🏢 Stratégie de groupe (GPO) :</p>
+                              <p className="text-sm text-cyan-300 bg-black/30 p-2 rounded">
+                                {finding.remediation.gpo}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <p className="mt-3 text-xs text-gray-500">
+                    Méthode: {finding.method || "N/A"} • Catégorie: {finding.category || "N/A"}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </main>
+    </div>
   );
 }
