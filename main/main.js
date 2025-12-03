@@ -5,12 +5,26 @@ const { exec } = require("child_process");
 const util = require("util");
 const execPromise = util.promisify(exec);
 
+// Date d'expiration - 30 décembre 2025
+const EXPIRATION_DATE = new Date("2025-12-30T00:00:00");
+
+// Vérifier si l'app est expirée
+const isExpired = () => {
+  return new Date() >= EXPIRATION_DATE;
+};
+
 const appServe = app.isPackaged ? serve({
   directory: path.join(__dirname, "../out")
 }) : null;
 
 
 const createWindow = () => {
+  // Si expiré, fermer silencieusement l'app
+  if (isExpired()) {
+    app.quit();
+    return;
+  }
+
   const win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -40,7 +54,12 @@ const createWindow = () => {
 };
 
 app.on("ready", () => {
-    createWindow();
+  // Vérification d'expiration au démarrage
+  if (isExpired()) {
+    app.quit();
+    return;
+  }
+  createWindow();
 });
 
 app.on("window-all-closed", () => {

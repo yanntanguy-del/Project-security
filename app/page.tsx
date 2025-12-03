@@ -103,7 +103,7 @@ function DownloadPage() {
             </p>
 
             {/* Download Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <a
                 href="https://github.com/yanntanguy-del/Project-security/releases/latest/download/SecurityScanner-Setup.exe"
                 className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl transition-all hover:scale-105 shadow-lg shadow-violet-500/25 flex items-center justify-center gap-3"
@@ -131,6 +131,15 @@ function DownloadPage() {
                 <span className="text-xl">🐧</span>
                 Linux (.AppImage)
               </a>
+            </div>
+
+            {/* SmartScreen Warning */}
+            <div className="max-w-2xl mx-auto mb-12 p-4 bg-yellow-900/20 border border-yellow-500/30 rounded-xl text-left">
+              <p className="text-yellow-400 text-sm font-semibold mb-2">⚠️ Message Windows SmartScreen</p>
+              <p className="text-gray-400 text-xs">
+                Si Windows affiche "Windows a protégé votre ordinateur", cliquez sur <strong className="text-white">"Informations complémentaires"</strong> puis <strong className="text-white">"Exécuter quand même"</strong>. 
+                C'est normal pour les nouvelles applications.
+              </p>
             </div>
 
             {/* Features */}
