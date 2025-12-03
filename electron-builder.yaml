@@ -1,12 +1,17 @@
-appId: "io.github.rbfraphael.electron-next"
-productName: "Electron Next.JS"
-copyright: "Copyright (c) 2023 RBFraphael"
+appId: "com.security.scanner"
+productName: "SecurityScanner"
+copyright: "Copyright (c) 2025"
 win:
-  target: ["dir", "portable", "zip"]
+  target: ["nsis"]
   icon: "resources/icon.ico"
+  artifactName: "SecurityScanner-Setup.${ext}"
 linux:
-  target: ["dir", "appimage", "zip"]
+  target: ["AppImage"]
   icon: "resources/icon.png"
+  artifactName: "SecurityScanner.${ext}"
 mac:
-  target: ["dir", "dmg", "zip"]
+  target: ["dmg"]
   icon: "resources/icon.icns"
+  artifactName: "SecurityScanner.${ext}"
+directories:
+  output: "dist"
