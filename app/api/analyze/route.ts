@@ -1169,7 +1169,112 @@ export async function GET() {
   }
 }
 
-// Supporter aussi POST pour la page findings
-export async function POST() {
-  return GET();
+// Supporter aussi POST pour la page findings - avec support des infos système passées
+export async function POST(request: Request) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    
+    // Si des infos système sont passées, les utiliser pour enrichir la détection
+    // Sinon, faire une détection complète
+    let system: DetectedSystem;
+    
+    if (body.system && (body.system.osFamily || body.system.osName)) {
+      // Utiliser les infos passées mais re-détecter certains éléments si nécessaire
+      const detectedSystem = await detectSystem();
+      
+      // Normaliser osFamily - detect-system renvoie "Windows 11" mais on veut "Windows"
+      let normalizedOsFamily = body.system.osFamily || detectedSystem.osFamily;
+      if (normalizedOsFamily.includes("Windows")) {
+        normalizedOsFamily = "Windows";
+      } else if (normalizedOsFamily.includes("mac") || normalizedOsFamily.includes("Mac")) {
+        normalizedOsFamily = "macOS";
+      } else if (normalizedOsFamily.includes("Linux") || normalizedOsFamily.includes("linux")) {
+        normalizedOsFamily = "Linux";
+      }
+      
+      system = {
+        ...detectedSystem,
+        // Fusionner avec les infos passées (elles peuvent être plus complètes côté client)
+        osFamily: normalizedOsFamily as "Windows" | "Linux" | "macOS" | "Unknown",
+        osName: body.system.osName || detectedSystem.osName,
+        osVersion: body.system.osVersion || detectedSystem.osVersion,
+        osEdition: body.system.osEdition || detectedSystem.osEdition,
+        buildNumber: body.system.buildNumber || detectedSystem.buildNumber,
+        manufacturer: body.system.manufacturer || detectedSystem.manufacturer,
+        model: body.system.model || detectedSystem.model,
+        processor: body.system.processor || detectedSystem.processor,
+      };
+      
+      // Conserver les capabilities si fournies
+      if (body.system.capabilities) {
+        system.processorFeatures = {
+          supportsCET: body.system.capabilities.supportsCET,
+          supportsVBS: body.system.capabilities.supportsVBS,
+        };
+      }
+    } else {
+      system = await detectSystem();
+    }
+
+    // 2. Sélectionner le baseline approprié
+    const { filename: baselineFilename, folder: baselineFolder } = pickBaseline(system);
+    
+    if (!baselineFilename || !baselineFolder) {
+      return NextResponse.json({
+        system,
+        baseline: null,
+        findings: [],
+        error: "Système d'exploitation non supporté",
+        scannedAt: new Date().toISOString(),
+      });
+    }
+
+    // 3. Charger le baseline
+    const baselineData = loadBaselineData(baselineFilename, baselineFolder);
+    let findings: Finding[] = baselineData?.findings || [];
+
+    // 4. Appliquer les variantes selon le système
+    findings = applyVariants(findings, system, baselineData);
+
+    // 5. Vérifier chaque finding (limité pour les performances)
+    const checkedFindings: Finding[] = [];
+    const maxFindings = 50;
+    const findingsToCheck = findings.slice(0, maxFindings);
+
+    for (const finding of findingsToCheck) {
+      if (finding.status === "unknown" && finding.currentValue?.includes("Non disponible")) {
+        checkedFindings.push(finding);
+      } else {
+        const checked = await checkFinding(finding, system.osFamily, system);
+        checkedFindings.push(checked);
+      }
+    }
+
+    // 6. Filtrer les findings non pertinents
+    const filteredFindings = checkedFindings.filter(f => {
+      if (f.status === "unknown" && f.skipReason === "service_not_installed") {
+        return false;
+      }
+      if (f.status === "unknown" && f.skipReason === "manual_check") {
+        return false;
+      }
+      return true;
+    });
+
+    // 7. Retourner les résultats
+    return NextResponse.json({
+      system,
+      baseline: baselineFilename,
+      baselineFolder,
+      findings: filteredFindings,
+      totalFindings: findings.length,
+      scannedAt: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    console.error("Erreur analyse POST:", error);
+    return NextResponse.json(
+      { error: error.message || "Erreur lors de l'analyse" },
+      { status: 500 }
+    );
+  }
 }
