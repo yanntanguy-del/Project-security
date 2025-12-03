@@ -5,6 +5,13 @@ import { useState, useEffect } from "react";
 // Date d'expiration - 30 décembre 2025
 const EXPIRATION_DATE = new Date("2025-12-30T00:00:00");
 
+// Clés de licence valides (tu peux en ajouter autant que tu veux)
+const VALID_LICENSE_KEYS = [
+  "SEC-2025-YANN-PRO",
+  "SEC-2025-ADMIN-001",
+  "SEC-2025-DEMO-TEST",
+];
+
 // Vérifier si l'app est expirée
 const isExpired = () => {
   return new Date() >= EXPIRATION_DATE;
@@ -14,6 +21,24 @@ const isExpired = () => {
 const isElectron = () => {
   if (typeof window === "undefined") return false;
   return !!(window as any).electron || navigator.userAgent.includes("Electron");
+};
+
+// Vérifier la licence stockée
+const getStoredLicense = (): string | null => {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("security_scanner_license");
+};
+
+// Sauvegarder la licence
+const storeLicense = (key: string) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("security_scanner_license", key);
+  }
+};
+
+// Valider une clé de licence
+const isValidLicense = (key: string): boolean => {
+  return VALID_LICENSE_KEYS.includes(key.trim().toUpperCase());
 };
 
 // ============================================================================
@@ -501,19 +526,108 @@ function ScannerPage() {
 }
 
 // ============================================================================
+// PAGE DE LICENCE (ELECTRON)
+// ============================================================================
+function LicensePage({ onValidLicense }: { onValidLicense: () => void }) {
+  const [licenseKey, setLicenseKey] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    // Petit délai pour l'effet visuel
+    setTimeout(() => {
+      if (isValidLicense(licenseKey)) {
+        storeLicense(licenseKey.trim().toUpperCase());
+        onValidLicense();
+      } else {
+        setError("Clé de licence invalide. Vérifiez votre clé et réessayez.");
+      }
+      setLoading(false);
+    }, 500);
+  };
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      <div className="fixed inset-0 bg-gradient-to-br from-violet-950/40 via-black to-purple-950/30 pointer-events-none" />
+      
+      <div className="relative min-h-screen flex items-center justify-center px-6">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <span className="text-6xl">🛡️</span>
+            <h1 className="text-3xl font-bold text-violet-400 mt-4">Security Scanner</h1>
+            <p className="text-gray-400 mt-2">Activation de la licence</p>
+          </div>
+
+          {/* Formulaire */}
+          <form onSubmit={handleSubmit} className="bg-gray-900/50 border border-violet-500/30 rounded-xl p-6">
+            <div className="mb-6">
+              <label htmlFor="license" className="block text-sm font-medium text-gray-300 mb-2">
+                🔑 Clé de licence
+              </label>
+              <input
+                type="text"
+                id="license"
+                value={licenseKey}
+                onChange={(e) => setLicenseKey(e.target.value.toUpperCase())}
+                placeholder="SEC-XXXX-XXXX-XXX"
+                className="w-full px-4 py-3 bg-black/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 font-mono tracking-wider"
+                autoFocus
+              />
+            </div>
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-900/30 border border-red-500/50 rounded-lg text-red-300 text-sm">
+                ❌ {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading || !licenseKey.trim()}
+              className="w-full py-3 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all"
+            >
+              {loading ? "⏳ Vérification..." : "✅ Activer la licence"}
+            </button>
+          </form>
+
+          {/* Info */}
+          <p className="text-center text-gray-500 text-xs mt-6">
+            Contactez l'administrateur pour obtenir une clé de licence.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // COMPOSANT PRINCIPAL
 // ============================================================================
 export default function HomePage() {
   const [isClient, setIsClient] = useState(false);
   const [isElectronApp, setIsElectronApp] = useState(false);
+  const [isLicensed, setIsLicensed] = useState(false);
+  const [checkingLicense, setCheckingLicense] = useState(true);
 
   useEffect(() => {
     setIsClient(true);
     setIsElectronApp(isElectron());
+    
+    // Vérifier si une licence valide est déjà stockée
+    const storedLicense = getStoredLicense();
+    if (storedLicense && isValidLicense(storedLicense)) {
+      setIsLicensed(true);
+    }
+    setCheckingLicense(false);
   }, []);
 
   // Pendant le SSR ou le chargement initial
-  if (!isClient) {
+  if (!isClient || checkingLicense) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="w-16 h-16 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
@@ -521,8 +635,13 @@ export default function HomePage() {
     );
   }
 
-  // Si on est dans Electron, afficher le scanner
+  // Si on est dans Electron
   if (isElectronApp) {
+    // Vérifier la licence d'abord
+    if (!isLicensed) {
+      return <LicensePage onValidLicense={() => setIsLicensed(true)} />;
+    }
+    // Licence valide, afficher le scanner
     return <ScannerPage />;
   }
 
