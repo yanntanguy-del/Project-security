@@ -53,3 +53,12 @@ next-env.d.ts
 
 # Electron build output
 /dist
+
+# Sauvegardes locales
+Sauvegarde_Application_*/
+
+# Fichiers temporaires
+*.js.bak
+main/main_original.js
+main/preload_original.js
+"Page de téléchargement.js"

@@ -20,7 +20,10 @@
           "command": "systemctl is-active fail2ban 2>/dev/null || echo 'inactive'",
           "severity": "High",
           "recommendedValue": "active",
-          "description": "Fail2ban protège contre les attaques par force brute"
+          "description": "Fail2ban protège contre les attaques par force brute",
+          "remediation": {
+            "default": "apt install fail2ban && systemctl enable --now fail2ban"
+          }
         }
       ]
     }
@@ -125,7 +128,7 @@
       "command": "dpkg -l unattended-upgrades 2>/dev/null | grep -c '^ii' || echo '0'",
       "severity": "High",
       "recommendedValue": "1",
-      "description": "Les mises à jour automatiques doivent être configurées",
+      "description": "Les mises à  jour automatiques doivent être configurées",
       "remediation": {
         "default": "apt install unattended-upgrades && dpkg-reconfigure -plow unattended-upgrades"
       }

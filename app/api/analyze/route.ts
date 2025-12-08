@@ -8,6 +8,359 @@ import os from "os";
 
 const execAsync = promisify(exec);
 
+// ============================================================================
+// CACHE POUR OPTIMISER LES APPELS WINDOWS (évite les appels répétés)
+// ============================================================================
+
+// Caches globaux Windows
+let mpPreferenceCache: Record<string, string> | null = null;
+let servicesCache: Record<string, { status: string; startType: string }> | null = null;
+let accountPolicyCache: Record<string, string> | null = null;
+let seceditCache: Record<string, string> | null = null;
+let asrRulesCache: Record<string, string> | null = null;
+
+// Caches globaux macOS
+let sysctlMacCache: Record<string, string> | null = null;
+let defaultsCache: Record<string, string> | null = null;
+
+// Caches globaux Linux
+let sysctlLinuxCache: Record<string, string> | null = null;
+
+// Charger toutes les préférences MpPreference en une seule fois
+async function loadMpPreferenceCache(): Promise<Record<string, string>> {
+  if (mpPreferenceCache !== null) return mpPreferenceCache;
+  
+  try {
+    // Utiliser -EncodedCommand pour éviter les problèmes d'échappement
+    const psScript = `
+      $mp = Get-MpPreference -ErrorAction SilentlyContinue
+      if ($mp) {
+        @{
+          PUAProtection = if ($null -ne $mp.PUAProtection) { $mp.PUAProtection } else { 0 }
+          MAPSReporting = if ($null -ne $mp.MAPSReporting) { $mp.MAPSReporting } else { 0 }
+          EnableNetworkProtection = if ($null -ne $mp.EnableNetworkProtection) { $mp.EnableNetworkProtection } else { 0 }
+          DisableIOAVProtection = if ($null -ne $mp.DisableIOAVProtection) { $mp.DisableIOAVProtection } else { $false }
+          DisableRealtimeMonitoring = if ($null -ne $mp.DisableRealtimeMonitoring) { $mp.DisableRealtimeMonitoring } else { $false }
+          DisableBehaviorMonitoring = if ($null -ne $mp.DisableBehaviorMonitoring) { $mp.DisableBehaviorMonitoring } else { $false }
+          DisableBlockAtFirstSeen = if ($null -ne $mp.DisableBlockAtFirstSeen) { $mp.DisableBlockAtFirstSeen } else { $false }
+          DisableScriptScanning = if ($null -ne $mp.DisableScriptScanning) { $mp.DisableScriptScanning } else { $false }
+          SubmitSamplesConsent = if ($null -ne $mp.SubmitSamplesConsent) { $mp.SubmitSamplesConsent } else { 0 }
+        } | ConvertTo-Json -Compress
+      } else {
+        '{}'
+      }
+    `;
+    
+    // Encoder en Base64 pour éviter les problèmes d'échappement
+    const encodedCommand = Buffer.from(psScript, 'utf16le').toString('base64');
+    
+    const { stdout } = await execAsync(`powershell -NoProfile -EncodedCommand ${encodedCommand}`, {
+      windowsHide: true,
+      timeout: 15000
+    });
+    
+    if (stdout.trim() && stdout.trim() !== '{}') {
+      const data = JSON.parse(stdout.trim());
+      mpPreferenceCache = {};
+      for (const [key, value] of Object.entries(data)) {
+        // Convertir les booléens en "0"/"1"
+        if (value === true) mpPreferenceCache[key] = "1";
+        else if (value === false) mpPreferenceCache[key] = "0";
+        else if (value !== null && value !== undefined) mpPreferenceCache[key] = String(value);
+        else mpPreferenceCache[key] = "0"; // Valeur par défaut si null
+      }
+      return mpPreferenceCache;
+    }
+  } catch (e) {
+    console.error("Erreur chargement MpPreference cache:", e);
+  }
+  
+  // Si on arrive ici, Windows Defender n'est peut-être pas disponible
+  mpPreferenceCache = {};
+  return mpPreferenceCache;
+}
+
+// Charger l'état des services Xbox en une seule fois
+async function loadServicesCache(): Promise<Record<string, { status: string; startType: string }>> {
+  if (servicesCache !== null) return servicesCache;
+  
+  try {
+    const services = ["XboxGipSvc", "XblAuthManager", "XblGameSave", "XboxNetApiSvc"];
+    
+    // Script PowerShell avec encodage Base64 pour éviter les problèmes d'échappement
+    const psScript = `
+      $result = @{}
+      @('${services.join("','")}') | ForEach-Object {
+        $svc = Get-Service -Name $_ -ErrorAction SilentlyContinue
+        if ($svc) {
+          $start = (Get-CimInstance Win32_Service -Filter "Name='$_'" -ErrorAction SilentlyContinue).StartMode
+          $result[$_] = @{Status=$svc.Status.ToString();StartType=$start}
+        }
+      }
+      $result | ConvertTo-Json -Compress
+    `;
+    
+    const encodedCommand = Buffer.from(psScript, 'utf16le').toString('base64');
+    
+    const { stdout } = await execAsync(`powershell -NoProfile -EncodedCommand ${encodedCommand}`, {
+      windowsHide: true,
+      timeout: 15000
+    });
+    
+    if (stdout.trim()) {
+      const rawCache = JSON.parse(stdout.trim());
+      // Normaliser les clés (StartType -> startType, Status -> status)
+      servicesCache = {};
+      for (const [serviceName, info] of Object.entries(rawCache)) {
+        const serviceInfo = info as Record<string, string>;
+        servicesCache[serviceName] = {
+          status: serviceInfo.Status || serviceInfo.status || "Unknown",
+          startType: serviceInfo.StartType || serviceInfo.startType || "Unknown"
+        };
+      }
+      return servicesCache!;
+    }
+  } catch (e) {
+    console.error("Erreur chargement services cache:", e);
+  }
+  
+  servicesCache = {};
+  return servicesCache;
+}
+
+// Charger toutes les politiques de compte en une seule fois (net accounts)
+async function loadAccountPolicyCache(): Promise<Record<string, string>> {
+  if (accountPolicyCache !== null) return accountPolicyCache;
+  
+  try {
+    const { stdout } = await execAsync("net accounts", { windowsHide: true, timeout: 10000 });
+    accountPolicyCache = {};
+    
+    // Parser la sortie de net accounts (format français et anglais)
+    const lines = stdout.replace(/\r/g, "").split("\n");
+    
+    for (const line of lines) {
+      // Durée du verrouillage (min) / Lockout duration
+      if (/verrouillage\s*\(min\)/i.test(line) || /lockout duration/i.test(line)) {
+        const match = line.match(/:\s*(\d+)/);
+        if (match) accountPolicyCache["account lockout duration"] = match[1];
+      }
+      // Seuil de verrouillage / Lockout threshold
+      else if (/seuil de verrouillage/i.test(line) || /lockout threshold/i.test(line)) {
+        const match = line.match(/:\s*(\d+|Jamais|Never)/i);
+        if (match) {
+          const val = match[1].toLowerCase();
+          accountPolicyCache["account lockout threshold"] = (val === "jamais" || val === "never") ? "0" : match[1];
+        }
+      }
+      // Fenêtre d'observation / Reset lockout counter
+      else if (/observation.*verrouillage/i.test(line) || /lockout.*window/i.test(line)) {
+        const match = line.match(/:\s*(\d+)/);
+        if (match) accountPolicyCache["reset account lockout counter"] = match[1];
+      }
+      // Historique des mots de passe / Password history
+      else if (/ant.?rieurs/i.test(line) || /password.*history/i.test(line)) {
+        const match = line.match(/:\s*(\d+|Aucune|None)/i);
+        if (match) {
+          const val = match[1].toLowerCase();
+          accountPolicyCache["length of password history maintained"] = (val === "aucune" || val === "none") ? "0" : match[1];
+        }
+      }
+      // Longueur minimale / Minimum password length
+      else if (/longueur minimale/i.test(line) || /minimum.*length/i.test(line)) {
+        const match = line.match(/:\s*(\d+)/);
+        if (match) accountPolicyCache["minimum password length"] = match[1];
+      }
+      // Durée de vie maximale / Maximum password age
+      else if (/vie maximale/i.test(line) || /maximum.*age/i.test(line)) {
+        const match = line.match(/:\s*(\d+|Illimit|Unlimited)/i);
+        if (match) {
+          const val = match[1].toLowerCase();
+          accountPolicyCache["maximum password age"] = (val.startsWith("illimit") || val === "unlimited") ? "0" : match[1];
+        }
+      }
+      // Durée de vie minimale / Minimum password age
+      else if (/vie minimale/i.test(line) || /minimum.*age/i.test(line)) {
+        const match = line.match(/:\s*(\d+)/);
+        if (match) accountPolicyCache["minimum password age"] = match[1];
+      }
+    }
+    
+    return accountPolicyCache;
+  } catch (e) {
+    console.error("Erreur chargement accountpolicy cache:", e);
+  }
+  
+  accountPolicyCache = {};
+  return accountPolicyCache;
+}
+
+// Charger tous les paramètres secedit en une seule fois
+async function loadSeceditCache(): Promise<Record<string, string>> {
+  if (seceditCache !== null) return seceditCache;
+  
+  try {
+    const tempFile = path.join(os.tmpdir(), `secedit_cache_${Date.now()}.inf`);
+    
+    await execAsync(`secedit /export /cfg "${tempFile}" /quiet`, { 
+      windowsHide: true,
+      timeout: 15000 
+    });
+    
+    if (fs.existsSync(tempFile)) {
+      const content = fs.readFileSync(tempFile, "utf16le");
+      fs.unlinkSync(tempFile);
+      
+      seceditCache = {};
+      
+      // Parser le fichier INF pour extraire les valeurs
+      const lines = content.split(/\r?\n/);
+      for (const line of lines) {
+        const match = line.match(/^(\w+)\s*=\s*(.+)$/);
+        if (match) {
+          seceditCache[match[1].toLowerCase()] = match[2].trim();
+        }
+      }
+      
+      return seceditCache;
+    }
+  } catch (e) {
+    console.error("Erreur chargement secedit cache:", e);
+  }
+  
+  seceditCache = {};
+  return seceditCache;
+}
+
+// ============================================================================
+// CACHE POUR macOS
+// ============================================================================
+
+// Charger tous les sysctl macOS en une seule fois
+async function loadSysctlMacCache(): Promise<Record<string, string>> {
+  if (sysctlMacCache !== null) return sysctlMacCache;
+  
+  try {
+    const { stdout } = await execAsync("sysctl -a 2>/dev/null", { timeout: 10000 });
+    sysctlMacCache = {};
+    
+    const lines = stdout.split("\n");
+    for (const line of lines) {
+      const match = line.match(/^([^:]+):\s*(.*)$/);
+      if (match) {
+        sysctlMacCache[match[1].trim()] = match[2].trim();
+      }
+    }
+    
+    return sysctlMacCache;
+  } catch (e) {
+    console.error("Erreur chargement sysctl mac cache:", e);
+  }
+  
+  sysctlMacCache = {};
+  return sysctlMacCache;
+}
+
+// Charger les préférences defaults communes en une seule fois (macOS)
+async function loadDefaultsCache(): Promise<Record<string, string>> {
+  if (defaultsCache !== null) return defaultsCache;
+  
+  try {
+    defaultsCache = {};
+    
+    // Liste des domaines/clés les plus utilisés dans les baselines macOS
+    const defaultsToLoad = [
+      { domain: "com.apple.screensaver", key: "askForPassword" },
+      { domain: "com.apple.screensaver", key: "askForPasswordDelay" },
+      { domain: "com.apple.Safari", key: "AutoOpenSafeDownloads" },
+      { domain: "com.apple.Safari", key: "WarnAboutFraudulentWebsites" },
+      { domain: "com.apple.finder", key: "AppleShowAllExtensions" },
+      { domain: "/Library/Preferences/com.apple.alf", key: "globalstate" },
+      { domain: "com.apple.loginwindow", key: "DisableGuestAccount" },
+      { domain: "com.apple.loginwindow", key: "GuestEnabled" },
+      { domain: "com.apple.SoftwareUpdate", key: "AutomaticCheckEnabled" },
+      { domain: "com.apple.SoftwareUpdate", key: "AutomaticDownload" },
+      { domain: "com.apple.commerce", key: "AutoUpdate" },
+      { domain: "com.apple.Terminal", key: "SecureKeyboardEntry" },
+      { domain: "com.apple.Bluetooth", key: "ControllerPowerState" },
+      { domain: "/Library/Preferences/com.apple.Bluetooth", key: "ControllerPowerState" },
+    ];
+    
+    // Exécuter toutes les requêtes en parallèle (beaucoup plus rapide)
+    const results = await Promise.allSettled(
+      defaultsToLoad.map(async ({ domain, key }) => {
+        try {
+          // Échapper les guillemets dans la clé et mettre des guillemets pour gérer les espaces
+          const escapedKey = key.replace(/"/g, '\\"');
+          const { stdout } = await execAsync(`defaults read ${domain} "${escapedKey}" 2>/dev/null`, { timeout: 2000 });
+          return { domain, key, value: stdout.trim() };
+        } catch {
+          return { domain, key, value: null };
+        }
+      })
+    );
+    
+    for (const result of results) {
+      if (result.status === "fulfilled" && result.value.value !== null) {
+        const cacheKey = `${result.value.domain}:${result.value.key}`;
+        defaultsCache[cacheKey] = result.value.value;
+      }
+    }
+    
+    return defaultsCache;
+  } catch (e) {
+    console.error("Erreur chargement defaults cache:", e);
+  }
+  
+  defaultsCache = {};
+  return defaultsCache;
+}
+
+// ============================================================================
+// CACHE POUR Linux
+// ============================================================================
+
+// Charger tous les sysctl Linux en une seule fois
+async function loadSysctlLinuxCache(): Promise<Record<string, string>> {
+  if (sysctlLinuxCache !== null) return sysctlLinuxCache;
+  
+  try {
+    const { stdout } = await execAsync("sysctl -a 2>/dev/null", { timeout: 10000 });
+    sysctlLinuxCache = {};
+    
+    const lines = stdout.split("\n");
+    for (const line of lines) {
+      // Format Linux: key = value
+      const match = line.match(/^([^=]+)\s*=\s*(.*)$/);
+      if (match) {
+        sysctlLinuxCache[match[1].trim()] = match[2].trim();
+      }
+    }
+    
+    return sysctlLinuxCache;
+  } catch (e) {
+    console.error("Erreur chargement sysctl linux cache:", e);
+  }
+  
+  sysctlLinuxCache = {};
+  return sysctlLinuxCache;
+}
+
+// Réinitialiser les caches (appelé au début de chaque scan)
+function resetCaches() {
+  // Windows
+  mpPreferenceCache = null;
+  servicesCache = null;
+  accountPolicyCache = null;
+  seceditCache = null;
+  asrRulesCache = null;
+  // macOS
+  sysctlMacCache = null;
+  defaultsCache = null;
+  // Linux
+  sysctlLinuxCache = null;
+}
+
 type DetectedSystem = {
   osFamily: "Windows" | "Linux" | "macOS" | "Unknown";
   osName?: string;
@@ -354,6 +707,7 @@ const LINUX_BASELINES = [
   { filename: "cis_ubuntu_2404_machine.json", distro: "Ubuntu", minVersion: "22.04", maxVersion: "23.99" },
   { filename: "cis_debian_12_machine.json", distro: "Debian", minVersion: "12", maxVersion: "12.99" },
   { filename: "cis_fedora_40_machine.json", distro: "Fedora", minVersion: "39", maxVersion: "41" },
+  { filename: "cis_arch_machine.json", distro: "Arch", minVersion: "0", maxVersion: "99999" },
 ];
 
 // ============================================================================
@@ -432,6 +786,11 @@ function pickLinuxBaseline(system: DetectedSystem): { filename: string; folder: 
   // Famille Red Hat/Fedora
   if (["fedora", "rhel", "centos", "rocky", "alma", "oracle"].includes(distroLower)) {
     return { filename: "cis_fedora_40_machine.json", folder: "linux" };
+  }
+  
+  // Famille Arch Linux
+  if (["arch", "archlinux", "manjaro", "endeavouros", "garuda", "artix", "arcolinux"].includes(distroLower)) {
+    return { filename: "cis_arch_machine.json", folder: "linux" };
   }
   
   // Fallback générique vers Ubuntu (le plus commun)
@@ -519,10 +878,29 @@ async function checkRegistryValue(regPath: string, regItem: string): Promise<str
 
     const lines = stdout.split("\n");
     for (const line of lines) {
+      // Chercher la ligne qui contient le nom de la valeur
       if (line.includes(regItem)) {
+        // Méthode 1: split par espaces multiples
         const parts = line.trim().split(/\s{2,}/);
         if (parts.length >= 3) {
           return parts[2];
+        }
+        
+        // Méthode 2: regex plus précis pour extraire la valeur après REG_*
+        const match = line.match(/REG_\w+\s+(.+)/i);
+        if (match) {
+          return match[1].trim();
+        }
+        
+        // Méthode 3: chercher la valeur hexadécimale ou décimale à la fin
+        const hexMatch = line.match(/(0x[0-9a-fA-F]+)\s*$/);
+        if (hexMatch) {
+          return hexMatch[1];
+        }
+        
+        const decMatch = line.match(/\s(\d+)\s*$/);
+        if (decMatch) {
+          return decMatch[1];
         }
       }
     }
@@ -533,10 +911,20 @@ async function checkRegistryValue(regPath: string, regItem: string): Promise<str
   }
 }
 
-// Vérifier une valeur via defaults (macOS)
+// Vérifier une valeur via defaults (macOS) - utilise le cache si disponible
 async function checkDefaultsValue(domain: string, key: string): Promise<string | null> {
   try {
-    const { stdout } = await execAsync(`defaults read ${domain} ${key} 2>/dev/null`);
+    // Essayer d'abord le cache
+    const cache = await loadDefaultsCache();
+    const cacheKey = `${domain}:${key}`;
+    if (cache[cacheKey] !== undefined) {
+      return cache[cacheKey];
+    }
+    
+    // Si pas dans le cache, faire l'appel direct
+    // Échapper les guillemets et mettre des guillemets pour gérer les espaces dans la clé
+    const escapedKey = key.replace(/"/g, '\\"');
+    const { stdout } = await execAsync(`defaults read ${domain} "${escapedKey}" 2>/dev/null`, { timeout: 3000 });
     return stdout.trim();
   } catch {
     return null;
@@ -553,89 +941,83 @@ async function checkCommandValue(command: string): Promise<string | null> {
   }
 }
 
-// Vérifier une valeur sysctl (Linux)
-async function checkSysctlValue(key: string): Promise<string | null> {
+// Vérifier une valeur sysctl (Linux/macOS) - utilise le cache si disponible
+async function checkSysctlValue(key: string, osFamily?: string): Promise<string | null> {
   try {
-    const { stdout } = await execAsync(`sysctl -n ${key} 2>/dev/null`);
+    // Utiliser le cache approprié selon l'OS
+    if (osFamily === "macOS") {
+      const cache = await loadSysctlMacCache();
+      if (cache[key] !== undefined) {
+        return cache[key];
+      }
+    } else {
+      const cache = await loadSysctlLinuxCache();
+      if (cache[key] !== undefined) {
+        return cache[key];
+      }
+    }
+    
+    // Fallback si pas dans le cache
+    const { stdout } = await execAsync(`sysctl -n ${key} 2>/dev/null`, { timeout: 3000 });
     return stdout.trim();
   } catch {
     return null;
   }
 }
 
-// Vérifier les politiques de compte Windows (net accounts)
+// Vérifier les politiques de compte Windows via le cache (beaucoup plus rapide)
 async function checkAccountPolicy(policyName: string): Promise<string | null> {
   try {
-    const { stdout } = await execAsync("net accounts", { windowsHide: true });
-    // Nettoyer la sortie - remplacer les retours chariot et espaces multiples
-    const cleanedOutput = stdout
-      .replace(/\r/g, "")
-      .replace(/\n\s+/g, " ")
-      .replace(/\s+/g, " ");
-    
-    // Mapper les noms de politiques aux patterns regex pour trouver les valeurs
-    // Utiliser des patterns qui marchent avec ou sans accents
-    const policyPatterns: Record<string, RegExp> = {
-      // Account lockout duration - "Durée du verrouillage (min):" en français
-      "account lockout duration": /verrouillage\s*\(min\)[^:]*:\s*(\d+)/i,
-      // Account lockout threshold - "Seuil de verrouillage:" en français
-      "account lockout threshold": /Seuil de verrouillage[^:]*:\s*(\d+)/i,
-      // Reset account lockout counter - "Fenêtre d'observation du verrouillage (min):" en français
-      "reset account lockout counter": /observation[^:]*verrouillage[^:]*:\s*(\d+)/i,
-      // Password history - "Nombre de mots de passe antérieurs à conserver:" en français
-      "length of password history maintained": /passe ant[^\s]*rieurs[^:]*:\s*(\d+|Aucune|None)/i,
-      // Minimum password length - "Longueur minimale du mot de passe:" en français
-      "minimum password length": /Longueur minimale[^:]*:\s*(\d+)/i,
-      // Maximum password age - "Durée de vie maximale du mot de passe (jours):" en français
-      "maximum password age": /vie maximale[^:]*:\s*(\d+)/i,
-      // Minimum password age - "Durée de vie minimale du mot de passe (jours):" en français
-      "minimum password age": /vie minimale[^:]*:\s*(\d+)/i,
-    };
-    
-    const pattern = policyPatterns[policyName.toLowerCase()];
-    if (!pattern) {
-      return null;
+    const cache = await loadAccountPolicyCache();
+    const value = cache[policyName.toLowerCase()];
+    if (value !== undefined) {
+      return value;
     }
-    
-    const match = cleanedOutput.match(pattern);
-    if (match) {
-      const value = match[1];
-      // Normaliser les valeurs "jamais"/"aucune" en "0" pour la comparaison
-      if (value.toLowerCase() === "jamais" || value.toLowerCase() === "never" || value.toLowerCase() === "aucune" || value.toLowerCase() === "none") {
-        return "0";
-      }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// Vérifier les paramètres secedit via le cache (beaucoup plus rapide)
+async function checkSeceditValue(settingPath: string): Promise<string | null> {
+  try {
+    const cache = await loadSeceditCache();
+    // Extraire le nom du paramètre du chemin
+    const settingName = settingPath.split("\\").pop() || settingPath;
+    const value = cache[settingName.toLowerCase()];
+    if (value !== undefined) {
+      return value;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// Vérifier les préférences Windows Defender via le cache (beaucoup plus rapide)
+async function checkMpPreference(propertyName: string): Promise<string | null> {
+  try {
+    const cache = await loadMpPreferenceCache();
+    const value = cache[propertyName];
+    if (value !== undefined && value !== "") {
       return value;
     }
     
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-// Vérifier les paramètres secedit (exportation temporaire de la policy)
-async function checkSeceditValue(settingPath: string): Promise<string | null> {
-  try {
-    // Exporter la configuration de sécurité dans un fichier temporaire
-    const tempFile = path.join(os.tmpdir(), `secedit_${Date.now()}.inf`);
-    
-    await execAsync(`secedit /export /cfg "${tempFile}" /quiet`, { 
-      windowsHide: true,
-      timeout: 10000 
-    });
-    
-    // Lire le fichier exporté
-    if (fs.existsSync(tempFile)) {
-      const content = fs.readFileSync(tempFile, "utf16le");
-      fs.unlinkSync(tempFile); // Nettoyer
-      
-      // Chercher le paramètre (format: SettingName = Value)
-      const settingName = settingPath.split("\\").pop() || settingPath;
-      const regex = new RegExp(`${settingName}\\s*=\\s*(.+)`, "i");
-      const match = content.match(regex);
-      
-      if (match) {
-        return match[1].trim();
+    // Fallback: appel direct si pas dans le cache (propriété non standard ou cache vide)
+    if (Object.keys(cache).length === 0) {
+      const psCommand = `(Get-MpPreference -ErrorAction SilentlyContinue).${propertyName}`;
+      const { stdout } = await execAsync(`powershell -NoProfile -Command "${psCommand}"`, {
+        windowsHide: true,
+        timeout: 5000
+      });
+      const result = stdout.trim();
+      if (result && result.toLowerCase() !== "true" && result.toLowerCase() !== "false") {
+        return result;
+      } else if (result.toLowerCase() === "true") {
+        return "1";
+      } else if (result.toLowerCase() === "false") {
+        return "0";
       }
     }
     
@@ -645,39 +1027,69 @@ async function checkSeceditValue(settingPath: string): Promise<string | null> {
   }
 }
 
-// Vérifier les règles ASR (Attack Surface Reduction) de Windows Defender
-async function checkAsrRule(ruleGuid: string): Promise<string | null> {
+// Charger toutes les règles ASR en une seule fois (beaucoup plus rapide)
+async function loadAsrRulesCache(): Promise<Record<string, string>> {
+  if (asrRulesCache !== null) return asrRulesCache;
+  
   try {
-    const psCommand = `(Get-MpPreference).AttackSurfaceReductionRules_Ids | ForEach-Object { $i = [array]::IndexOf((Get-MpPreference).AttackSurfaceReductionRules_Ids, $_); if ($_ -eq '${ruleGuid}') { (Get-MpPreference).AttackSurfaceReductionRules_Actions[$i] } }`;
+    const psScript = `
+      $mp = Get-MpPreference -ErrorAction SilentlyContinue
+      $result = @{}
+      if ($mp -and $mp.AttackSurfaceReductionRules_Ids) {
+        for ($i = 0; $i -lt $mp.AttackSurfaceReductionRules_Ids.Count; $i++) {
+          $result[$mp.AttackSurfaceReductionRules_Ids[$i]] = $mp.AttackSurfaceReductionRules_Actions[$i]
+        }
+      }
+      $result | ConvertTo-Json -Compress
+    `;
     
-    const { stdout } = await execAsync(`powershell -NoProfile -Command "${psCommand}"`, {
+    const encodedCommand = Buffer.from(psScript, 'utf16le').toString('base64');
+    
+    const { stdout } = await execAsync(`powershell -NoProfile -EncodedCommand ${encodedCommand}`, {
       windowsHide: true,
       timeout: 10000
     });
     
-    const value = stdout.trim();
-    // 0 = Disabled, 1 = Block, 2 = Audit, 6 = Warn
-    return value || "0";
+    if (stdout.trim() && stdout.trim() !== '{}') {
+      asrRulesCache = JSON.parse(stdout.trim());
+      // Convertir les valeurs en strings
+      for (const [key, value] of Object.entries(asrRulesCache!)) {
+        asrRulesCache![key] = String(value);
+      }
+      return asrRulesCache!;
+    }
+  } catch (e) {
+    console.error("Erreur chargement ASR cache:", e);
+  }
+  
+  asrRulesCache = {};
+  return asrRulesCache;
+}
+
+// Vérifier les règles ASR via le cache (beaucoup plus rapide)
+async function checkAsrRule(ruleGuid: string): Promise<string | null> {
+  try {
+    const cache = await loadAsrRulesCache();
+    const value = cache[ruleGuid];
+    if (value !== undefined) {
+      return value;
+    }
+    // Règle non configurée = désactivée par défaut
+    return "0";
   } catch {
     return null;
   }
 }
 
-// Vérifier l'état d'un service Windows
+// Vérifier l'état d'un service Windows via le cache (beaucoup plus rapide)
 async function checkWindowsService(serviceName: string): Promise<{ status: string; startType: string } | null> {
   try {
-    const psCommand = `$svc = Get-Service -Name '${serviceName}' -ErrorAction SilentlyContinue; if ($svc) { $startType = (Get-WmiObject Win32_Service -Filter "Name='${serviceName}'" -ErrorAction SilentlyContinue).StartMode; @{Status=$svc.Status.ToString();StartType=$startType} | ConvertTo-Json -Compress }`;
-    
-    const { stdout } = await execAsync(`powershell -NoProfile -Command "${psCommand}"`, {
-      windowsHide: true,
-      timeout: 10000
-    });
-    
-    if (stdout.trim()) {
-      const result = JSON.parse(stdout.trim());
+    const cache = await loadServicesCache();
+    const serviceInfo = cache[serviceName];
+    if (serviceInfo) {
       return {
-        status: result.Status || "Unknown",
-        startType: result.StartType || "Unknown"
+        status: serviceInfo.status || "Unknown",
+        startType: serviceInfo.startType || "Unknown"
       };
     }
     return null;
@@ -845,6 +1257,56 @@ async function checkWindowsFinding(finding: Finding, system?: DetectedSystem): P
       }
     }
   }
+  // Méthode MpPreference (préférences Windows Defender via Get-MpPreference)
+  else if (finding.method === "MpPreference" && finding.methodArgument) {
+    const currentValue = await checkMpPreference(finding.methodArgument);
+    
+    if (currentValue !== null && currentValue !== "") {
+      // Affichage convivial pour certaines valeurs
+      let displayValue = currentValue;
+      if (finding.methodArgument === "PUAProtection") {
+        displayValue = currentValue === "0" ? "Désactivé" : currentValue === "1" ? "Activé" : currentValue === "2" ? "Mode audit" : currentValue;
+      } else if (finding.methodArgument === "MAPSReporting") {
+        displayValue = currentValue === "0" ? "Désactivé" : currentValue === "1" ? "Basic" : currentValue === "2" ? "Advanced" : currentValue;
+      } else if (finding.methodArgument === "EnableNetworkProtection") {
+        displayValue = currentValue === "0" ? "Désactivé" : currentValue === "1" ? "Activé (Block)" : currentValue === "2" ? "Audit" : currentValue;
+      } else if (finding.methodArgument?.startsWith("Disable")) {
+        // Pour les paramètres "Disable*", la logique est inversée : 0 = activé, 1 = désactivé
+        displayValue = currentValue === "0" ? "Protection activée" : currentValue === "1" ? "Protection désactivée" : currentValue;
+      } else if (currentValue === "1" || currentValue.toLowerCase() === "true") {
+        displayValue = "Activé";
+      } else if (currentValue === "0" || currentValue.toLowerCase() === "false") {
+        displayValue = "Désactivé";
+      }
+      
+      result.currentValue = displayValue;
+      
+      if (finding.recommendedValue !== undefined) {
+        const operator = finding.operator || "=";
+        if (operator === "=") {
+          result.status = currentValue === finding.recommendedValue ? "pass" : "fail";
+        } else if (operator === ">=") {
+          result.status = parseInt(currentValue) >= parseInt(finding.recommendedValue) ? "pass" : "fail";
+        }
+      }
+    } else if (finding.defaultValue !== undefined) {
+      // MpPreference n'a pas retourné de valeur - utiliser la valeur par défaut du baseline
+      const defaultVal = String(finding.defaultValue);
+      result.currentValue = `${defaultVal} (valeur par défaut)`;
+      
+      if (finding.recommendedValue !== undefined) {
+        const operator = finding.operator || "=";
+        if (operator === "=") {
+          result.status = defaultVal === finding.recommendedValue ? "pass" : "fail";
+        } else if (operator === ">=") {
+          result.status = parseInt(defaultVal) >= parseInt(finding.recommendedValue) ? "pass" : "fail";
+        }
+      }
+    } else {
+      result.currentValue = "Non disponible";
+      result.status = "unknown";
+    }
+  }
   // Méthode service (vérifier l'état d'un service Windows)
   else if (finding.method === "service" && finding.methodArgument) {
     const serviceName = finding.methodArgument;
@@ -944,7 +1406,7 @@ async function checkLinuxFinding(finding: Finding): Promise<Finding> {
   const result: Finding = { ...finding, status: "unknown", currentValue: undefined };
 
   if (finding.method === "sysctl" && finding.key) {
-    const currentValue = await checkSysctlValue(finding.key);
+    const currentValue = await checkSysctlValue(finding.key, "Linux");
     result.currentValue = currentValue || "Non défini";
 
     if (currentValue !== null && finding.recommendedValue !== undefined) {
@@ -1011,6 +1473,53 @@ async function checkFinding(finding: Finding, osFamily: string, system?: Detecte
 // ============================================================================
 // APPLICATION DES VARIANTES ET FILTRAGE
 // ============================================================================
+
+// Traduction des sévérités en français
+const SEVERITY_TRANSLATIONS: Record<string, string> = {
+  "critical": "Critique",
+  "high": "Élevée",
+  "medium": "Moyenne",
+  "low": "Faible",
+  "info": "Info",
+  "informational": "Info",
+};
+
+// Ordre de priorité des sévérités (pour le tri)
+const SEVERITY_ORDER: Record<string, number> = {
+  "critical": 0,
+  "critique": 0,
+  "high": 1,
+  "élevée": 1,
+  "medium": 2,
+  "moyenne": 2,
+  "low": 3,
+  "faible": 3,
+  "info": 4,
+  "informational": 4,
+};
+
+// Traduire la sévérité en français
+function translateSeverity(severity: string): string {
+  const lower = severity.toLowerCase();
+  return SEVERITY_TRANSLATIONS[lower] || severity;
+}
+
+// Trier les findings par sévérité (Critical > High > Medium > Low > Info)
+function sortFindingsBySeverity(findings: Finding[]): Finding[] {
+  return [...findings].sort((a, b) => {
+    const orderA = SEVERITY_ORDER[a.severity.toLowerCase()] ?? 5;
+    const orderB = SEVERITY_ORDER[b.severity.toLowerCase()] ?? 5;
+    return orderA - orderB;
+  });
+}
+
+// Traduire et formater un finding pour l'affichage
+function translateFinding(finding: Finding): Finding {
+  return {
+    ...finding,
+    severity: translateSeverity(finding.severity),
+  };
+}
 
 // IDs des findings qui nécessitent des fonctionnalités spécifiques
 const REQUIRES_CET = ["10698"]; // Kernel-mode Hardware-enforced Stack Protection
@@ -1100,6 +1609,9 @@ function applyVariants(findings: Finding[], system: DetectedSystem, baselineData
 
 export async function GET() {
   try {
+    // 0. Réinitialiser les caches pour un scan frais
+    resetCaches();
+    
     // 1. Détecter le système d'exploitation
     const system = await detectSystem();
 
@@ -1123,19 +1635,44 @@ export async function GET() {
     // 4. Appliquer les variantes selon le système
     findings = applyVariants(findings, system, baselineData);
 
-    // 5. Vérifier chaque finding (limité pour les performances)
-    const checkedFindings: Finding[] = [];
-    const maxFindings = 50; // Limiter le nombre de vérifications
+    // 4.5. Pré-charger les caches en parallèle selon l'OS (optimisation majeure)
+    if (system.osFamily === "Windows") {
+      await Promise.all([
+        loadMpPreferenceCache(),
+        loadServicesCache(),
+        loadAccountPolicyCache(),
+        loadSeceditCache(),
+        loadAsrRulesCache()
+      ]);
+    } else if (system.osFamily === "macOS") {
+      await Promise.all([
+        loadDefaultsCache(),
+        loadSysctlMacCache()
+      ]);
+    } else if (system.osFamily === "Linux") {
+      await loadSysctlLinuxCache();
+    }
+
+    // 5. Vérifier les findings EN PARALLÈLE (optimisation majeure)
+    const maxFindings = 50;
     const findingsToCheck = findings.slice(0, maxFindings);
 
-    for (const finding of findingsToCheck) {
-      // Si le finding a déjà été marqué comme incompatible, ne pas le revérifier
-      if (finding.status === "unknown" && finding.currentValue?.includes("Non disponible")) {
-        checkedFindings.push(finding);
-      } else {
-        const checked = await checkFinding(finding, system.osFamily, system);
-        checkedFindings.push(checked);
-      }
+    // Traiter les findings en lots parallèles pour éviter de surcharger le système
+    const BATCH_SIZE = 10; // Traiter 10 findings en parallèle à la fois
+    const checkedFindings: Finding[] = [];
+    
+    for (let i = 0; i < findingsToCheck.length; i += BATCH_SIZE) {
+      const batch = findingsToCheck.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map(async (finding) => {
+          // Si le finding a déjà été marqué comme incompatible, ne pas le revérifier
+          if (finding.status === "unknown" && finding.currentValue?.includes("Non disponible")) {
+            return finding;
+          }
+          return checkFinding(finding, system.osFamily, system);
+        })
+      );
+      checkedFindings.push(...batchResults);
     }
 
     // 6. Filtrer les findings non pertinents (services non installés, checks manuels)
@@ -1151,12 +1688,16 @@ export async function GET() {
       return true;
     });
 
-    // 7. Retourner les résultats
+    // 7. Traduire les sévérités en français et trier par gravité
+    const translatedFindings = filteredFindings.map(translateFinding);
+    const sortedFindings = sortFindingsBySeverity(translatedFindings);
+
+    // 8. Retourner les résultats
     return NextResponse.json({
       system,
       baseline: baselineFilename,
       baselineFolder,
-      findings: filteredFindings,
+      findings: sortedFindings,
       totalFindings: findings.length,
       scannedAt: new Date().toISOString(),
     });
@@ -1172,6 +1713,9 @@ export async function GET() {
 // Supporter aussi POST pour la page findings - avec support des infos système passées
 export async function POST(request: Request) {
   try {
+    // 0. Réinitialiser les caches pour un scan frais
+    resetCaches();
+    
     const body = await request.json().catch(() => ({}));
     
     // Si des infos système sont passées, les utiliser pour enrichir la détection
@@ -1236,18 +1780,43 @@ export async function POST(request: Request) {
     // 4. Appliquer les variantes selon le système
     findings = applyVariants(findings, system, baselineData);
 
-    // 5. Vérifier chaque finding (limité pour les performances)
-    const checkedFindings: Finding[] = [];
+    // 4.5. Pré-charger les caches en parallèle selon l'OS (optimisation majeure)
+    if (system.osFamily === "Windows") {
+      await Promise.all([
+        loadMpPreferenceCache(),
+        loadServicesCache(),
+        loadAccountPolicyCache(),
+        loadSeceditCache(),
+        loadAsrRulesCache()
+      ]);
+    } else if (system.osFamily === "macOS") {
+      await Promise.all([
+        loadDefaultsCache(),
+        loadSysctlMacCache()
+      ]);
+    } else if (system.osFamily === "Linux") {
+      await loadSysctlLinuxCache();
+    }
+
+    // 5. Vérifier les findings EN PARALLÈLE (optimisation majeure)
     const maxFindings = 50;
     const findingsToCheck = findings.slice(0, maxFindings);
 
-    for (const finding of findingsToCheck) {
-      if (finding.status === "unknown" && finding.currentValue?.includes("Non disponible")) {
-        checkedFindings.push(finding);
-      } else {
-        const checked = await checkFinding(finding, system.osFamily, system);
-        checkedFindings.push(checked);
-      }
+    // Traiter les findings en lots parallèles
+    const BATCH_SIZE = 10;
+    const checkedFindings: Finding[] = [];
+    
+    for (let i = 0; i < findingsToCheck.length; i += BATCH_SIZE) {
+      const batch = findingsToCheck.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map(async (finding) => {
+          if (finding.status === "unknown" && finding.currentValue?.includes("Non disponible")) {
+            return finding;
+          }
+          return checkFinding(finding, system.osFamily, system);
+        })
+      );
+      checkedFindings.push(...batchResults);
     }
 
     // 6. Filtrer les findings non pertinents
@@ -1261,12 +1830,16 @@ export async function POST(request: Request) {
       return true;
     });
 
-    // 7. Retourner les résultats
+    // 7. Traduire les sévérités en français et trier par gravité
+    const translatedFindings = filteredFindings.map(translateFinding);
+    const sortedFindings = sortFindingsBySeverity(translatedFindings);
+
+    // 8. Retourner les résultats
     return NextResponse.json({
       system,
       baseline: baselineFilename,
       baselineFolder,
-      findings: filteredFindings,
+      findings: sortedFindings,
       totalFindings: findings.length,
       scannedAt: new Date().toISOString(),
     });

@@ -1,0 +1,588 @@
+{
+  "metadata": {
+    "name": "CIS Arch Linux Benchmark",
+    "version": "1.0.0",
+    "description": "Baseline de sécurité pour Arch Linux basé sur CIS Benchmarks et meilleures pratiques",
+    "os": "Linux",
+    "distro": "Arch",
+    "distroVersion": "rolling",
+    "source": "CIS Benchmarks + Arch Wiki Security Guidelines",
+    "lastUpdated": "2025-01-15"
+  },
+  "variants": {
+    "Server": {
+      "additionalFindings": [
+        {
+          "id": "ARCH-SRV001",
+          "category": "Server Hardening",
+          "name": "Fail2ban Service",
+          "method": "command",
+          "command": "systemctl is-active fail2ban 2>/dev/null || echo 'inactive'",
+          "severity": "High",
+          "recommendedValue": "active",
+          "description": "Fail2ban protège contre les attaques par force brute",
+          "remediation": {
+            "default": "pacman -S fail2ban && systemctl enable --now fail2ban"
+          }
+        }
+      ]
+    },
+    "Desktop": {
+      "additionalFindings": [
+        {
+          "id": "ARCH-DT001",
+          "category": "Desktop Security",
+          "name": "Screen Lock Timeout",
+          "method": "command",
+          "command": "gsettings get org.gnome.desktop.screensaver lock-enabled 2>/dev/null || echo 'not available'",
+          "severity": "Medium",
+          "recommendedValue": "true",
+          "description": "L'écran doit se verrouiller automatiquement",
+          "remediation": {
+            "default": "gsettings set org.gnome.desktop.screensaver lock-enabled true"
+          }
+        }
+      ]
+    }
+  },
+  "findings": [
+    {
+      "id": "ARCH1001",
+      "category": "System Integrity",
+      "name": "Pacman GPG Verification",
+      "method": "command",
+      "command": "grep -E '^SigLevel.*=.*Required' /etc/pacman.conf | wc -l",
+      "severity": "Critical",
+      "recommendedValue": "1",
+      "description": "La vérification GPG des paquets doit être activée",
+      "remediation": {
+        "default": "sudo sed -i 's/^SigLevel.*/SigLevel = Required DatabaseOptional/' /etc/pacman.conf"
+      }
+    },
+    {
+      "id": "ARCH1002",
+      "category": "System Integrity",
+      "name": "AIDE Installed",
+      "method": "command",
+      "command": "pacman -Q aide 2>/dev/null && echo 'installed' || echo 'not installed'",
+      "severity": "High",
+      "recommendedValue": "installed",
+      "description": "AIDE (Advanced Intrusion Detection Environment) surveille l'intégrité des fichiers",
+      "remediation": {
+        "default": "pacman -S aide && aideinit"
+      }
+    },
+    {
+      "id": "ARCH2001",
+      "category": "Boot Security",
+      "name": "Secure Boot",
+      "method": "command",
+      "command": "mokutil --sb-state 2>/dev/null || echo 'not available'",
+      "severity": "Medium",
+      "recommendedValue": "SecureBoot enabled",
+      "description": "Secure Boot doit être activé dans UEFI",
+      "remediation": {
+        "manual": "Activer Secure Boot dans les paramètres BIOS/UEFI et configurer les clés"
+      }
+    },
+    {
+      "id": "ARCH2002",
+      "category": "Boot Security",
+      "name": "GRUB Password",
+      "method": "file",
+      "path": "/boot/grub/grub.cfg",
+      "pattern": "password_pbkdf2",
+      "severity": "High",
+      "description": "Mot de passe GRUB pour protéger le bootloader",
+      "remediation": {
+        "default": "grub-mkpasswd-pbkdf2 et configurer dans /etc/grub.d/40_custom"
+      }
+    },
+    {
+      "id": "ARCH2003",
+      "category": "Boot Security",
+      "name": "Systemd-boot Secure",
+      "method": "command",
+      "command": "bootctl status 2>/dev/null | grep -i 'secure boot' || echo 'not using systemd-boot'",
+      "severity": "Medium",
+      "description": "Vérifier la configuration de systemd-boot si utilisé",
+      "remediation": {
+        "default": "Configurer systemd-boot avec Secure Boot selon le wiki Arch"
+      }
+    },
+    {
+      "id": "ARCH3001",
+      "category": "Mandatory Access Control",
+      "name": "AppArmor Status",
+      "method": "command",
+      "command": "aa-status --enabled 2>/dev/null && echo 'enabled' || echo 'disabled'",
+      "severity": "High",
+      "recommendedValue": "enabled",
+      "description": "AppArmor doit être activé pour le contrôle d'accès obligatoire",
+      "remediation": {
+        "default": "pacman -S apparmor && systemctl enable --now apparmor"
+      }
+    },
+    {
+      "id": "ARCH3002",
+      "category": "Mandatory Access Control",
+      "name": "SELinux Status",
+      "method": "command",
+      "command": "getenforce 2>/dev/null || echo 'not installed'",
+      "severity": "High",
+      "recommendedValue": "Enforcing",
+      "description": "SELinux peut être utilisé comme alternative à AppArmor",
+      "remediation": {
+        "default": "Installer et configurer SELinux depuis AUR ou utiliser AppArmor"
+      }
+    },
+    {
+      "id": "ARCH4001",
+      "category": "User Accounts",
+      "name": "Password Minimum Length",
+      "method": "command",
+      "command": "grep -E '^minlen' /etc/security/pwquality.conf 2>/dev/null | cut -d= -f2 | tr -d ' ' || echo 'not set'",
+      "severity": "High",
+      "recommendedValue": "14",
+      "description": "Longueur minimale du mot de passe",
+      "remediation": {
+        "default": "pacman -S libpwquality && echo 'minlen = 14' >> /etc/security/pwquality.conf"
+      }
+    },
+    {
+      "id": "ARCH4002",
+      "category": "User Accounts",
+      "name": "Password Complexity",
+      "method": "command",
+      "command": "grep -E '^minclass' /etc/security/pwquality.conf 2>/dev/null | cut -d= -f2 | tr -d ' ' || echo 'not set'",
+      "severity": "Medium",
+      "recommendedValue": "3",
+      "description": "Nombre minimum de types de caractères requis",
+      "remediation": {
+        "default": "echo 'minclass = 3' >> /etc/security/pwquality.conf"
+      }
+    },
+    {
+      "id": "ARCH4003",
+      "category": "User Accounts",
+      "name": "Empty Passwords Check",
+      "method": "command",
+      "command": "awk -F: '($2 == \"\") { print $1 }' /etc/shadow 2>/dev/null | wc -l",
+      "severity": "Critical",
+      "recommendedValue": "0",
+      "description": "Aucun compte ne doit avoir un mot de passe vide",
+      "remediation": {
+        "default": "passwd <utilisateur> pour définir un mot de passe"
+      }
+    },
+    {
+      "id": "ARCH4004",
+      "category": "User Accounts",
+      "name": "UID 0 Accounts",
+      "method": "command",
+      "command": "awk -F: '($3 == 0 && $1 != \"root\") { print $1 }' /etc/passwd | wc -l",
+      "severity": "Critical",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Seul root doit avoir l'UID 0",
+      "remediation": {
+        "default": "Supprimer ou modifier les comptes non-root avec UID 0"
+      }
+    },
+    {
+      "id": "ARCH4005",
+      "category": "User Accounts",
+      "name": "Sudo Configuration",
+      "method": "command",
+      "command": "grep -r 'NOPASSWD' /etc/sudoers /etc/sudoers.d/ 2>/dev/null | grep -v '^#' | wc -l",
+      "severity": "Medium",
+      "recommendedValue": "0",
+      "description": "Éviter NOPASSWD dans la configuration sudo",
+      "remediation": {
+        "default": "Supprimer NOPASSWD des fichiers sudoers"
+      }
+    },
+    {
+      "id": "ARCH5001",
+      "category": "SSH Configuration",
+      "name": "SSH Protocol Version",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'protocol' || echo 'default (2)'",
+      "severity": "Critical",
+      "recommendedValue": "2",
+      "description": "SSH doit utiliser uniquement le protocole 2",
+      "remediation": {
+        "default": "echo 'Protocol 2' | sudo tee -a /etc/ssh/sshd_config && sudo systemctl restart sshd"
+      }
+    },
+    {
+      "id": "ARCH5002",
+      "category": "SSH Configuration",
+      "name": "SSH Root Login",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'permitrootlogin' | awk '{print $2}'",
+      "severity": "High",
+      "defaultValue": "prohibit-password",
+      "recommendedValue": "no",
+      "description": "La connexion root SSH doit être désactivée",
+      "remediation": {
+        "default": "sudo sed -i 's/^#*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config && sudo systemctl restart sshd"
+      }
+    },
+    {
+      "id": "ARCH5003",
+      "category": "SSH Configuration",
+      "name": "SSH Password Authentication",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'passwordauthentication' | awk '{print $2}'",
+      "severity": "Medium",
+      "defaultValue": "yes",
+      "recommendedValue": "no",
+      "description": "Désactiver l'authentification par mot de passe (utiliser les clés)",
+      "remediation": {
+        "default": "sudo sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config && sudo systemctl restart sshd"
+      }
+    },
+    {
+      "id": "ARCH5004",
+      "category": "SSH Configuration",
+      "name": "SSH Empty Passwords",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'permitemptypasswords' | awk '{print $2}'",
+      "severity": "Critical",
+      "defaultValue": "no",
+      "recommendedValue": "no",
+      "description": "Les mots de passe vides doivent être interdits",
+      "remediation": {
+        "default": "sudo sed -i 's/^#*PermitEmptyPasswords.*/PermitEmptyPasswords no/' /etc/ssh/sshd_config && sudo systemctl restart sshd"
+      }
+    },
+    {
+      "id": "ARCH5005",
+      "category": "SSH Configuration",
+      "name": "SSH X11 Forwarding",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'x11forwarding' | awk '{print $2}'",
+      "severity": "Low",
+      "defaultValue": "no",
+      "recommendedValue": "no",
+      "description": "Désactiver le forwarding X11 sauf si nécessaire",
+      "remediation": {
+        "default": "sudo sed -i 's/^#*X11Forwarding.*/X11Forwarding no/' /etc/ssh/sshd_config && sudo systemctl restart sshd"
+      }
+    },
+    {
+      "id": "ARCH5006",
+      "category": "SSH Configuration",
+      "name": "SSH Max Auth Tries",
+      "method": "command",
+      "command": "sshd -T 2>/dev/null | grep -i 'maxauthtries' | awk '{print $2}'",
+      "severity": "Medium",
+      "defaultValue": "6",
+      "recommendedValue": "4",
+      "operator": "<=",
+      "description": "Nombre maximum de tentatives d'authentification",
+      "remediation": {
+        "default": "sudo sed -i 's/^#*MaxAuthTries.*/MaxAuthTries 4/' /etc/ssh/sshd_config && sudo systemctl restart sshd"
+      }
+    },
+    {
+      "id": "ARCH6001",
+      "category": "Firewall",
+      "name": "iptables Status",
+      "method": "command",
+      "command": "systemctl is-active iptables 2>/dev/null || echo 'inactive'",
+      "severity": "High",
+      "recommendedValue": "active",
+      "description": "Le pare-feu iptables doit être activé",
+      "remediation": {
+        "default": "pacman -S iptables && systemctl enable --now iptables"
+      }
+    },
+    {
+      "id": "ARCH6002",
+      "category": "Firewall",
+      "name": "nftables Status",
+      "method": "command",
+      "command": "systemctl is-active nftables 2>/dev/null || echo 'inactive'",
+      "severity": "High",
+      "recommendedValue": "active",
+      "description": "nftables est le successeur moderne de iptables",
+      "remediation": {
+        "default": "pacman -S nftables && systemctl enable --now nftables"
+      }
+    },
+    {
+      "id": "ARCH6003",
+      "category": "Firewall",
+      "name": "UFW Status",
+      "method": "command",
+      "command": "ufw status 2>/dev/null | grep -i 'status:' | awk '{print $2}'",
+      "severity": "High",
+      "recommendedValue": "active",
+      "description": "UFW est une interface simple pour iptables",
+      "remediation": {
+        "default": "pacman -S ufw && ufw enable"
+      }
+    },
+    {
+      "id": "ARCH7001",
+      "category": "Services",
+      "name": "Unnecessary Services",
+      "method": "command",
+      "command": "systemctl list-unit-files --type=service --state=enabled | grep -E '(avahi|cups|bluetooth)' | wc -l",
+      "severity": "Low",
+      "recommendedValue": "0",
+      "description": "Désactiver les services non nécessaires",
+      "remediation": {
+        "default": "systemctl disable --now avahi-daemon cups bluetooth"
+      }
+    },
+    {
+      "id": "ARCH7002",
+      "category": "Services",
+      "name": "telnet Server",
+      "method": "command",
+      "command": "pacman -Q inetutils 2>/dev/null | grep -c telnetd || echo '0'",
+      "severity": "Critical",
+      "recommendedValue": "0",
+      "description": "Le serveur telnet doit être désinstallé (non sécurisé)",
+      "remediation": {
+        "default": "pacman -R inetutils (si telnetd est utilisé)"
+      }
+    },
+    {
+      "id": "ARCH8001",
+      "category": "Kernel Hardening",
+      "name": "ASLR Status",
+      "method": "sysctl",
+      "key": "kernel.randomize_va_space",
+      "severity": "High",
+      "defaultValue": "2",
+      "recommendedValue": "2",
+      "operator": "=",
+      "description": "Address Space Layout Randomization doit être activé",
+      "remediation": {
+        "default": "sysctl -w kernel.randomize_va_space=2"
+      }
+    },
+    {
+      "id": "ARCH8002",
+      "category": "Kernel Hardening",
+      "name": "Kernel Pointer Hiding",
+      "method": "sysctl",
+      "key": "kernel.kptr_restrict",
+      "severity": "Medium",
+      "defaultValue": "1",
+      "recommendedValue": "2",
+      "operator": ">=",
+      "description": "Cacher les pointeurs kernel aux utilisateurs non-root",
+      "remediation": {
+        "default": "echo 'kernel.kptr_restrict = 2' >> /etc/sysctl.d/99-security.conf && sysctl -p"
+      }
+    },
+    {
+      "id": "ARCH8003",
+      "category": "Kernel Hardening",
+      "name": "Dmesg Restrictions",
+      "method": "sysctl",
+      "key": "kernel.dmesg_restrict",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Restreindre l'accès à dmesg aux utilisateurs non-root",
+      "remediation": {
+        "default": "echo 'kernel.dmesg_restrict = 1' >> /etc/sysctl.d/99-security.conf && sysctl -p"
+      }
+    },
+    {
+      "id": "ARCH8004",
+      "category": "Kernel Hardening",
+      "name": "SYN Flood Protection",
+      "method": "sysctl",
+      "key": "net.ipv4.tcp_syncookies",
+      "severity": "High",
+      "defaultValue": "1",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "Protection contre les attaques SYN flood",
+      "remediation": {
+        "default": "echo 'net.ipv4.tcp_syncookies = 1' >> /etc/sysctl.d/99-security.conf && sysctl -p"
+      }
+    },
+    {
+      "id": "ARCH8005",
+      "category": "Kernel Hardening",
+      "name": "IP Forwarding",
+      "method": "sysctl",
+      "key": "net.ipv4.ip_forward",
+      "severity": "Medium",
+      "defaultValue": "0",
+      "recommendedValue": "0",
+      "operator": "=",
+      "description": "Le forwarding IP doit être désactivé sauf si routeur",
+      "remediation": {
+        "default": "echo 'net.ipv4.ip_forward = 0' >> /etc/sysctl.d/99-security.conf && sysctl -p"
+      }
+    },
+    {
+      "id": "ARCH8006",
+      "category": "Kernel Hardening",
+      "name": "Hardened Kernel",
+      "method": "command",
+      "command": "uname -r | grep -c 'hardened' || echo '0'",
+      "severity": "Info",
+      "recommendedValue": "1",
+      "description": "Utiliser le kernel linux-hardened pour plus de sécurité",
+      "remediation": {
+        "default": "pacman -S linux-hardened && grub-mkconfig -o /boot/grub/grub.cfg"
+      }
+    },
+    {
+      "id": "ARCH9001",
+      "category": "File Permissions",
+      "name": "/etc/passwd Permissions",
+      "method": "command",
+      "command": "stat -c '%a' /etc/passwd",
+      "severity": "High",
+      "recommendedValue": "644",
+      "operator": "<=",
+      "description": "Permissions de /etc/passwd",
+      "remediation": {
+        "default": "chmod 644 /etc/passwd"
+      }
+    },
+    {
+      "id": "ARCH9002",
+      "category": "File Permissions",
+      "name": "/etc/shadow Permissions",
+      "method": "command",
+      "command": "stat -c '%a' /etc/shadow",
+      "severity": "Critical",
+      "recommendedValue": "640",
+      "operator": "<=",
+      "description": "Permissions de /etc/shadow",
+      "remediation": {
+        "default": "chmod 640 /etc/shadow"
+      }
+    },
+    {
+      "id": "ARCH9003",
+      "category": "File Permissions",
+      "name": "SUID Files Audit",
+      "method": "command",
+      "command": "find / -type f -perm -4000 2>/dev/null | wc -l",
+      "severity": "Info",
+      "description": "Nombre de fichiers avec le bit SUID",
+      "remediation": {
+        "default": "Auditer régulièrement: find / -type f -perm -4000 -exec ls -l {} \\;"
+      }
+    },
+    {
+      "id": "ARCH10001",
+      "category": "Logging",
+      "name": "Systemd Journal Persistent",
+      "method": "command",
+      "command": "cat /etc/systemd/journald.conf 2>/dev/null | grep -E '^Storage=' | cut -d= -f2 || echo 'auto'",
+      "severity": "Medium",
+      "recommendedValue": "persistent",
+      "description": "Les journaux systemd doivent être persistants",
+      "remediation": {
+        "default": "sudo sed -i 's/^#*Storage=.*/Storage=persistent/' /etc/systemd/journald.conf && sudo systemctl restart systemd-journald"
+      }
+    },
+    {
+      "id": "ARCH10002",
+      "category": "Logging",
+      "name": "Auditd Service",
+      "method": "command",
+      "command": "systemctl is-active auditd 2>/dev/null || echo 'inactive'",
+      "severity": "High",
+      "recommendedValue": "active",
+      "description": "Le service d'audit auditd doit être actif",
+      "remediation": {
+        "default": "pacman -S audit && systemctl enable --now auditd"
+      }
+    },
+    {
+      "id": "ARCH11001",
+      "category": "Updates",
+      "name": "System Updated",
+      "method": "command",
+      "command": "pacman -Qu 2>/dev/null | wc -l",
+      "severity": "High",
+      "recommendedValue": "0",
+      "description": "Vérifier que le système est à jour",
+      "remediation": {
+        "default": "pacman -Syu"
+      }
+    },
+    {
+      "id": "ARCH11002",
+      "category": "Updates",
+      "name": "Pacman Mirrors Updated",
+      "method": "command",
+      "command": "find /etc/pacman.d/mirrorlist -mtime +30 | wc -l",
+      "severity": "Low",
+      "recommendedValue": "0",
+      "description": "Mettre à jour régulièrement la liste des miroirs",
+      "remediation": {
+        "default": "pacman -S reflector && reflector --latest 10 --sort rate --save /etc/pacman.d/mirrorlist"
+      }
+    },
+    {
+      "id": "ARCH12001",
+      "category": "Cron",
+      "name": "Crontab Permissions",
+      "method": "command",
+      "command": "stat -c '%a' /etc/crontab 2>/dev/null || echo 'not found'",
+      "severity": "Medium",
+      "recommendedValue": "600",
+      "operator": "<=",
+      "description": "Permissions restrictives sur /etc/crontab",
+      "remediation": {
+        "default": "chmod 600 /etc/crontab"
+      }
+    },
+    {
+      "id": "ARCH13001",
+      "category": "AUR Security",
+      "name": "AUR Helper PKGBUILD Review",
+      "method": "info",
+      "severity": "Medium",
+      "description": "Toujours vérifier les PKGBUILD avant d'installer depuis l'AUR",
+      "remediation": {
+        "info": "Lire le PKGBUILD et les fichiers sources avant d'installer un paquet AUR"
+      }
+    },
+    {
+      "id": "ARCH14001",
+      "category": "Encryption",
+      "name": "LUKS Disk Encryption",
+      "method": "command",
+      "command": "lsblk -o NAME,FSTYPE | grep -c 'crypto_LUKS' || echo '0'",
+      "severity": "High",
+      "recommendedValue": "1",
+      "operator": ">=",
+      "description": "Chiffrement LUKS des partitions",
+      "remediation": {
+        "manual": "Configurer LUKS lors de l'installation ou chiffrer les partitions existantes"
+      }
+    },
+    {
+      "id": "ARCH14002",
+      "category": "Encryption",
+      "name": "Swap Encryption",
+      "method": "command",
+      "command": "cat /etc/crypttab 2>/dev/null | grep -c 'swap' || echo '0'",
+      "severity": "Medium",
+      "recommendedValue": "1",
+      "operator": ">=",
+      "description": "Le swap doit être chiffré",
+      "remediation": {
+        "default": "Configurer swap chiffré dans /etc/crypttab"
+      }
+    }
+  ]
+}

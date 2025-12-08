@@ -21,7 +21,10 @@
           "command": "system_profiler SPiBridgeDataType 2>/dev/null | grep -q 'Secure Enclave'",
           "severity": "Info",
           "recommendedValue": "Available",
-          "description": "Vérifier la présence du Secure Enclave (Apple Silicon)"
+          "description": "Vérifier la présence du Secure Enclave (Apple Silicon)",
+          "remediation": {
+            "info": "Le Secure Enclave est intégré au processeur Apple Silicon - fonctionnalité matérielle"
+          }
         },
         {
           "id": "MAC-AS002",
@@ -31,7 +34,10 @@
           "command": "csrutil authenticated-root status",
           "severity": "High",
           "recommendedValue": "enabled",
-          "description": "Protection de l'intégrité du kernel (Signed System Volume)"
+          "description": "Protection de l'intégrité du kernel (Signed System Volume)",
+          "remediation": {
+            "manual": "Démarrer en Recovery Mode (maintenir le bouton Power), ouvrir Terminal, exécuter: csrutil authenticated-root enable"
+          }
         }
       ]
     },
@@ -45,7 +51,10 @@
           "command": "system_profiler SPiBridgeDataType 2>/dev/null | grep -q 'T2'",
           "severity": "Info",
           "recommendedValue": "Present",
-          "description": "Vérifier la présence de la puce T2 (Mac Intel récents)"
+          "description": "Vérifier la présence de la puce T2 (Mac Intel récents)",
+          "remediation": {
+            "info": "La puce T2 est présente sur les Mac Intel récents (2018+) - fonctionnalité matérielle"
+          }
         }
       ]
     }
@@ -93,7 +102,7 @@
       "recommendedValue": "installed",
       "description": "XProtect est l'antimalware intégré d'Apple",
       "remediation": {
-        "default": "Installer les mises à jour système via: softwareupdate --install --all"
+        "default": "Installer les mises à  jour système via: softwareupdate --install --all"
       }
     },
     {
@@ -106,7 +115,7 @@
       "recommendedValue": "present",
       "description": "MRT supprime automatiquement les malwares connus",
       "remediation": {
-        "default": "Installer les mises à jour système"
+        "default": "Installer les mises à  jour système"
       }
     },
     {
@@ -245,7 +254,7 @@
       "description": "SSH doit être désactivé si non nécessaire",
       "remediation": {
         "default": "sudo systemsetup -setremotelogin off",
-        "gui": "Préférences Système > Général > Partage > Connexion à distance"
+        "gui": "Préférences Système > Général > Partage > Connexion à  distance"
       }
     },
     {
@@ -300,7 +309,7 @@
       "command": "sudo defaults read /var/db/locationd/Library/Preferences/ByHost/com.apple.locationd.plist LocationServicesEnabled 2>/dev/null || echo 'not set'",
       "severity": "Low",
       "recommendedValue": "0",
-      "description": "Services de localisation - à désactiver si non nécessaire",
+      "description": "Services de localisation - à  désactiver si non nécessaire",
       "remediation": {
         "gui": "Préférences Système > Confidentialité et Sécurité > Services de localisation"
       }
@@ -347,7 +356,7 @@
       "defaultValue": "1",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "La vérification automatique des mises à jour doit être activée",
+      "description": "La vérification automatique des mises à  jour doit être activée",
       "remediation": {
         "default": "sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticCheckEnabled -bool true"
       }
@@ -363,7 +372,7 @@
       "defaultValue": "1",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Le téléchargement automatique des mises à jour doit être activé",
+      "description": "Le téléchargement automatique des mises à  jour doit être activé",
       "remediation": {
         "default": "sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownload -bool true"
       }
@@ -692,7 +701,7 @@
       "command": "nvram -p | grep -c 'fmm-mobileme-token-FMM'",
       "severity": "Medium",
       "recommendedValue": "1",
-      "description": "Localiser mon Mac permet de retrouver ou effacer l'appareil à distance",
+      "description": "Localiser mon Mac permet de retrouver ou effacer l'appareil à  distance",
       "remediation": {
         "gui": "Préférences Système > Apple ID > iCloud > Localiser mon Mac"
       }

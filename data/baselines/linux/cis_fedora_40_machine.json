@@ -60,7 +60,11 @@
       "command": "mokutil --sb-state 2>/dev/null || echo 'not available'",
       "severity": "Medium",
       "recommendedValue": "SecureBoot enabled",
-      "description": "Secure Boot doit être activé"
+      "description": "Secure Boot doit être activé",
+      "remediation": {
+        "manual": "Activer Secure Boot dans les paramètres BIOS/UEFI",
+        "note": "Nécessite un redémarrage et accès au BIOS"
+      }
     },
     {
       "id": "FED3001",
@@ -96,7 +100,10 @@
       "command": "firewall-cmd --get-default-zone 2>/dev/null || echo 'not set'",
       "severity": "Medium",
       "recommendedValue": "public",
-      "description": "Zone par défaut restrictive"
+      "description": "Zone par défaut restrictive",
+      "remediation": {
+        "default": "firewall-cmd --set-default-zone=public"
+      }
     },
     {
       "id": "FED5001",
@@ -106,7 +113,7 @@
       "command": "systemctl is-enabled dnf-automatic.timer 2>/dev/null || echo 'disabled'",
       "severity": "High",
       "recommendedValue": "enabled",
-      "description": "Mises à jour automatiques via dnf-automatic",
+      "description": "Mises à  jour automatiques via dnf-automatic",
       "remediation": {
         "default": "dnf install dnf-automatic && systemctl enable --now dnf-automatic.timer"
       }
@@ -119,7 +126,10 @@
       "key": "kernel.randomize_va_space",
       "severity": "High",
       "recommendedValue": "2",
-      "description": "ASLR activé"
+      "description": "ASLR activé",
+      "remediation": {
+        "default": "sysctl -w kernel.randomize_va_space=2 && echo 'kernel.randomize_va_space = 2' >> /etc/sysctl.d/99-security.conf"
+      }
     },
     {
       "id": "FED7001",
@@ -129,7 +139,10 @@
       "command": "grep -E '^minlen' /etc/security/pwquality.conf 2>/dev/null | cut -d= -f2 | tr -d ' '",
       "severity": "Medium",
       "recommendedValue": "14",
-      "description": "Longueur minimale du mot de passe"
+      "description": "Longueur minimale du mot de passe",
+      "remediation": {
+        "default": "echo 'minlen = 14' >> /etc/security/pwquality.conf"
+      }
     },
     {
       "id": "FED8001",
@@ -139,7 +152,10 @@
       "command": "systemctl is-active auditd 2>/dev/null || echo 'inactive'",
       "severity": "High",
       "recommendedValue": "active",
-      "description": "Service d'audit actif"
+      "description": "Service d'audit actif",
+      "remediation": {
+        "default": "dnf install audit && systemctl enable --now auditd"
+      }
     }
   ]
 }

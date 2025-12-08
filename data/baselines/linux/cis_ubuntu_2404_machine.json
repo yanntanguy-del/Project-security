@@ -20,7 +20,10 @@
           "command": "aa-status --enabled 2>/dev/null && aa-status | grep -c 'profiles are in enforce mode'",
           "severity": "High",
           "recommendedValue": ">0",
-          "description": "Les services serveur doivent avoir des profils AppArmor en mode enforce"
+          "description": "Les services serveur doivent avoir des profils AppArmor en mode enforce",
+          "remediation": {
+            "default": "aa-enforce /etc/apparmor.d/*"
+          }
         },
         {
           "id": "LNX-SRV002",
@@ -30,10 +33,15 @@
           "command": "systemctl is-active fail2ban 2>/dev/null || echo 'not installed'",
           "severity": "High",
           "recommendedValue": "active",
-          "description": "Fail2ban protège contre les attaques par force brute"
+          "description": "Fail2ban protège contre les attaques par force brute",
+          "remediation": {
+            "default": "sudo apt install fail2ban && sudo systemctl enable --now fail2ban"
+          }
         }
       ],
-      "excludeFindings": ["LNX8001"]
+      "excludeFindings": [
+        "LNX8001"
+      ]
     },
     "Desktop": {
       "additionalFindings": [
@@ -45,7 +53,10 @@
           "command": "gsettings get org.gnome.desktop.screensaver lock-enabled 2>/dev/null || echo 'not set'",
           "severity": "Medium",
           "recommendedValue": "true",
-          "description": "L'écran doit se verrouiller automatiquement"
+          "description": "L'écran doit se verrouiller automatiquement",
+          "remediation": {
+            "default": "gsettings set org.gnome.desktop.screensaver lock-enabled true"
+          }
         },
         {
           "id": "LNX-DSK002",
@@ -55,7 +66,10 @@
           "command": "gsettings get org.gnome.desktop.screensaver lock-delay 2>/dev/null || echo 'not set'",
           "severity": "Medium",
           "recommendedValue": "0",
-          "description": "Délai de verrouillage automatique (0 = immédiat)"
+          "description": "Délai de verrouillage automatique (0 = immédiat)",
+          "remediation": {
+            "default": "gsettings set org.gnome.desktop.screensaver lock-delay 0"
+          }
         }
       ]
     }
@@ -303,7 +317,7 @@
       "recommendedValue": "2",
       "description": "SSH doit utiliser uniquement le protocole 2",
       "remediation": {
-        "default": "Protocol 2 dans /etc/ssh/sshd_config"
+        "default": "echo 'Protocol 2' | sudo tee -a /etc/ssh/sshd_config && sudo systemctl restart sshd"
       }
     },
     {
@@ -317,7 +331,7 @@
       "recommendedValue": "no",
       "description": "La connexion root SSH doit être désactivée",
       "remediation": {
-        "default": "PermitRootLogin no dans /etc/ssh/sshd_config"
+        "default": "sudo sed -i 's/^#*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config && sudo systemctl restart sshd"
       }
     },
     {
@@ -331,7 +345,7 @@
       "recommendedValue": "no",
       "description": "Désactiver l'authentification par mot de passe (utiliser les clés)",
       "remediation": {
-        "default": "PasswordAuthentication no dans /etc/ssh/sshd_config (après avoir configuré les clés)"
+        "default": "sudo sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config && sudo systemctl restart sshd"
       }
     },
     {
@@ -345,7 +359,7 @@
       "recommendedValue": "no",
       "description": "Les mots de passe vides doivent être interdits",
       "remediation": {
-        "default": "PermitEmptyPasswords no dans /etc/ssh/sshd_config"
+        "default": "sudo sed -i 's/^#*PermitEmptyPasswords.*/PermitEmptyPasswords no/' /etc/ssh/sshd_config && sudo systemctl restart sshd"
       }
     },
     {
@@ -359,7 +373,7 @@
       "recommendedValue": "no",
       "description": "Désactiver le forwarding X11 sauf si nécessaire",
       "remediation": {
-        "default": "X11Forwarding no dans /etc/ssh/sshd_config"
+        "default": "sudo sed -i 's/^#*X11Forwarding.*/X11Forwarding no/' /etc/ssh/sshd_config && sudo systemctl restart sshd"
       }
     },
     {
@@ -374,7 +388,7 @@
       "operator": "<=",
       "description": "Nombre maximum de tentatives d'authentification",
       "remediation": {
-        "default": "MaxAuthTries 4 dans /etc/ssh/sshd_config"
+        "default": "sudo sed -i 's/^#*MaxAuthTries.*/MaxAuthTries 4/' /etc/ssh/sshd_config && sudo systemctl restart sshd"
       }
     },
     {
@@ -552,7 +566,7 @@
       "defaultValue": "0",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Restreindre l'accès à dmesg aux utilisateurs non-root",
+      "description": "Restreindre l'accès à  dmesg aux utilisateurs non-root",
       "remediation": {
         "default": "echo 'kernel.dmesg_restrict = 1' >> /etc/sysctl.conf && sysctl -p"
       }
@@ -746,7 +760,7 @@
       "command": "cat /etc/apt/apt.conf.d/20auto-upgrades 2>/dev/null | grep -c 'Unattended-Upgrade \"1\"' || echo '0'",
       "severity": "High",
       "recommendedValue": "1",
-      "description": "Les mises à jour de sécurité automatiques doivent être activées",
+      "description": "Les mises à  jour de sécurité automatiques doivent être activées",
       "remediation": {
         "default": "sudo apt install unattended-upgrades && sudo dpkg-reconfigure -plow unattended-upgrades"
       }
@@ -785,7 +799,7 @@
       "method": "command",
       "command": "ls /etc/at.deny 2>/dev/null && echo 'exists' || echo 'not exists'",
       "severity": "Low",
-      "description": "Contrôler l'accès à la commande at",
+      "description": "Contrôler l'accès à  la commande at",
       "remediation": {
         "default": "Créer /etc/at.allow avec uniquement les utilisateurs autorisés"
       }

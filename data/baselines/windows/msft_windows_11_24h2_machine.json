@@ -9,11 +9,33 @@
   },
   "variants": {
     "Home": {
-      "excludeFindings": ["10000", "10001", "10003", "10100", "10101", "10102", "10103", "10672", "10673", "10674", "10698", "10700", "10756", "10757", "10758", "10759", "10993", "ENT001", "ENT002"],
+      "excludeFindings": [
+        "10000",
+        "10001",
+        "10003",
+        "10100",
+        "10101",
+        "10102",
+        "10103",
+        "10672",
+        "10673",
+        "10674",
+        "10698",
+        "10700",
+        "10756",
+        "10757",
+        "10758",
+        "10759",
+        "10993",
+        "ENT001",
+        "ENT002"
+      ],
       "description": "Windows Home n'a pas BitLocker, Device Guard, Credential Guard, LSASS PPL, Network Protection via GPO, AppLocker, Application Guard. Les politiques de mot de passe locales sont ignorées car la plupart utilisent un compte Microsoft."
     },
     "Pro": {
-      "excludeFindings": ["10674"],
+      "excludeFindings": [
+        "10674"
+      ],
       "description": "Windows Pro a BitLocker mais pas Credential Guard complet"
     },
     "Enterprise": {
@@ -213,7 +235,7 @@
       "recommendedValue": "10",
       "operator": "<=",
       "description": "Après combien de tentatives de mot de passe incorrect le compte doit-il se bloquer ? C'est comme un coffre-fort qui se verrouille après trop d'essais ratés.",
-      "risk": "Sans limite, un pirate peut essayer des milliers de mots de passe jusqu'à trouver le bon. Avec une limite de 10 tentatives, il est bloqué avant d'avoir pu tester beaucoup de combinaisons.",
+      "risk": "Sans limite, un pirate peut essayer des milliers de mots de passe jusqu'à  trouver le bon. Avec une limite de 10 tentatives, il est bloqué avant d'avoir pu tester beaucoup de combinaisons.",
       "remediation": {
         "default": "net accounts /lockoutthreshold:10",
         "gpo": "Computer Configuration > Windows Settings > Security Settings > Account Policies > Account Lockout Policy"
@@ -255,7 +277,7 @@
       "defaultValue": "0",
       "recommendedValue": "14",
       "operator": ">=",
-      "description": "La longueur minimale que doit avoir votre mot de passe. Plus c'est long, plus c'est difficile à deviner pour un pirate.",
+      "description": "La longueur minimale que doit avoir votre mot de passe. Plus c'est long, plus c'est difficile à  deviner pour un pirate.",
       "risk": "Un mot de passe court (moins de 14 caractères) peut être deviné en quelques heures par un ordinateur qui teste toutes les combinaisons. Avec 14 caractères ou plus, cela prendrait des siècles.",
       "remediation": {
         "default": "net accounts /minpwlen:14",
@@ -272,8 +294,12 @@
       "defaultValue": "0",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Ce paramètre oblige les mots de passe à contenir un mélange de majuscules, minuscules, chiffres et symboles. C'est comme demander une serrure avec plusieurs types de clés différentes.",
-      "risk": "Sans complexité, les utilisateurs choisissent souvent des mots de passe simples comme 'motdepasse123' que les pirates testent en premier. Un mot de passe complexe est beaucoup plus difficile à deviner."
+      "description": "Ce paramètre oblige les mots de passe à  contenir un mélange de majuscules, minuscules, chiffres et symboles. C'est comme demander une serrure avec plusieurs types de clés différentes.",
+      "risk": "Sans complexité, les utilisateurs choisissent souvent des mots de passe simples comme 'motdepasse123' que les pirates testent en premier. Un mot de passe complexe est beaucoup plus difficile à  deviner.",
+      "remediation": {
+        "default": "$tempDir = 'C:\\Temp'; if (!(Test-Path $tempDir)) { New-Item -ItemType Directory -Path $tempDir -Force }; secedit /export /cfg $tempDir\\secpol.cfg; (Get-Content $tempDir\\secpol.cfg).Replace('PasswordComplexity = 0', 'PasswordComplexity = 1') | Set-Content $tempDir\\secpol.cfg; secedit /configure /db c:\\windows\\security\\local.sdb /cfg $tempDir\\secpol.cfg /areas SECURITYPOLICY; Remove-Item $tempDir\\secpol.cfg -Force",
+        "gpo": "Computer Configuration > Windows Settings > Security Settings > Account Policies > Password Policy > Password must meet complexity requirements"
+      }
     },
     {
       "id": "10103",
@@ -286,7 +312,11 @@
       "recommendedValue": "0",
       "operator": "=",
       "description": "Windows peut stocker votre mot de passe de façon 'déchiffrable' (comme un coffre dont on peut récupérer la clé) ou 'non déchiffrable' (une fois fermé, impossible de retrouver le code original).",
-      "risk": "Si activé, vos mots de passe sont stockés d'une façon qui permet de les retrouver en clair. C'est comme écrire le code de votre coffre-fort sur un papier caché dans le coffre lui-même."
+      "risk": "Si activé, vos mots de passe sont stockés d'une façon qui permet de les retrouver en clair. C'est comme écrire le code de votre coffre-fort sur un papier caché dans le coffre lui-même.",
+      "remediation": {
+        "default": "$tempDir = 'C:\\Temp'; if (!(Test-Path $tempDir)) { New-Item -ItemType Directory -Path $tempDir -Force }; secedit /export /cfg $tempDir\\secpol.cfg; (Get-Content $tempDir\\secpol.cfg).Replace('ClearTextPassword = 1', 'ClearTextPassword = 0') | Set-Content $tempDir\\secpol.cfg; secedit /configure /db c:\\windows\\security\\local.sdb /cfg $tempDir\\secpol.cfg /areas SECURITYPOLICY; Remove-Item $tempDir\\secpol.cfg -Force",
+        "gpo": "Computer Configuration > Windows Settings > Security Settings > Account Policies > Password Policy > Store passwords using reversible encryption"
+      }
     },
     {
       "id": "10200",
@@ -299,7 +329,7 @@
       "defaultValue": "1",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Si un compte n'a pas de mot de passe, ce paramètre empêche de s'y connecter à distance (depuis un autre ordinateur). Seule une connexion directe sur la machine est autorisée.",
+      "description": "Si un compte n'a pas de mot de passe, ce paramètre empêche de s'y connecter à  distance (depuis un autre ordinateur). Seule une connexion directe sur la machine est autorisée.",
       "risk": "Sans cette protection, n'importe qui sur le réseau pourrait se connecter aux comptes sans mot de passe. C'est comme laisser la porte de votre maison grande ouverte.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'LimitBlankPasswordUse' -Value 1 -Type DWord"
@@ -317,7 +347,7 @@
       "recommendedValue": "900",
       "operator": "=",
       "description": "Au bout de combien de temps sans activité l'écran se verrouille-t-il automatiquement ? 900 secondes = 15 minutes.",
-      "risk": "Si vous quittez votre bureau sans verrouiller l'écran, n'importe qui peut accéder à votre session. Le verrouillage automatique protège votre ordinateur même si vous oubliez.",
+      "risk": "Si vous quittez votre bureau sans verrouiller l'écran, n'importe qui peut accéder à  votre session. Le verrouillage automatique protège votre ordinateur même si vous oubliez.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'InactivityTimeoutSecs' -Value 900 -Type DWord"
       }
@@ -333,7 +363,7 @@
       "defaultValue": "0",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Quand votre PC communique avec un serveur de fichiers, ce paramètre ajoute une 'signature' à chaque message pour prouver qu'il n'a pas été modifié en route.",
+      "description": "Quand votre PC communique avec un serveur de fichiers, ce paramètre ajoute une 'signature' à  chaque message pour prouver qu'il n'a pas été modifié en route.",
       "risk": "Sans signature, un pirate sur le même réseau peut intercepter et modifier les données échangées (attaque 'man-in-the-middle'). Il pourrait par exemple remplacer un fichier que vous téléchargez par un virus.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters' -Name 'RequireSecuritySignature' -Value 1 -Type DWord"
@@ -350,8 +380,8 @@
       "defaultValue": "1",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Quand vous créez un mot de passe Windows, le système peut le stocker de deux façons : une méthode ancienne (LAN Manager) très facile à pirater, ou une méthode moderne et sécurisée. Ce paramètre empêche Windows de garder la version facile à pirater.",
-      "risk": "Si ce paramètre est désactivé, votre mot de passe est stocké dans un format ancien que les pirates peuvent craquer en quelques minutes avec des outils gratuits. C'est comme écrire votre code de carte bancaire sur un post-it collé à votre portefeuille.",
+      "description": "Quand vous créez un mot de passe Windows, le système peut le stocker de deux façons : une méthode ancienne (LAN Manager) très facile à  pirater, ou une méthode moderne et sécurisée. Ce paramètre empêche Windows de garder la version facile à  pirater.",
+      "risk": "Si ce paramètre est désactivé, votre mot de passe est stocké dans un format ancien que les pirates peuvent craquer en quelques minutes avec des outils gratuits. C'est comme écrire votre code de carte bancaire sur un post-it collé à  votre portefeuille.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'NoLMHash' -Value 1 -Type DWord"
       }
@@ -368,7 +398,7 @@
       "recommendedValue": "5",
       "operator": "=",
       "description": "Il existe plusieurs versions du protocole d'authentification Windows (LM, NTLM, NTLMv2). Les anciennes versions ont des failles connues. Ce paramètre force l'utilisation uniquement de NTLMv2, la version la plus sécurisée.",
-      "risk": "Les anciennes versions (LM et NTLM) peuvent être crackées en quelques heures. Un pirate qui capture votre authentification sur le réseau pourrait retrouver votre mot de passe et accéder à vos ressources.",
+      "risk": "Les anciennes versions (LM et NTLM) peuvent être crackées en quelques heures. Un pirate qui capture votre authentification sur le réseau pourrait retrouver votre mot de passe et accéder à  vos ressources.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'LmCompatibilityLevel' -Value 5 -Type DWord"
       }
@@ -384,7 +414,7 @@
       "defaultValue": "0",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Le compte 'Administrateur' intégré à Windows est un compte spécial très puissant. Par défaut, il contourne les demandes de confirmation UAC. Ce paramètre le force à demander confirmation comme les autres comptes admin.",
+      "description": "Le compte 'Administrateur' intégré à  Windows est un compte spécial très puissant. Par défaut, il contourne les demandes de confirmation UAC. Ce paramètre le force à  demander confirmation comme les autres comptes admin.",
       "risk": "Si un virus s'exécute sous ce compte, il aura immédiatement tous les droits sans aucune demande de confirmation. Activer ce paramètre ajoute une protection supplémentaire même pour ce compte privilégié.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'FilterAdministratorToken' -Value 1 -Type DWord"
@@ -418,8 +448,8 @@
       "defaultValue": "1",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "C'est le bouton ON/OFF principal de l'UAC (la fenêtre qui demande 'Voulez-vous autoriser cette application à apporter des modifications ?'). Quand activé, même les administrateurs doivent confirmer les actions sensibles.",
-      "risk": "Désactiver l'UAC revient à donner les clés de votre maison à tous les programmes. N'importe quel virus pourrait s'installer, modifier Windows, ou voler vos données sans que vous ne voyiez jamais d'avertissement.",
+      "description": "C'est le bouton ON/OFF principal de l'UAC (la fenêtre qui demande 'Voulez-vous autoriser cette application à  apporter des modifications ?'). Quand activé, même les administrateurs doivent confirmer les actions sensibles.",
+      "risk": "Désactiver l'UAC revient à  donner les clés de votre maison à  tous les programmes. N'importe quel virus pourrait s'installer, modifier Windows, ou voler vos données sans que vous ne voyiez jamais d'avertissement.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'EnableLUA' -Value 1 -Type DWord"
       }
@@ -436,7 +466,10 @@
       "recommendedValue": "2",
       "operator": "=",
       "description": "Nouvelle fonctionnalité de Windows 11 24H2 : une protection renforcée pour les administrateurs. Quand activée, les droits admin sont donnés temporairement uniquement pour la tâche demandée, puis retirés automatiquement.",
-      "risk": "Sans cette protection, si un virus compromet votre session, il garde les droits admin indéfiniment. Avec cette protection, même si un virus passe, ses droits expirent rapidement."
+      "risk": "Sans cette protection, si un virus compromet votre session, il garde les droits admin indéfiniment. Avec cette protection, même si un virus passe, ses droits expirent rapidement.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'ConsentPromptBehaviorEnhancedAdmin' -Value 2 -Type DWord"
+      }
     },
     {
       "id": "10233",
@@ -450,20 +483,23 @@
       "recommendedValue": "2",
       "operator": "=",
       "description": "Windows 11 24H2 propose deux modes UAC : le mode classique (comme avant) ou le nouveau mode 'Administrator Protection' plus sécurisé. La valeur 2 active le nouveau mode renforcé.",
-      "risk": "Le mode classique a des failles connues permettant de contourner l'UAC. Le nouveau mode corrige ces failles et isole mieux les droits administrateur du reste de votre session."
+      "risk": "Le mode classique a des failles connues permettant de contourner l'UAC. Le nouveau mode corrige ces failles et isole mieux les droits administrateur du reste de votre session.",
+      "remediation": {
+        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'TypeOfAdminApprovalMode' -Value 2 -Type DWord"
+      }
     },
     {
       "id": "10501",
       "category": "Windows Firewall",
       "name": "EnableFirewall (Domain Profile)",
       "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\DomainProfile",
       "registryItem": "EnableFirewall",
       "severity": "Medium",
-      "defaultValue": "0",
+      "defaultValue": "1",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Le pare-feu est comme un vigile à l'entrée de votre ordinateur : il contrôle qui peut entrer et sortir. Ce paramètre l'active quand vous êtes connecté au réseau de votre entreprise.",
+      "description": "Le pare-feu est comme un vigile à  l'entrée de votre ordinateur : il contrôle qui peut entrer et sortir. Ce paramètre l'active quand vous êtes connecté au réseau de votre entreprise.",
       "risk": "Sans pare-feu, votre ordinateur accepte toutes les connexions entrantes. Les pirates peuvent alors facilement scanner et attaquer votre machine depuis le réseau.",
       "remediation": {
         "default": "Set-NetFirewallProfile -Profile Domain -Enabled True"
@@ -474,13 +510,13 @@
       "category": "Windows Firewall",
       "name": "EnableFirewall (Private Profile)",
       "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\StandardProfile",
       "registryItem": "EnableFirewall",
       "severity": "Medium",
-      "defaultValue": "0",
+      "defaultValue": "1",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Le pare-feu pour le profil 'Privé' s'applique quand vous êtes connecté à un réseau de confiance (comme votre Wi-Fi maison). Il filtre quand même les connexions entrantes pour bloquer les intrusions.",
+      "description": "Le pare-feu pour le profil 'Privé' s'applique quand vous êtes connecté à  un réseau de confiance (comme votre Wi-Fi maison). Il filtre quand même les connexions entrantes pour bloquer les intrusions.",
       "risk": "Même sur votre réseau personnel, d'autres appareils infectés (TV connectée, smartphone...) pourraient tenter d'attaquer votre PC. Le pare-feu empêche ces tentatives.",
       "remediation": {
         "default": "Set-NetFirewallProfile -Profile Private -Enabled True"
@@ -491,10 +527,10 @@
       "category": "Windows Firewall",
       "name": "EnableFirewall (Public Profile)",
       "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\PublicProfile",
       "registryItem": "EnableFirewall",
       "severity": "Medium",
-      "defaultValue": "0",
+      "defaultValue": "1",
       "recommendedValue": "1",
       "operator": "=",
       "description": "Le profil 'Public' s'active quand vous êtes sur un réseau non fiable (café, aéroport, hôtel...). C'est le mode le plus restrictif car vous partagez le réseau avec des inconnus.",
@@ -515,9 +551,9 @@
       "recommendedValue": "4",
       "operator": "=",
       "description": "SMBv1 est un ancien protocole de partage de fichiers qui contient des failles de sécurité graves. Il n'est plus nécessaire sur les systèmes modernes.",
-      "risk": "Ce protocole peut être exploité par des virus et logiciels espions (ransomwares, malwares) pour infecter votre ordinateur à distance, sans que vous n'ayez à cliquer sur quoi que ce soit.",
+      "risk": "Ce protocole peut être exploité par des virus et logiciels espions (ransomwares, malwares) pour infecter votre ordinateur à  distance, sans que vous n'ayez à  cliquer sur quoi que ce soit.",
       "remediation": {
-        "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\MrxSmb10' -Name 'Start' -Value 4 -Type DWord"
+        "default": "if (!(Test-Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\MrxSmb10')) { New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\MrxSmb10' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\MrxSmb10' -Name 'Start' -Value 4 -Type DWord"
       }
     },
     {
@@ -534,7 +570,7 @@
       "description": "Ce paramètre désactive la partie 'serveur' du protocole SMBv1, empêchant d'autres ordinateurs de se connecter au vôtre via ce vieux protocole vulnérable.",
       "risk": "Même si vous n'utilisez pas SMBv1, le laisser actif permet aux attaquants de cibler votre machine. C'est comme laisser une vieille porte derrière votre maison, même si vous ne l'utilisez jamais.",
       "remediation": {
-        "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters' -Name 'SMB1' -Value 0 -Type DWord"
+        "default": "if (!(Test-Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters')) { New-Item -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters' -Force | Out-Null }; Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanmanServer\\Parameters' -Name 'SMB1' -Value 0 -Type DWord"
       }
     },
     {
@@ -549,7 +585,7 @@
       "recommendedValue": "0",
       "operator": "=",
       "description": "WDigest est une ancienne méthode d'authentification qui stocke votre mot de passe en mémoire de façon récupérable.",
-      "risk": "Si un pirate accède à votre PC, il peut extraire votre mot de passe en clair depuis la mémoire. Ce paramètre doit être désactivé pour protéger vos identifiants.",
+      "risk": "Si un pirate accède à  votre PC, il peut extraire votre mot de passe en clair depuis la mémoire. Ce paramètre doit être désactivé pour protéger vos identifiants.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\SecurityProviders\\WDigest' -Name 'UseLogonCredential' -Value 0 -Type DWord"
       }
@@ -565,7 +601,7 @@
       "defaultValue": "1",
       "recommendedValue": "0",
       "operator": "=",
-      "description": "LLMNR est un protocole qui permet de trouver des ordinateurs sur le réseau local. Problème : il répond à n'importe qui sans vérification, ce qui permet des attaques.",
+      "description": "LLMNR est un protocole qui permet de trouver des ordinateurs sur le réseau local. Problème : il répond à  n'importe qui sans vérification, ce qui permet des attaques.",
       "risk": "Un attaquant peut se faire passer pour le serveur que vous cherchez et intercepter vos identifiants. L'outil 'Responder' exploit cette faille et est très utilisé par les pentesters et pirates.",
       "remediation": {
         "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient' -Name 'EnableMulticast' -Value 0 -Type DWord"
@@ -583,7 +619,11 @@
       "recommendedValue": "0",
       "operator": "=",
       "description": "Windows 11 24H2 a ajouté une commande 'sudo' comme sur Linux. Elle permet d'exécuter des commandes en tant qu'admin depuis le terminal sans ouvrir une nouvelle fenêtre.",
-      "risk": "Cette fonctionnalité est nouvelle et pourrait contenir des failles non découvertes. De plus, elle facilite l'élévation de privilèges pour les scripts malveillants. Microsoft recommande de la désactiver en entreprise."
+      "risk": "Cette fonctionnalité est nouvelle et pourrait contenir des failles non découvertes. De plus, elle facilite l'élévation de privilèges pour les scripts malveillants. Microsoft recommande de la désactiver en entreprise.",
+      "remediation": {
+        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Sudo' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Sudo' -Name 'Enabled' -Value 0 -Type DWord",
+        "gpo": "Computer Configuration > Administrative Templates > System > Configure the behavior of the sudo command > Disabled"
+      }
     },
     {
       "id": "10672",
@@ -596,10 +636,10 @@
       "defaultValue": "",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "VBS crée une zone isolée dans la mémoire de votre PC grâce à la virtualisation. Cette zone protégée est inaccessible même aux virus qui auraient des droits administrateur.",
-      "risk": "Sans VBS, un virus avec droits admin a accès à toute la mémoire, y compris vos mots de passe. Avec VBS, ces données sensibles restent protégées même en cas d'infection.",
+      "description": "VBS crée une zone isolée dans la mémoire de votre PC grâce à  la virtualisation. Cette zone protégée est inaccessible même aux virus qui auraient des droits administrateur.",
+      "risk": "Sans VBS, un virus avec droits admin a accès à  toute la mémoire, y compris vos mots de passe. Avec VBS, ces données sensibles restent protégées même en cas d'infection.",
       "remediation": {
-        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'EnableVirtualizationBasedSecurity' -Value 1 -Type DWord",
+        "default": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'EnableVirtualizationBasedSecurity' -Value 1 -Type DWord",
         "note": "Requiert Pro/Enterprise"
       }
     },
@@ -615,9 +655,10 @@
       "recommendedValue": "1",
       "operator": "=",
       "description": "HVCI (aussi appelé 'Memory Integrity' dans les paramètres Windows) vérifie que tout code exécuté dans le noyau Windows est légitime et signé.",
-      "risk": "Les virus avancés (rootkits) essaient de s'injecter dans le cœur de Windows pour être invisibles. HVCI bloque ces tentatives en empêchant l'exécution de code non autorisé.",
+      "risk": "Les virus avancés (rootkits) essaient de s'injecter dans le cÃ…\"ur de Windows pour être invisibles. HVCI bloque ces tentatives en empêchant l'exécution de code non autorisé.",
       "remediation": {
-        "note": "Requiert Pro/Enterprise"
+        "default": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'HypervisorEnforcedCodeIntegrity' -Value 1 -Type DWord",
+        "note": "Requiert Pro/Enterprise. Un redémarrage est nécessaire."
       }
     },
     {
@@ -632,9 +673,10 @@
       "recommendedValue": "1",
       "operator": "=",
       "description": "Credential Guard isole vos identifiants Windows dans une zone protégée, inaccessible même aux programmes avec droits administrateur.",
-      "risk": "Sans cette protection, un attaquant qui accède à votre PC peut voler vos identifiants stockés en mémoire et les utiliser pour accéder à d'autres ressources.",
+      "risk": "Sans cette protection, un attaquant qui accède à  votre PC peut voler vos identifiants stockés en mémoire et les utiliser pour accéder à  d'autres ressources.",
       "remediation": {
-        "note": "Requiert Enterprise uniquement"
+        "default": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'LsaCfgFlags' -Value 1 -Type DWord",
+        "note": "Requiert Enterprise uniquement. Un redémarrage est nécessaire."
       }
     },
     {
@@ -649,7 +691,7 @@
       "recommendedValue": "1",
       "operator": "=",
       "description": "Cette protection utilise votre processeur (Intel CET ou AMD) pour empêcher les attaques de type 'Return-Oriented Programming' qui détournent le flux d'exécution des programmes.",
-      "risk": "Les attaques ROP sont très utilisées pour contourner les protections et exécuter du code malveillant. Cette protection matérielle les rend beaucoup plus difficiles à réaliser.",
+      "risk": "Les attaques ROP sont très utilisées pour contourner les protections et exécuter du code malveillant. Cette protection matérielle les rend beaucoup plus difficiles à  réaliser.",
       "compatibility": "Nécessite un processeur Intel 11e génération+ (Tiger Lake) ou AMD Zen 3+ avec support CET (Control-flow Enforcement Technology). Non disponible sur les anciens processeurs.",
       "remediation": {
         "default": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'ConfigureKernelShadowStacksLaunch' -Value 1 -Type DWord",
@@ -701,7 +743,7 @@
       "defaultValue": "0",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Les ports Thunderbolt/USB4 permettent un accès direct à la mémoire (DMA). Ce paramètre bloque les nouveaux périphériques DMA quand le PC est verrouillé.",
+      "description": "Les ports Thunderbolt/USB4 permettent un accès direct à  la mémoire (DMA). Ce paramètre bloque les nouveaux périphériques DMA quand le PC est verrouillé.",
       "risk": "Un attaquant avec un accès physique peut brancher un appareil spécial qui lit directement votre mémoire, contournant Windows et votre mot de passe. Ces attaques 'DMA' permettent de voler des clés de chiffrement.",
       "remediation": {
         "note": "Requiert Pro/Enterprise avec BitLocker"
@@ -718,7 +760,7 @@
       "defaultValue": "1",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "SmartScreen vérifie les fichiers téléchargés et les programmes exécutés en les comparant à une liste de menaces connues dans le cloud Microsoft.",
+      "description": "SmartScreen vérifie les fichiers téléchargés et les programmes exécutés en les comparant à  une liste de menaces connues dans le cloud Microsoft.",
       "risk": "Sans SmartScreen, vous pouvez exécuter des fichiers dangereux sans avertissement. SmartScreen bloque les virus connus et vous avertit des fichiers suspects avant qu'ils ne s'exécutent.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System' -Name 'EnableSmartScreen' -Value 1 -Type DWord"
@@ -728,9 +770,8 @@
       "id": "10972",
       "category": "Administrative Templates: Windows Components",
       "name": "Microsoft Defender Antivirus: Configure detection for PUA",
-      "method": "Registry",
-      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender",
-      "registryItem": "PUAProtection",
+      "method": "MpPreference",
+      "methodArgument": "PUAProtection",
       "severity": "Medium",
       "defaultValue": "0",
       "recommendedValue": "1",
@@ -745,15 +786,14 @@
       "id": "10973",
       "category": "Administrative Templates: Windows Components",
       "name": "Microsoft Defender Antivirus: MAPS: Join Microsoft MAPS",
-      "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Spynet",
-      "registryItem": "SpynetReporting",
+      "method": "MpPreference",
+      "methodArgument": "MAPSReporting",
       "severity": "Medium",
       "defaultValue": "0",
       "recommendedValue": "2",
       "operator": "=",
-      "description": "MAPS (Microsoft Active Protection Service) envoie des infos sur les fichiers suspects à Microsoft pour analyse en temps réel. En retour, vous recevez une protection contre les nouvelles menaces en quelques secondes.",
-      "risk": "Sans MAPS, Defender dépend uniquement des mises à jour téléchargées. Avec MAPS, un nouveau virus détecté n'importe où dans le monde peut être bloqué chez vous en quelques minutes.",
+      "description": "MAPS (Microsoft Active Protection Service) envoie des infos sur les fichiers suspects à  Microsoft pour analyse en temps réel. En retour, vous recevez une protection contre les nouvelles menaces en quelques secondes.",
+      "risk": "Sans MAPS, Defender dépend uniquement des mises à  jour téléchargées. Avec MAPS, un nouveau virus détecté n'importe où dans le monde peut être bloqué chez vous en quelques minutes.",
       "remediation": {
         "default": "Set-MpPreference -MAPSReporting Advanced"
       }
@@ -762,15 +802,14 @@
       "id": "10993",
       "category": "Administrative Templates: Windows Components",
       "name": "Microsoft Defender Antivirus: Network Protection",
-      "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\Network Protection",
-      "registryItem": "EnableNetworkProtection",
+      "method": "MpPreference",
+      "methodArgument": "EnableNetworkProtection",
       "severity": "Medium",
-      "defaultValue": "",
+      "defaultValue": "0",
       "recommendedValue": "1",
       "operator": "=",
       "description": "La protection réseau bloque les connexions vers des sites web dangereux connus pour héberger des virus (malwares) ou des arnaques (phishing).",
-      "risk": "Sans cette protection, vous pouvez accéder à des sites dangereux et télécharger des virus. La protection réseau vous arrête AVANT d'atteindre le site dangereux.",
+      "risk": "Sans cette protection, vous pouvez accéder à  des sites dangereux et télécharger des virus. La protection réseau vous arrête AVANT d'atteindre le site dangereux.",
       "compatibility": "Disponible sur Windows 10/11 Pro, Enterprise et Education. Nécessite Microsoft Defender Antivirus actif (pas compatible avec un antivirus tiers).",
       "remediation": {
         "default": "Set-MpPreference -EnableNetworkProtection Enabled"
@@ -804,8 +843,8 @@
       "defaultValue": "0",
       "recommendedValue": "0",
       "operator": "=",
-      "description": "WinRM permet de gérer un PC à distance via PowerShell. L'authentification 'Basic' envoie le mot de passe en clair (juste encodé en Base64, pas chiffré).",
-      "risk": "Si quelqu'un intercepte le trafic réseau, il peut lire votre mot de passe directement. Il faut utiliser Kerberos ou une autre méthode sécurisée à la place.",
+      "description": "WinRM permet de gérer un PC à  distance via PowerShell. L'authentification 'Basic' envoie le mot de passe en clair (juste encodé en Base64, pas chiffré).",
+      "risk": "Si quelqu'un intercepte le trafic réseau, il peut lire votre mot de passe directement. Il faut utiliser Kerberos ou une autre méthode sécurisée à  la place.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Client' -Name 'AllowBasic' -Value 0 -Type DWord -Force"
       }
@@ -821,8 +860,8 @@
       "defaultValue": "0",
       "recommendedValue": "0",
       "operator": "=",
-      "description": "Ce paramètre interdit d'utiliser WinRM (administration à distance) sans chiffrement. Toutes les communications doivent être protégées.",
-      "risk": "Sans chiffrement, toutes les commandes PowerShell et leurs résultats sont visibles sur le réseau. Un attaquant peut voir vos mots de passe, vos fichiers, tout ce que vous faites à distance.",
+      "description": "Ce paramètre interdit d'utiliser WinRM (administration à  distance) sans chiffrement. Toutes les communications doivent être protégées.",
+      "risk": "Sans chiffrement, toutes les commandes PowerShell et leurs résultats sont visibles sur le réseau. Un attaquant peut voir vos mots de passe, vos fichiers, tout ce que vous faites à  distance.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Client' -Name 'AllowUnencryptedTraffic' -Value 0 -Type DWord -Force"
       }
@@ -838,8 +877,8 @@
       "defaultValue": "0",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Empêche le client Bureau à distance d'enregistrer les mots de passe des connexions. Les utilisateurs doivent retaper leur mot de passe à chaque connexion.",
-      "risk": "Les mots de passe RDP enregistrés sont stockés dans le gestionnaire d'identifiants Windows. Un attaquant sur votre PC peut les extraire et accéder à tous les serveurs où vous vous connectez.",
+      "description": "Empêche le client Bureau à  distance d'enregistrer les mots de passe des connexions. Les utilisateurs doivent retaper leur mot de passe à  chaque connexion.",
+      "risk": "Les mots de passe RDP enregistrés sont stockés dans le gestionnaire d'identifiants Windows. Un attaquant sur votre PC peut les extraire et accéder à  tous les serveurs où vous vous connectez.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services' -Name 'DisablePasswordSaving' -Value 1 -Type DWord -Force"
       }
@@ -855,7 +894,7 @@
       "defaultValue": "0",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Force le chiffrement de toutes les communications RPC (Remote Procedure Call) utilisées par le Bureau à distance pour les opérations de gestion.",
+      "description": "Force le chiffrement de toutes les communications RPC (Remote Procedure Call) utilisées par le Bureau à  distance pour les opérations de gestion.",
       "risk": "Sans chiffrement RPC, les commandes de gestion RDP passent en clair sur le réseau. Un attaquant pourrait intercepter ou modifier ces communications pour prendre le contrôle de la session.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services' -Name 'fEncryptRPCTraffic' -Value 1 -Type DWord -Force"
@@ -881,32 +920,30 @@
       "id": "11013",
       "category": "Administrative Templates: Windows Components",
       "name": "Microsoft Defender: Scan all downloaded files and attachments",
-      "method": "Registry",
-      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
-      "registryItem": "DisableIOAVProtection",
+      "method": "MpPreference",
+      "methodArgument": "DisableIOAVProtection",
       "severity": "Medium",
       "defaultValue": "0",
       "recommendedValue": "0",
       "operator": "=",
-      "description": "Analyser tous les fichiers téléchargés et pièces jointes",
+      "description": "Analyser tous les fichiers téléchargés et pièces jointes. La valeur 0 (False) signifie que la protection est ACTIVÉE.",
       "remediation": {
-        "default": "Set-MpPreference -DisableIOAVProtection $false"
+        "default": "Set-MpPreference -DisableIOAVProtection 0"
       }
     },
     {
       "id": "11014",
       "category": "Administrative Templates: Windows Components",
       "name": "Microsoft Defender: Turn off real-time protection",
-      "method": "Registry",
-      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
-      "registryItem": "DisableRealtimeMonitoring",
+      "method": "MpPreference",
+      "methodArgument": "DisableRealtimeMonitoring",
       "severity": "High",
       "defaultValue": "0",
       "recommendedValue": "0",
       "operator": "=",
-      "description": "Ne pas désactiver la protection en temps réel",
+      "description": "Ne pas désactiver la protection en temps réel. La valeur 0 (False) signifie que la protection est ACTIVÉE.",
       "remediation": {
-        "default": "Set-MpPreference -DisableRealtimeMonitoring $false"
+        "default": "Set-MpPreference -DisableRealtimeMonitoring 0"
       }
     },
     {
@@ -921,7 +958,7 @@
       "recommendedValue": "1",
       "operator": "=",
       "description": "Cette protection vous alerte lorsque vous entrez votre mot de passe Windows sur un site web suspect ou dans une application douteuse. Elle détecte aussi si vous réutilisez vos mots de passe.",
-      "risk": "L'hameçonnage (phishing) est l'arnaque la plus courante : un faux site ressemblant à votre banque ou à Microsoft vous demande votre mot de passe. Sans cette protection, vous ne serez pas averti et vos identifiants peuvent être volés.",
+      "risk": "L'hameçonnage (phishing) est l'arnaque la plus courante : un faux site ressemblant à  votre banque ou à  Microsoft vous demande votre mot de passe. Sans cette protection, vous ne serez pas averti et vos identifiants peuvent être volés.",
       "compatibility": "Disponible uniquement sur Windows 11 22H2 et versions ultérieures. Non disponible sur Windows 10.",
       "remediation": {
         "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WTDS\\Components' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WTDS\\Components' -Name 'NotifyMalicious' -Value 1 -Type DWord",
@@ -932,64 +969,64 @@
       "id": "11050",
       "category": "System Services",
       "name": "Xbox Accessory Management Service (XboxGipSvc)",
-      "method": "Registry",
-      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\XboxGipSvc",
-      "registryItem": "Start",
+      "method": "service",
+      "methodArgument": "XboxGipSvc",
       "severity": "Medium",
-      "defaultValue": "3",
-      "recommendedValue": "4",
+      "defaultValue": "Manual",
+      "recommendedValue": "Disabled",
       "operator": "=",
-      "description": "Désactiver le service Xbox Accessory Management",
+      "description": "Désactiver le service Xbox Accessory Management. Ce service gère les accessoires Xbox connectés au PC.",
+      "risk": "Un service inutile qui s'exécute augmente la surface d'attaque. Si vous n'utilisez pas d'accessoires Xbox, désactivez-le.",
       "remediation": {
-        "default": "Set-Service -Name XboxGipSvc -StartupType Disabled"
+        "default": "Set-Service -Name XboxGipSvc -StartupType Disabled; Stop-Service -Name XboxGipSvc -Force -ErrorAction SilentlyContinue"
       }
     },
     {
       "id": "11052",
       "category": "System Services",
       "name": "Xbox Live Auth Manager (XblAuthManager)",
-      "method": "Registry",
-      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\XblAuthManager",
-      "registryItem": "Start",
+      "method": "service",
+      "methodArgument": "XblAuthManager",
       "severity": "Medium",
-      "defaultValue": "3",
-      "recommendedValue": "4",
+      "defaultValue": "Manual",
+      "recommendedValue": "Disabled",
       "operator": "=",
-      "description": "Désactiver le service Xbox Live Auth Manager",
+      "description": "Désactiver le service Xbox Live Auth Manager. Ce service gère l'authentification Xbox Live.",
+      "risk": "Un service inutile qui s'exécute augmente la surface d'attaque. Si vous n'utilisez pas Xbox Live, désactivez-le.",
       "remediation": {
-        "default": "Set-Service -Name XblAuthManager -StartupType Disabled"
+        "default": "Set-Service -Name XblAuthManager -StartupType Disabled; Stop-Service -Name XblAuthManager -Force -ErrorAction SilentlyContinue"
       }
     },
     {
       "id": "11054",
       "category": "System Services",
       "name": "Xbox Live Game Save (XblGameSave)",
-      "method": "Registry",
-      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\XblGameSave",
-      "registryItem": "Start",
+      "method": "service",
+      "methodArgument": "XblGameSave",
       "severity": "Medium",
-      "defaultValue": "3",
-      "recommendedValue": "4",
+      "defaultValue": "Manual",
+      "recommendedValue": "Disabled",
       "operator": "=",
-      "description": "Désactiver le service Xbox Live Game Save",
+      "description": "Désactiver le service Xbox Live Game Save. Ce service synchronise les sauvegardes de jeux Xbox.",
+      "risk": "Un service inutile qui s'exécute augmente la surface d'attaque. Si vous n'utilisez pas Xbox Live, désactivez-le.",
       "remediation": {
-        "default": "Set-Service -Name XblGameSave -StartupType Disabled"
+        "default": "Set-Service -Name XblGameSave -StartupType Disabled; Stop-Service -Name XblGameSave -Force -ErrorAction SilentlyContinue"
       }
     },
     {
       "id": "11056",
       "category": "System Services",
       "name": "Xbox Live Networking Service (XboxNetApiSvc)",
-      "method": "Registry",
-      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\XboxNetApiSvc",
-      "registryItem": "Start",
+      "method": "service",
+      "methodArgument": "XboxNetApiSvc",
       "severity": "Medium",
-      "defaultValue": "3",
-      "recommendedValue": "4",
+      "defaultValue": "Manual",
+      "recommendedValue": "Disabled",
       "operator": "=",
-      "description": "Désactiver le service Xbox Live Networking",
+      "description": "Désactiver le service Xbox Live Networking. Ce service gère les connexions réseau Xbox Live.",
+      "risk": "Un service inutile qui s'exécute augmente la surface d'attaque. Si vous n'utilisez pas Xbox Live, désactivez-le.",
       "remediation": {
-        "default": "Set-Service -Name XboxNetApiSvc -StartupType Disabled"
+        "default": "Set-Service -Name XboxNetApiSvc -StartupType Disabled; Stop-Service -Name XboxNetApiSvc -Force -ErrorAction SilentlyContinue"
       }
     },
     {
@@ -1085,7 +1122,7 @@
       "defaultValue": "0",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Quand votre PC partage des fichiers, ce paramètre ajoute une signature à chaque communication pour garantir qu'elle n'a pas été modifiée.",
+      "description": "Quand votre PC partage des fichiers, ce paramètre ajoute une signature à  chaque communication pour garantir qu'elle n'a pas été modifiée.",
       "risk": "Sans signature, un attaquant sur le même réseau peut intercepter et modifier les fichiers que vous partagez (attaque man-in-the-middle).",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Services\\LanManServer\\Parameters' -Name 'RequireSecuritySignature' -Value 1 -Type DWord"
@@ -1120,7 +1157,7 @@
       "recommendedValue": "1",
       "operator": "=",
       "description": "Empêche les utilisateurs anonymes de lister les comptes ET les partages réseau de votre PC.",
-      "risk": "Exposer ces informations aide les attaquants à cartographier votre réseau et planifier leurs attaques.",
+      "risk": "Exposer ces informations aide les attaquants à  cartographier votre réseau et planifier leurs attaques.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Lsa' -Name 'RestrictAnonymous' -Value 1 -Type DWord"
       }
@@ -1171,7 +1208,7 @@
       "recommendedValue": "2",
       "operator": "=",
       "description": "NetBIOS est un ancien protocole réseau. Ce paramètre configure comment votre PC résout les noms NetBIOS.",
-      "risk": "Une mauvaise configuration permet des attaques de type 'NetBIOS poisoning' où un attaquant répond à la place du vrai serveur.",
+      "risk": "Une mauvaise configuration permet des attaques de type 'NetBIOS poisoning' où un attaquant répond à  la place du vrai serveur.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NetBT\\Parameters' -Name 'NodeType' -Value 2 -Type DWord"
       }
@@ -1187,8 +1224,8 @@
       "defaultValue": "0",
       "recommendedValue": "2",
       "operator": "=",
-      "description": "Le 'source routing' permet à un paquet réseau de spécifier son chemin. Les attaquants l'utilisent pour contourner les pare-feux.",
-      "risk": "Un attaquant peut forcer ses paquets malveillants à passer par des chemins spécifiques pour éviter la détection.",
+      "description": "Le 'source routing' permet à  un paquet réseau de spécifier son chemin. Les attaquants l'utilisent pour contourner les pare-feux.",
+      "risk": "Un attaquant peut forcer ses paquets malveillants à  passer par des chemins spécifiques pour éviter la détection.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Services\\Tcpip6\\Parameters' -Name 'DisableIPSourceRouting' -Value 2 -Type DWord"
       }
@@ -1255,7 +1292,7 @@
       "defaultValue": "1",
       "recommendedValue": "0",
       "operator": "=",
-      "description": "Windows peut se connecter automatiquement à des réseaux Wi-Fi 'suggérés' par Microsoft ou vos contacts.",
+      "description": "Windows peut se connecter automatiquement à  des réseaux Wi-Fi 'suggérés' par Microsoft ou vos contacts.",
       "risk": "Ces réseaux publics ouverts ne sont pas chiffrés et peuvent être créés par des attaquants pour intercepter votre trafic.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Microsoft\\wcmsvc\\wifinetworkmanager\\config' -Name 'AutoConnectAllowedOEM' -Value 0 -Type DWord"
@@ -1273,7 +1310,7 @@
       "recommendedValue": "1",
       "operator": "=",
       "description": "Empêche l'exécution automatique de programmes sur les appareils comme les téléphones ou appareils photo connectés.",
-      "risk": "Un appareil malveillant pourrait exécuter automatiquement un virus dès sa connexion à votre PC.",
+      "risk": "Un appareil malveillant pourrait exécuter automatiquement un virus dès sa connexion à  votre PC.",
       "remediation": {
         "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Explorer' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\Explorer' -Name 'NoAutoplayfornonVolume' -Value 1 -Type DWord"
       }
@@ -1374,8 +1411,8 @@
       "defaultValue": "0",
       "recommendedValue": "1",
       "operator": "=",
-      "description": "Après une mise à jour Windows, le système peut se reconnecter automatiquement à votre session. Ce paramètre le désactive.",
-      "risk": "La reconnexion automatique peut exposer votre session si quelqu'un a accès physique à votre PC après un redémarrage.",
+      "description": "Après une mise à  jour Windows, le système peut se reconnecter automatiquement à  votre session. Ce paramètre le désactive.",
+      "risk": "La reconnexion automatique peut exposer votre session si quelqu'un a accès physique à  votre PC après un redémarrage.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'DisableAutomaticRestartSignOn' -Value 1 -Type DWord"
       }
@@ -1443,7 +1480,7 @@
       "recommendedValue": "0",
       "operator": "=",
       "description": "Force le chiffrement de toutes les communications WinRM (Windows Remote Management).",
-      "risk": "Sans chiffrement, toutes les commandes exécutées à distance et leurs résultats sont visibles en clair sur le réseau.",
+      "risk": "Sans chiffrement, toutes les commandes exécutées à  distance et leurs résultats sont visibles en clair sur le réseau.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Service' -Name 'AllowUnencryptedTraffic' -Value 0 -Type DWord"
       }
@@ -1477,7 +1514,7 @@
       "recommendedValue": "0",
       "operator": "=",
       "description": "Applique les restrictions UAC même pour les connexions réseau avec un compte local admin.",
-      "risk": "Sans ce paramètre, un attaquant avec des identifiants admin locaux peut se connecter à distance avec tous les privilèges, contournant l'UAC.",
+      "risk": "Sans ce paramètre, un attaquant avec des identifiants admin locaux peut se connecter à  distance avec tous les privilèges, contournant l'UAC.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'LocalAccountTokenFilterPolicy' -Value 0 -Type DWord"
       }

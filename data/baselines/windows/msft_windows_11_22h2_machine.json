@@ -20,7 +20,7 @@
       "operator": ">=",
       "description": "Durée de verrouillage du compte après échecs de connexion",
       "remediation": {
-        "default": "Set-LocalSecurityPolicy -Policy 'Account lockout duration' -Value 10",
+        "default": "net accounts /lockoutduration:10",
         "gpo": "Computer Configuration > Windows Settings > Security Settings > Account Policies > Account Lockout Policy",
         "intune": "Endpoint Security > Account Protection"
       }
@@ -36,7 +36,7 @@
       "operator": "<=",
       "description": "Nombre de tentatives de connexion avant verrouillage",
       "remediation": {
-        "default": "Set-LocalSecurityPolicy -Policy 'Account lockout threshold' -Value 10",
+        "default": "net accounts /lockoutthreshold:10",
         "gpo": "Computer Configuration > Windows Settings > Security Settings > Account Policies > Account Lockout Policy"
       }
     },
@@ -52,7 +52,7 @@
       "operator": "=",
       "description": "Autoriser le verrouillage du compte Administrateur",
       "remediation": {
-        "default": "secedit /export /cfg c:\\secpol.cfg; (Get-Content c:\\secpol.cfg) -replace 'AllowAdministratorLockout.*', 'AllowAdministratorLockout = 1' | Set-Content c:\\secpol.cfg; secedit /configure /db c:\\windows\\security\\local.sdb /cfg c:\\secpol.cfg"
+        "default": "$tempDir = 'C:\\Temp'; if (!(Test-Path $tempDir)) { New-Item -ItemType Directory -Path $tempDir -Force }; secedit /export /cfg $tempDir\\secpol.cfg; (Get-Content $tempDir\\secpol.cfg).Replace('AllowAdministratorLockout = 0', 'AllowAdministratorLockout = 1') | Set-Content $tempDir\\secpol.cfg; secedit /configure /db c:\\windows\\security\\local.sdb /cfg $tempDir\\secpol.cfg /areas SECURITYPOLICY; Remove-Item $tempDir\\secpol.cfg -Force"
       }
     },
     {
@@ -97,7 +97,7 @@
       "operator": "=",
       "description": "Le mot de passe doit respecter les exigences de complexité",
       "remediation": {
-        "default": "secedit /export /cfg c:\\secpol.cfg; (Get-Content c:\\secpol.cfg) -replace 'PasswordComplexity.*', 'PasswordComplexity = 1' | Set-Content c:\\secpol.cfg; secedit /configure /db c:\\windows\\security\\local.sdb /cfg c:\\secpol.cfg"
+        "default": "$tempDir = 'C:\\Temp'; if (!(Test-Path $tempDir)) { New-Item -ItemType Directory -Path $tempDir -Force }; secedit /export /cfg $tempDir\\secpol.cfg; (Get-Content $tempDir\\secpol.cfg).Replace('PasswordComplexity = 0', 'PasswordComplexity = 1') | Set-Content $tempDir\\secpol.cfg; secedit /configure /db c:\\windows\\security\\local.sdb /cfg $tempDir\\secpol.cfg /areas SECURITYPOLICY; Remove-Item $tempDir\\secpol.cfg -Force"
       }
     },
     {
@@ -112,7 +112,7 @@
       "operator": "=",
       "description": "Ne pas stocker les mots de passe avec chiffrement réversible",
       "remediation": {
-        "default": "secedit /export /cfg c:\\secpol.cfg; (Get-Content c:\\secpol.cfg) -replace 'ClearTextPassword.*', 'ClearTextPassword = 0' | Set-Content c:\\secpol.cfg; secedit /configure /db c:\\windows\\security\\local.sdb /cfg c:\\secpol.cfg"
+        "default": "$tempDir = 'C:\\Temp'; if (!(Test-Path $tempDir)) { New-Item -ItemType Directory -Path $tempDir -Force }; secedit /export /cfg $tempDir\\secpol.cfg; (Get-Content $tempDir\\secpol.cfg).Replace('ClearTextPassword = 1', 'ClearTextPassword = 0') | Set-Content $tempDir\\secpol.cfg; secedit /configure /db c:\\windows\\security\\local.sdb /cfg $tempDir\\secpol.cfg /areas SECURITYPOLICY; Remove-Item $tempDir\\secpol.cfg -Force"
       }
     },
     {
@@ -246,12 +246,12 @@
     {
       "id": "10501",
       "category": "Windows Firewall",
-      "name": "EnableFirewall (Domain Profile, Policy)",
+      "name": "EnableFirewall (Domain Profile)",
       "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\DomainProfile",
       "registryItem": "EnableFirewall",
       "severity": "Medium",
-      "defaultValue": "0",
+      "defaultValue": "1",
       "recommendedValue": "1",
       "operator": "=",
       "description": "Activer le pare-feu Windows pour le profil Domaine",
@@ -262,12 +262,12 @@
     {
       "id": "10515",
       "category": "Windows Firewall",
-      "name": "EnableFirewall (Private Profile, Policy)",
+      "name": "EnableFirewall (Private Profile)",
       "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PrivateProfile",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\StandardProfile",
       "registryItem": "EnableFirewall",
       "severity": "Medium",
-      "defaultValue": "0",
+      "defaultValue": "1",
       "recommendedValue": "1",
       "operator": "=",
       "description": "Activer le pare-feu Windows pour le profil Privé",
@@ -278,12 +278,12 @@
     {
       "id": "10529",
       "category": "Windows Firewall",
-      "name": "EnableFirewall (Public Profile, Policy)",
+      "name": "EnableFirewall (Public Profile)",
       "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\PublicProfile",
+      "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\PublicProfile",
       "registryItem": "EnableFirewall",
       "severity": "Medium",
-      "defaultValue": "0",
+      "defaultValue": "1",
       "recommendedValue": "1",
       "operator": "=",
       "description": "Activer le pare-feu Windows pour le profil Public",
@@ -352,7 +352,7 @@
       "operator": "=",
       "description": "Désactiver LLMNR (vulnérable aux attaques de type responder)",
       "remediation": {
-        "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient' -Name 'EnableMulticast' -Value 0 -Type DWord -Force"
+        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient' -Name 'EnableMulticast' -Value 0 -Type DWord"
       }
     },
     {
@@ -368,7 +368,7 @@
       "operator": "=",
       "description": "Activer la sécurité basée sur la virtualisation (VBS)",
       "remediation": {
-        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'EnableVirtualizationBasedSecurity' -Value 1 -Type DWord -Force"
+        "default": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'EnableVirtualizationBasedSecurity' -Value 1 -Type DWord"
       }
     },
     {
@@ -384,7 +384,7 @@
       "operator": "=",
       "description": "Activer HVCI (Hypervisor-protected Code Integrity)",
       "remediation": {
-        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'HypervisorEnforcedCodeIntegrity' -Value 1 -Type DWord -Force"
+        "default": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'HypervisorEnforcedCodeIntegrity' -Value 1 -Type DWord"
       }
     },
     {
@@ -400,7 +400,7 @@
       "operator": "=",
       "description": "Activer Credential Guard",
       "remediation": {
-        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'LsaCfgFlags' -Value 1 -Type DWord -Force"
+        "default": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'LsaCfgFlags' -Value 1 -Type DWord"
       }
     },
     {
@@ -455,9 +455,8 @@
       "id": "10972",
       "category": "Administrative Templates: Windows Components",
       "name": "Microsoft Defender Antivirus: Configure detection for potentially unwanted applications",
-      "method": "Registry",
-      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender",
-      "registryItem": "PUAProtection",
+      "method": "MpPreference",
+      "methodArgument": "PUAProtection",
       "severity": "Medium",
       "defaultValue": "0",
       "recommendedValue": "1",
@@ -471,9 +470,8 @@
       "id": "10973",
       "category": "Administrative Templates: Windows Components",
       "name": "Microsoft Defender Antivirus: MAPS: Join Microsoft MAPS",
-      "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Spynet",
-      "registryItem": "SpynetReporting",
+      "method": "MpPreference",
+      "methodArgument": "MAPSReporting",
       "severity": "Medium",
       "defaultValue": "0",
       "recommendedValue": "2",
@@ -487,11 +485,10 @@
       "id": "10993",
       "category": "Administrative Templates: Windows Components",
       "name": "Microsoft Defender Antivirus: Microsoft Defender Exploit Guard: Network Protection: Prevent users and apps from accessing dangerous websites",
-      "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\Network Protection",
-      "registryItem": "EnableNetworkProtection",
+      "method": "MpPreference",
+      "methodArgument": "EnableNetworkProtection",
       "severity": "Medium",
-      "defaultValue": "",
+      "defaultValue": "0",
       "recommendedValue": "1",
       "operator": "=",
       "description": "Activer la protection réseau contre les sites dangereux",
@@ -503,32 +500,30 @@
       "id": "11013",
       "category": "Administrative Templates: Windows Components",
       "name": "Microsoft Defender Antivirus: Real-time Protection: Scan all downloaded files and attachments",
-      "method": "Registry",
-      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
-      "registryItem": "DisableIOAVProtection",
+      "method": "MpPreference",
+      "methodArgument": "DisableIOAVProtection",
       "severity": "Medium",
       "defaultValue": "0",
       "recommendedValue": "0",
       "operator": "=",
       "description": "Analyser tous les fichiers téléchargés et pièces jointes",
       "remediation": {
-        "default": "Set-MpPreference -DisableIOAVProtection $false"
+        "default": "Set-MpPreference -DisableIOAVProtection 0"
       }
     },
     {
       "id": "11014",
       "category": "Administrative Templates: Windows Components",
       "name": "Microsoft Defender Antivirus: Real-time Protection: Turn off real-time protection",
-      "method": "Registry",
-      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
-      "registryItem": "DisableRealtimeMonitoring",
+      "method": "MpPreference",
+      "methodArgument": "DisableRealtimeMonitoring",
       "severity": "Medium",
       "defaultValue": "0",
       "recommendedValue": "0",
       "operator": "=",
       "description": "Ne pas désactiver la protection en temps réel",
       "remediation": {
-        "default": "Set-MpPreference -DisableRealtimeMonitoring $false"
+        "default": "Set-MpPreference -DisableRealtimeMonitoring 0"
       }
     },
     {
@@ -714,7 +709,11 @@
     },
     "Home": {
       "description": "Ajustements pour Windows 11 Home (certaines fonctionnalités non disponibles)",
-      "excludeFindings": ["10674", "10673", "10672"],
+      "excludeFindings": [
+        "10674",
+        "10673",
+        "10672"
+      ],
       "notes": "Device Guard, Credential Guard et HVCI ne sont pas disponibles sur Windows Home"
     },
     "Pro": {
