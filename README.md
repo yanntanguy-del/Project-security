@@ -9,7 +9,6 @@ Application d'analyse de sécurité pour Windows, macOS et Linux basée sur les 
 Avant de commencer, assurez-vous d'avoir installé :
 
 - **Node.js** (version 18 ou supérieure) : [Télécharger Node.js](https://nodejs.org/)
-- **Git** (optionnel, pour cloner le repo) : [Télécharger Git](https://git-scm.com/)
 
 Pour vérifier si Node.js est installé, ouvrez un terminal et tapez :
 ```bash
@@ -20,74 +19,125 @@ node --version
 
 ## 🚀 Installation (étape par étape)
 
-### Méthode 1 : Téléchargement ZIP (plus simple)
+### Étape 1 : Télécharger le projet
 
-1. **Télécharger le projet**
-   - Cliquez sur le bouton vert **"Code"** en haut de cette page
-   - Cliquez sur **"Download ZIP"**
-   - Décompressez le fichier ZIP téléchargé
+1. Cliquez sur le bouton vert **"Code"** en haut de cette page
+2. Cliquez sur **"Download ZIP"**
+3. Décompressez le fichier ZIP téléchargé
 
-2. **Ouvrir le dossier dans VS Code**
-   - Ouvrez Visual Studio Code
-   - Fichier → Ouvrir le dossier
-   - ⚠️ **IMPORTANT** : Sélectionnez le dossier racine `Project-security-feat-coding-interfaces` (celui qui contient `package.json`)
-   - **NE PAS** ouvrir le sous-dossier `app`
+### Étape 2 : Naviguer vers le BON dossier
 
-3. **Ouvrir un terminal dans VS Code**
-   - Menu : Terminal → Nouveau terminal
-   - Ou raccourci : `Ctrl + ù` (Windows) / `Cmd + ù` (Mac)
+⚠️ **TRÈS IMPORTANT** : Après décompression, vous aurez cette structure :
+```
+Project-security-feat-coding-interfaces/
+└── Project-security-feat-coding-interfaces/   ← C'EST CE DOSSIER !
+    ├── app/                                    ← PAS celui-ci !
+    ├── components/
+    ├── data/
+    ├── main/
+    ├── package.json                           ← Le fichier doit être visible ici
+    └── ...
+```
 
-4. **Installer les dépendances**
-   ```bash
-   npm install
-   ```
-   ⏳ Attendez que l'installation se termine (peut prendre 1-2 minutes)
+**Vous devez ouvrir le dossier qui contient `package.json`**, pas le dossier `app` !
 
-5. **Lancer l'application**
-   ```bash
-   npm run dev
-   ```
+### Étape 3 : Ouvrir dans VS Code
 
-6. **C'est prêt !** 🎉
-   - L'application Electron s'ouvre automatiquement
-   - Si elle ne s'ouvre pas, allez sur http://localhost:3000 dans votre navigateur
+1. Ouvrez Visual Studio Code
+2. **Fichier** → **Ouvrir le dossier**
+3. Naviguez jusqu'au dossier `Project-security-feat-coding-interfaces` (le deuxième niveau, celui avec `package.json`)
+4. Cliquez sur **Sélectionner un dossier**
 
----
+### Étape 4 : Ouvrir un terminal
 
-### Méthode 2 : Avec Git (pour développeurs)
+- Menu : **Terminal** → **Nouveau terminal**
+- Ou raccourci : `Ctrl + ù`
+
+Vérifiez que vous voyez quelque chose comme :
+```
+PS C:\...\Project-security-feat-coding-interfaces>
+```
+Et **PAS** :
+```
+PS C:\...\Project-security-feat-coding-interfaces\app>    ← MAUVAIS !
+```
+
+### Étape 5 : Installer les dépendances
 
 ```bash
-# 1. Cloner le repository
-git clone https://github.com/yanntanguy-del/Project-security.git
-
-# 2. Entrer dans le dossier
-cd Project-security
-
-# 3. Installer les dépendances
 npm install
+```
 
-# 4. Lancer l'application
+⏳ **Attendez** que l'installation se termine (1-2 minutes). Vous verrez des messages comme :
+```
+added 762 packages, and audited 763 packages in 60s
+```
+
+⚠️ Les avertissements `npm warn deprecated` sont normaux, ignorez-les.
+
+### Étape 6 : Lancer l'application
+
+```bash
 npm run dev
 ```
 
+### Étape 7 : C'est prêt ! 🎉
+
+L'application Electron s'ouvre automatiquement. Si elle ne s'ouvre pas, allez sur http://localhost:3000 dans votre navigateur.
+
 ---
 
-## 🔧 Résolution des problèmes courants
+## 🔧 Résolution des problèmes
 
-### ❌ Erreur : "'concurrently' n'est pas reconnu"
-**Cause** : Les dépendances ne sont pas installées.  
-**Solution** : Exécutez `npm install` avant `npm run dev`
+### ❌ "'concurrently' n'est pas reconnu"
 
-### ❌ Erreur : "Missing script: dev"
-**Cause** : Vous êtes dans le mauvais dossier.  
-**Solution** : Assurez-vous d'être dans le dossier racine (celui avec `package.json`), pas dans le sous-dossier `app`
+```
+'concurrently' n'est pas reconnu en tant que commande interne
+ou externe, un programme exécutable ou un fichier de commandes.
+```
 
-### ❌ Erreur : "Port 3000 is in use"
-**Cause** : Une autre application utilise le port 3000.  
-**Solution** : Fermez l'autre application ou redémarrez votre ordinateur
+**Cause** : Vous n'avez pas exécuté `npm install`  
+**Solution** : Exécutez `npm install` puis réessayez `npm run dev`
 
-### ❌ L'application ne s'ouvre pas
-**Solution** : Ouvrez manuellement http://localhost:3000 dans votre navigateur
+---
+
+### ❌ "Missing script: dev"
+
+```
+npm error Missing script: "dev"
+```
+
+**Cause** : Vous êtes dans le mauvais dossier (probablement dans `app/`)  
+**Solution** : 
+1. Tapez `cd ..` pour remonter d'un niveau
+2. Vérifiez avec `ls` (ou `dir`) que vous voyez `package.json`
+3. Réessayez `npm install` puis `npm run dev`
+
+---
+
+### ❌ "up to date, audited 1 package"
+
+Si `npm install` affiche seulement :
+```
+up to date, audited 1 package in 425ms
+```
+
+**Cause** : Vous êtes dans le mauvais dossier et avez créé un `package.json` vide avec `npm init`  
+**Solution** :
+1. Supprimez le fichier `package.json` créé par erreur dans `app/`
+2. Remontez au bon dossier avec `cd ..`
+3. Relancez `npm install`
+
+---
+
+### ❌ L'application se ferme immédiatement
+
+Si vous voyez :
+```
+[ELECTRON] electron . exited with code 0
+```
+
+C'est normal si vous fermez la fenêtre. Pour relancer : `npm run dev`
 
 ---
 
@@ -109,23 +159,6 @@ npm run dev
 | Windows | 10 (22H2), 11 (22H2, 24H2) |
 | macOS | Sonoma (14), Sequoia (15) |
 | Linux | Ubuntu 24.04, Debian 12, Fedora 40, Arch |
-
----
-
-## 📁 Structure du projet
-
-```
-Project-security/
-├── app/                    # Pages et API Next.js
-├── components/             # Composants UI
-├── data/baselines/         # Baselines de sécurité (JSON)
-│   ├── windows/
-│   ├── macos/
-│   └── linux/
-├── main/                   # Code Electron
-├── package.json            # ← Le fichier doit être ici !
-└── README.md
-```
 
 ---
 
