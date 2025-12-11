@@ -631,12 +631,10 @@ export default function HomePage() {
       const res = await fetch("/api/analyze", {
         method: "POST",
 
-        // Nouvelle page d'accueil pour Vercel : présentation + bouton GitHub
+        // Page d'accueil complète et améliorée pour Vercel
         return (
           <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0f0a1a 0%, #1a0a2e 50%, #0f172a 100%)", color: "#fff", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif" }}>
-            <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: -1 }}>
-              {/* Animation de fond simplifiée */}
-            </div>
+            <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: -1 }} />
             <header style={{ padding: "2rem", textAlign: "center", borderBottom: "1px solid rgba(139,92,246,0.2)", backdropFilter: "blur(10px)", background: "rgba(15,10,26,0.7)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem", marginBottom: "0.5rem" }}>
                 <div style={{ width: 50, height: 50, background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", boxShadow: "0 4px 20px rgba(139,92,246,0.4)" }}>🛡️</div>
@@ -652,13 +650,13 @@ export default function HomePage() {
                 <p style={{ fontSize: "1.25rem", color: "#94a3b8", maxWidth: 700, margin: "0 auto 2.5rem", lineHeight: 1.7 }}>
                   Security Scanner est un outil gratuit qui analyse votre ordinateur pour détecter les vulnérabilités et vous aide à appliquer les meilleures pratiques de sécurité.
                 </p>
-                <a href="https://github.com/yanntanguy-del/Project-security" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: "0.75rem", padding: "1.25rem 3rem", fontSize: "1.125rem", fontWeight: 600, color: "#fff", background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)", border: "none", borderRadius: 16, cursor: "pointer", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 30px rgba(139,92,246,0.4)" }}>
+                <a href="https://github.com/yanntanguy-del/Project-security" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: "0.75rem", padding: "1.25rem 3rem", fontSize: "1.125rem", fontWeight: 600, color: "#fff", background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);", border: "none", borderRadius: 16, cursor: "pointer", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 30px rgba(139,92,246,0.4)" }}>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: 24, height: 24 }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
-                  Accéder au téléchargement
+                  Accéder au dépôt GitHub
                 </a>
-                <p style={{ marginTop: "1rem", color: "#64748b", fontSize: "0.875rem" }}>Vous serez redirigé vers GitHub</p>
+                <p style={{ marginTop: "1rem", color: "#64748b", fontSize: "0.875rem" }}>Vous serez redirigé vers la page GitHub pour installer l'application</p>
               </section>
               <section style={{ marginBottom: "2rem" }}>
                 <h2 style={{ textAlign: "center", fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.5rem", color: "#fff" }}>Qu'est-ce que Security Scanner ?</h2>
@@ -680,7 +678,7 @@ export default function HomePage() {
                   <div>
                     <h3 style={{ color: "#fff", fontSize: "1.125rem", marginBottom: "0.5rem" }}>Comment obtenir l'application ?</h3>
                     <p style={{ color: "#94a3b8", lineHeight: 1.6 }}>
-                      En cliquant sur le bouton ci-dessus, vous serez redirigé vers la page GitHub du projet. L'application n'est pas téléchargée directement depuis ce site.
+                      Cliquez sur le bouton ci-dessus pour accéder au dépôt GitHub. Suivez les instructions sur la page pour télécharger et installer l'application sur votre ordinateur.
                     </p>
                   </div>
                 </div>
@@ -691,9 +689,9 @@ export default function HomePage() {
                   <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start" }}>
                     <div style={{ flexShrink: 0, width: 50, height: 50, background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 700, boxShadow: "0 4px 20px rgba(139,92,246,0.4)" }}>1</div>
                     <div style={{ flex: 1, paddingTop: "0.5rem" }}>
-                      <h4 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem", color: "#fff" }}>Accédez à GitHub</h4>
+                      <h4 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem", color: "#fff" }}>Accédez au dépôt GitHub</h4>
                       <p style={{ color: "#94a3b8", lineHeight: 1.6 }}>
-                        Cliquez sur le bouton "Accéder au téléchargement" ci-dessus. Vous serez redirigé vers la page GitHub du projet.
+                        Cliquez sur le bouton "Accéder au dépôt GitHub" ci-dessus. Vous serez redirigé vers la page du projet.
                       </p>
                     </div>
                   </div>
@@ -728,12 +726,12 @@ export default function HomePage() {
               </section>
               <section style={{ textAlign: "center", background: "linear-gradient(135deg, rgba(139,92,246,0.1) 0%, rgba(99,102,241,0.1) 100%)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 24, padding: "2rem" }}>
                 <h3 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem", color: "#fff" }}>Prêt à sécuriser votre système ?</h3>
-                <p style={{ color: "#94a3b8", marginBottom: "2rem", fontSize: "1.125rem" }}>Accédez à GitHub pour télécharger Security Scanner gratuitement.</p>
+                <p style={{ color: "#94a3b8", marginBottom: "2rem", fontSize: "1.125rem" }}>Accédez au dépôt GitHub pour télécharger Security Scanner gratuitement.</p>
                 <a href="https://github.com/yanntanguy-del/Project-security" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: "0.75rem", padding: "1.25rem 3rem", fontSize: "1.125rem", fontWeight: 600, color: "#fff", background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)", border: "none", borderRadius: 16, cursor: "pointer", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 30px rgba(139,92,246,0.4)" }}>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: 24, height: 24 }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
-                  Accéder à GitHub
+                  Accéder au dépôt GitHub
                 </a>
               </section>
             </main>

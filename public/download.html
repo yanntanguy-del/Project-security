@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Scanner - Téléchargement</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0a1a 0%, #1a0a2e 50%, #0f172a 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 70%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        /* Header */
+        header {
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            backdrop-filter: blur(10px);
+            background: rgba(15, 10, 26, 0.7);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #c4b5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .version {
+            color: #a78bfa;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Main content */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        /* Hero section */
+        .hero {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .hero h2 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero h2 span {
+            background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            max-width: 700px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
+
+        /* Download button */
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.25rem 3rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 40px rgba(139, 92, 246, 0.6);
+        }
+
+        .download-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .download-info {
+            margin-top: 1rem;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        /* Features section */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 5rem;
+        }
+
+        .feature-card {
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #fff;
+        }
+
+        .feature-card p {
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        /* How it works section */
+        .how-it-works {
+            margin-bottom: 5rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            color: #fff;
+        }
+
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .step-content {
+            flex: 1;
+            padding-top: 0.5rem;
+        }
+
+        .step-content h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .step-content p {
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        /* Requirements section */
+        .requirements {
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 5rem;
+        }
+
+        .requirements h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: #fff;
+        }
+
+        .requirements-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            list-style: none;
+        }
+
+        .requirements-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .requirements-list li svg {
+            width: 20px;
+            height: 20px;
+            color: #22c55e;
+            flex-shrink: 0;
+        }
+
+        /* CTA section */
+        .cta {
+            text-align: center;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 24px;
+            padding: 4rem 2rem;
+        }
+
+        .cta h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .cta p {
+            color: #94a3b8;
+            margin-bottom: 2rem;
+            font-size: 1.125rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid rgba(139, 92, 246, 0.2);
+            margin-top: 4rem;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+
+        /* What is it section */
+        .what-is-it {
+            margin-bottom: 4rem;
+        }
+
+        .info-card {
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 2.5rem;
+        }
+
+        .info-card p {
+            color: #94a3b8;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-card p:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-card strong {
+            color: #fff;
+        }
+
+        /* Notice section */
+        .notice {
+            margin-bottom: 4rem;
+        }
+
+        .notice-card {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+        }
+
+        .notice-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .notice-content h3 {
+            color: #fff;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .notice-content p {
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h2 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .download-btn {
+                padding: 1rem 2rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <header>
+        <div class="logo">
+            <div class="logo-icon">🛡️</div>
+            <h1>Security Scanner</h1>
+        </div>
+        <span class="version">Version 0.1.0</span>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <h2>Analysez et <span>sécurisez</span><br>votre système</h2>
+            <p>
+                Security Scanner est un outil gratuit qui analyse votre ordinateur 
+                pour détecter les vulnérabilités et vous aide à appliquer les meilleures 
+                pratiques de sécurité.
+            </p>
+            <a href="https://github.com/yanntanguy-del/Project-security/releases/latest/download/SecurityScanner-Setup.exe" class="download-btn" download>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Télécharger l'application
+            </a>
+            <p class="download-info">Téléchargement direct • ~80 MB</p>
+        </section>
+
+        <!-- What is it Section -->
+        <section class="what-is-it">
+            <h2 class="section-title">Qu'est-ce que Security Scanner ?</h2>
+            <div class="info-card">
+                <p>
+                    <strong>Security Scanner</strong> est une application qui analyse automatiquement 
+                    les paramètres de sécurité de votre ordinateur. Elle vérifie plus de 100 configurations 
+                    différentes : pare-feu, antivirus, politiques de mot de passe, et bien d'autres.
+                </p>
+                <p>
+                    L'application génère un <strong>rapport détaillé</strong> avec des codes couleur : 
+                    <span style="color: #22c55e;">vert</span> pour ce qui est conforme, 
+                    <span style="color: #ef4444;">rouge</span> pour ce qui nécessite attention, et 
+                    <span style="color: #eab308;">jaune</span> pour ce qui n'a pas pu être vérifié.
+                </p>
+                <p>
+                    Pour chaque problème détecté, vous recevez des <strong>instructions claires</strong> 
+                    pour corriger les vulnérabilités. L'interface est entièrement en français et conçue 
+                    pour être compréhensible, même sans connaissances techniques.
+                </p>
+            </div>
+        </section>
+
+        <!-- Important notice -->
+        <section class="notice">
+            <div class="notice-card">
+                <div class="notice-icon">💡</div>
+                <div class="notice-content">
+                    <h3>Application gratuite et sécurisée</h3>
+                    <p>
+                        L'application est téléchargée directement depuis notre serveur sécurisé. 
+                        Elle ne contient aucun virus ni logiciel malveillant.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it works Section -->
+        <section class="how-it-works">
+            <h2 class="section-title">Comment installer l'application ?</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Téléchargez l'application</h4>
+                        <p>
+                            Cliquez sur le bouton "Télécharger l'application" ci-dessus. 
+                            Le fichier <strong>SecurityScanner-Setup.exe</strong> sera téléchargé automatiquement.
+                        </p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Lancez l'installateur</h4>
+                        <p>
+                            Une fois le téléchargement terminé, double-cliquez sur le fichier 
+                            <strong>SecurityScanner-Setup.exe</strong> dans votre dossier Téléchargements.
+                        </p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Utilisez l'application</h4>
+                        <p>
+                            Après l'installation, un raccourci <strong>Security Scanner</strong> 
+                            apparaîtra sur votre bureau. Double-cliquez dessus pour lancer l'application.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta">
+            <h3>Prêt à sécuriser votre système ?</h3>
+            <p>Téléchargez Security Scanner gratuitement en un clic.</p>
+            <a href="https://github.com/yanntanguy-del/Project-security/releases/latest/download/SecurityScanner-Setup.exe" class="download-btn" download>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Télécharger maintenant
+            </a>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 Security Scanner. Outil d'analyse de sécurité.</p>
+    </footer>
+</body>
+</html>

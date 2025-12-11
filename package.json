@@ -22,7 +22,7 @@
     "dotenv": "^17.2.3",
     "electron-serve": "^3.0.0",
     "lucide-react": "^0.545.0",
-    "next": "15.5.5",
+    "next": "^16.0.8",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "tailwind-merge": "^3.3.1"
