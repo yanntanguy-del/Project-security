@@ -1,8 +1,8 @@
-<<<<<<< HEAD
 "use client";
 
 import Link from "next/link";
 
+export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-violet-950 via-black to-purple-950 text-white">
       <div className="bg-black/60 rounded-2xl shadow-xl p-10 max-w-xl w-full flex flex-col items-center">
@@ -26,38 +26,10 @@ import Link from "next/link";
           Version 0.1.0 &mdash; © 2025 Security Scanner<br />
           <span className="text-gray-400">Développé par yanntanguy-del</span>
         </div>
-      </main>
-    );
-  }
-    "NetBT NodeType configuration": "Configuration du type de nœud NetBT",
-    "MSS: DisableIPSourceRouting IPv6": "Désactiver le routage source IPv6",
-    "MSS: DisableIPSourceRouting IPv4": "Désactiver le routage source IPv4",
-    "MSS: EnableICMPRedirect - Allow ICMP redirects": "Autoriser les redirections ICMP",
-    
-    // === WINDOWS - DEVICE GUARD ET VBS ===
-    "Configure the behavior of the sudo command": "Configurer le comportement de la commande sudo",
-    "Device Guard: Turn On Virtualization Based Security": "Activer la sécurité basée sur la virtualisation (VBS)",
-    "Device Guard: Virtualization Based Protection of Code Integrity": "Protection de l'intégrité du code par VBS (HVCI)",
-    "Device Guard: Credential Guard Configuration": "Configuration de Credential Guard",
-    "Device Guard: Kernel-mode Hardware-enforced Stack Protection": "Protection matérielle de la pile en mode noyau",
-    "Local Security Authority: Configures LSASS to run as a protected process": "Configurer LSASS en processus protégé",
-    "Turn On Virtualization Based Security": "Activer la sécurité basée sur la virtualisation (VBS)",
-    "Virtualization Based Security": "Sécurité basée sur la virtualisation (VBS)",
-    "Credential Guard Configuration": "Configuration de Credential Guard",
-    "UEFI lock": "Verrouillage UEFI",
-    
-    // === WINDOWS - AUTOPLAY ET USB ===
-    "AutoPlay Policies: Turn off Autoplay": "Désactiver l'exécution automatique",
-    "AutoPlay Policies: Disallow Autoplay for non-volume devices": "Désactiver l'autoplay pour les appareils non-volume",
-    "AutoPlay Policies: Set default behavior for AutoRun": "Définir le comportement par défaut d'AutoRun",
-    "BitLocker: Disable new DMA devices when computer is locked": "BitLocker : Désactiver les appareils DMA quand verrouillé",
-    
-    // === WINDOWS - SMARTSCREEN ET DEFENDER ===
-    "File Explorer: Configure Windows Defender SmartScreen": "Configurer Windows Defender SmartScreen",
-    "Microsoft Defender Antivirus: Configure detection for PUA": "Configurer la détection des applications indésirables (PUA)",
-    "Microsoft Defender Antivirus: MAPS: Join Microsoft MAPS": "Rejoindre Microsoft MAPS (protection cloud)",
-    "Microsoft Defender Antivirus: Network Protection": "Protection réseau de Microsoft Defender",
-    "Microsoft Defender: Scan all downloaded files and attachments": "Analyser tous les fichiers téléchargés",
+      </div>
+    </main>
+  );
+}
     "Microsoft Defender: Turn off real-time protection": "Ne pas désactiver la protection en temps réel",
     "Windows Defender SmartScreen: Enhanced Phishing Protection": "Protection anti-hameçonnage améliorée",
     "Configure detection for potentially unwanted applications": "Configurer la détection des applications indésirables (PUA)",
