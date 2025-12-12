@@ -15,29 +15,6 @@ export default function HomePage() {
     </main>
   );
 }
-    "Block Office applications from creating child processes": "Empêcher Office de créer des processus enfants",
-    "Block credential stealing from LSASS": "Bloquer le vol d'identifiants depuis LSASS",
-    "Block JavaScript/VBScript from launching downloaded content": "Bloquer JS/VBScript de lancer du contenu téléchargé",
-    "Use advanced protection against ransomware": "Activer la protection avancée contre les ransomwares",
-    "Block Office applications from creating executable content": "Empêcher Office de créer du contenu exécutable",
-    "Block Office applications from injecting code into other processes": "Empêcher Office d'injecter du code",
-    "Block Win32 API calls from Office macros": "Bloquer les appels Win32 depuis les macros Office",
-    "Block execution of potentially obfuscated scripts": "Bloquer l'exécution de scripts obfusqués",
-    "Block untrusted and unsigned processes that run from USB": "Bloquer les processus non signés depuis USB",
-    "Block Adobe Reader from creating child processes": "Empêcher Adobe Reader de créer des processus enfants",
-    "Block persistence through WMI event subscription": "Bloquer la persistance via WMI",
-    "Block all Office applications from creating child processes": "Empêcher Office de créer des processus enfants",
-    "Block JavaScript or VBScript from launching downloaded executable content": "Bloquer JavaScript/VBScript de lancer des exécutables",
-    "Block executable files from running unless they meet a prevalence, age, or trusted list criterion": "Bloquer les exécutables non fiables",
-    "Block credential stealing from the Windows local security authority subsystem": "Bloquer le vol d'identifiants depuis LSASS",
-    "Block process creations originating from PSExec and WMI commands": "Bloquer les processus créés via PSExec et WMI",
-    "Block Office communication application from creating child processes": "Empêcher Outlook de créer des processus enfants",
-    "Block abuse of exploited vulnerable signed drivers": "Bloquer l'abus de pilotes signés vulnérables",
-    
-    // === WINDOWS - AUTRES PARAMÈTRES ===
-    "Cloud Content: Turn off Microsoft consumer experiences": "Désactiver les expériences consommateur Microsoft",
-    "Windows Installer: Allow user control over installs": "Contrôle utilisateur sur les installations",
-    "Windows Installer: Always install with elevated privileges": "Toujours installer avec des privilèges élevés",
     "Windows Logon Options: Disable automatic restart sign-on": "Désactiver la reconnexion automatique après redémarrage",
     "Apply UAC restrictions to local accounts on network logons": "Appliquer les restrictions UAC aux comptes locaux réseau",
     "Search: Allow indexing of encrypted files": "Autoriser l'indexation des fichiers chiffrés",
