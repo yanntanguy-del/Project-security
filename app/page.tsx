@@ -1,4 +1,4 @@
-// app/page.tsx - Landing page statique Vercel
+"use client";
 
 export default function HomePage() {
   return (
