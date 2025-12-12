@@ -60,34 +60,6 @@ export default function HomePage() {
     </div>
   );
 }
-    "Password must meet complexity requirements": "Le mot de passe doit respecter les exigences de complexité",
-    "Store passwords using reversible encryption": "Stocker les mots de passe avec chiffrement réversible",
-    "Reset account lockout counter after": "Réinitialiser le compteur de verrouillage après",
-    "Enforce password history": "Appliquer l'historique des mots de passe",
-    "Maximum password age": "Durée de vie maximale du mot de passe",
-    "Minimum password age": "Durée de vie minimale du mot de passe",
-    
-    // === WINDOWS - OPTIONS DE SÉCURITÉ ===
-    "Accounts: Limit local account use of blank passwords to console logon only": "Limiter les mots de passe vides à la connexion console",
-    "Interactive logon: Machine inactivity limit": "Limite d'inactivité de la machine",
-    "Microsoft network client: Digitally sign communications (always)": "Client réseau : Signer numériquement les communications",
-    "Microsoft network server: Digitally sign communications (always)": "Serveur réseau : Signer numériquement les communications",
-    "Network security: Do not store LAN Manager hash value": "Ne pas stocker la valeur de hachage LAN Manager",
-    "Network security: LAN Manager authentication level": "Niveau d'authentification LAN Manager",
-    "Network access: Do not allow anonymous enumeration of SAM accounts": "Interdire l'énumération anonyme des comptes SAM",
-    "Network access: Do not allow anonymous enumeration of SAM accounts and shares": "Interdire l'énumération anonyme des comptes et partages",
-    "Network security: LDAP client signing requirements": "Exigences de signature du client LDAP",
-    "Audit: Force audit policy subcategory settings": "Forcer les paramètres de sous-catégorie d'audit",
-    
-    // === WINDOWS - UAC ===
-    "User Account Control: Admin Approval Mode for Built-in Administrator": "UAC : Mode d'approbation admin pour l'Administrateur intégré",
-    "User Account Control: Behavior of elevation prompt for administrators": "UAC : Comportement de l'invite d'élévation pour les admins",
-    "User Account Control: Run all administrators in Admin Approval Mode": "UAC : Exécuter tous les admins en mode d'approbation",
-    "User Account Control: Behavior for administrators with Administrator protection": "UAC : Comportement avec protection Administrateur",
-    "User Account Control: Configure type of Admin Approval Mode": "UAC : Configurer le type de mode d'approbation",
-    "User Account Control: Admin Approval Mode for the Built-in Administrator account": "UAC : Mode d'approbation admin pour le compte Administrateur",
-    "User Account Control: Behavior of the elevation prompt for administrators": "UAC : Comportement de l'invite d'élévation pour les administrateurs",
-    "User Account Control: Behavior of the elevation prompt for standard users": "UAC : Comportement de l'invite d'élévation pour les utilisateurs",
     "User Account Control: Detect application installations and prompt for elevation": "UAC : Détecter les installations et demander l'élévation",
     
     // === WINDOWS - PARE-FEU ===
