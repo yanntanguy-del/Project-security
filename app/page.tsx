@@ -1,63 +1,35 @@
-// app/page.tsx - Interface principale avec style violet original
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 
-const APP_VERSION = "0.1.0";
-
-interface Finding {
-  id: string;
-  name: string;
-  category: string;
-  method: string;
-  recommendedValue?: string;
-  currentValue?: string;
-  status: "pass" | "fail" | "unknown";
-  severity: string;
-  description?: string;
-  risk?: string;
-  compatibility?: string;
-  skipReason?: string;
-  defaultValue?: string;
-  remediation?: string | {
-    default?: string;
-    gpo?: string;
-    intune?: string;
-    manual?: string;
-  };
+export default function Home() {
+  return (
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-violet-950 via-black to-purple-950 text-white">
+      <div className="bg-black/60 rounded-2xl shadow-xl p-10 max-w-xl w-full flex flex-col items-center">
+        <div className="flex items-center gap-3 mb-4">
+          <span className="text-4xl">🛡️</span>
+          <span className="text-2xl font-bold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">Security Scanner</span>
+        </div>
+        <h1 className="text-3xl font-bold mb-2 text-center">Téléchargez l'application de sécurité</h1>
+        <p className="text-lg text-gray-300 mb-6 text-center">
+          Cette application n'est pas utilisable en ligne.<br />
+          Pour analyser et sécuriser votre ordinateur, <b>téléchargez l'application</b> sur GitHub.
+        </p>
+        <Link href="https://github.com/yanntanguy-del/Project-security" target="_blank" className="inline-block px-8 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 text-white font-semibold text-lg shadow-lg hover:scale-105 transition mb-2">
+          Accéder au téléchargement GitHub
+        </Link>
+        <p className="text-sm text-gray-400 mt-2 text-center">
+          Vous serez redirigé vers la page GitHub pour installer l'application sur Windows, macOS ou Linux.<br />
+          <span className="text-yellow-400">Aucune analyse n'est possible depuis le navigateur.</span>
+        </p>
+        <div className="mt-8 text-xs text-gray-500 text-center">
+          Version 0.1.0 &mdash; © 2025 Security Scanner<br />
+          <span className="text-gray-400">Développé par yanntanguy-del</span>
+        </div>
+      </div>
+    </main>
+  );
 }
-
-interface SystemInfo {
-  osFamily: string;
-  osName: string;
-  osVersion: string;
-  osEdition?: string;
-  buildNumber?: string;
-  manufacturer?: string;
-  model?: string;
-}
-
-interface ScanResult {
-  system: SystemInfo;
-  baseline: string;
-  totalFindings: number;
-  findings: Finding[];
-  scannedAt: string;
-}
-
-type AppState = "welcome" | "scanning" | "results";
-
-// Fonction pour traduire les noms des findings en français
-const translateFindingName = (name: string): string => {
-  const translations: Record<string, string> = {
-    // =====================================
-    // === WINDOWS - POLITIQUES DE COMPTE ===
-    // =====================================
-    "Account lockout duration": "Durée de verrouillage du compte",
-    "Account lockout threshold": "Seuil de verrouillage du compte",
-    "Allow Administrator account lockout": "Autoriser le verrouillage du compte Administrateur",
-    "Length of password history maintained": "Historique des mots de passe conservés",
-    "Minimum password length": "Longueur minimale du mot de passe",
     "Password must meet complexity requirements": "Le mot de passe doit respecter les exigences de complexité",
     "Store passwords using reversible encryption": "Stocker les mots de passe avec chiffrement réversible",
     "Reset account lockout counter after": "Réinitialiser le compteur de verrouillage après",
