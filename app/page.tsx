@@ -60,64 +60,6 @@ export default function HomePage() {
     </div>
   );
 }
-    "Credential Guard Configuration": "Configuration de Credential Guard",
-    "UEFI lock": "Verrouillage UEFI",
-    
-    // === WINDOWS - AUTOPLAY ET USB ===
-    "AutoPlay Policies: Turn off Autoplay": "Désactiver l'exécution automatique",
-    "AutoPlay Policies: Disallow Autoplay for non-volume devices": "Désactiver l'autoplay pour les appareils non-volume",
-    "AutoPlay Policies: Set default behavior for AutoRun": "Définir le comportement par défaut d'AutoRun",
-    "BitLocker: Disable new DMA devices when computer is locked": "BitLocker : Désactiver les appareils DMA quand verrouillé",
-    
-    // === WINDOWS - SMARTSCREEN ET DEFENDER ===
-    "File Explorer: Configure Windows Defender SmartScreen": "Configurer Windows Defender SmartScreen",
-    "Microsoft Defender Antivirus: Configure detection for PUA": "Configurer la détection des applications indésirables (PUA)",
-    "Microsoft Defender Antivirus: MAPS: Join Microsoft MAPS": "Rejoindre Microsoft MAPS (protection cloud)",
-    "Microsoft Defender Antivirus: Network Protection": "Protection réseau de Microsoft Defender",
-    "Microsoft Defender: Scan all downloaded files and attachments": "Analyser tous les fichiers téléchargés",
-    "Microsoft Defender: Turn off real-time protection": "Ne pas désactiver la protection en temps réel",
-    "Windows Defender SmartScreen: Enhanced Phishing Protection": "Protection anti-hameçonnage améliorée",
-    "Configure detection for potentially unwanted applications": "Configurer la détection des applications indésirables (PUA)",
-    "Join Microsoft MAPS": "Rejoindre Microsoft MAPS (protection cloud)",
-    "Configure the 'Block at First Sight' feature": "Activer le blocage à la première vue",
-    "Send file samples when further analysis is required": "Envoyer des échantillons pour analyse",
-    "Turn on real-time protection": "Activer la protection en temps réel",
-    "Turn on behavior monitoring": "Activer la surveillance comportementale",
-    "Scan all downloaded files and attachments": "Analyser tous les fichiers téléchargés",
-    "Turn on script scanning": "Activer l'analyse des scripts",
-    "Configure Attack Surface Reduction rules": "Configurer les règles ASR",
-    "Turn on network protection": "Activer la protection réseau",
-    "Prevent users and apps from accessing dangerous websites": "Bloquer l'accès aux sites web dangereux",
-    
-    // === WINDOWS - POWERSHELL ===
-    "Windows PowerShell: Turn on PowerShell Script Block Logging": "Activer la journalisation des scripts PowerShell",
-    "Turn on PowerShell Script Block Logging (Invocation)": "Activer la journalisation d'invocation PowerShell",
-    
-    // === WINDOWS - WINRM ===
-    "WinRM Client: Allow Basic authentication": "Client WinRM : Autoriser l'authentification basique",
-    "WinRM Client: Allow unencrypted traffic": "Client WinRM : Autoriser le trafic non chiffré",
-    "WinRM Client: Disallow Digest authentication": "Client WinRM : Interdire l'authentification Digest",
-    "WinRM Service: Allow Basic authentication": "Service WinRM : Autoriser l'authentification basique",
-    "WinRM Service: Allow unencrypted traffic": "Service WinRM : Autoriser le trafic non chiffré",
-    "WinRM Service: Disallow WinRM from storing RunAs credentials": "Service WinRM : Interdire le stockage des identifiants",
-    
-    // === WINDOWS - BUREAU À DISTANCE ===
-    "Remote Desktop: Do not allow passwords to be saved": "Bureau à distance : Ne pas enregistrer les mots de passe",
-    "Remote Desktop: Require secure RPC communication": "Bureau à distance : Exiger une communication RPC sécurisée",
-    "Remote Desktop: Set client connection encryption level": "Bureau à distance : Niveau de chiffrement élevé",
-    
-    // === WINDOWS - SERVICES XBOX ===
-    "Xbox Accessory Management Service (XboxGipSvc)": "Service de gestion des accessoires Xbox",
-    "Xbox Live Auth Manager (XblAuthManager)": "Gestionnaire d'authentification Xbox Live",
-    "Xbox Live Game Save (XblGameSave)": "Sauvegarde de jeux Xbox Live",
-    "Xbox Live Networking Service (XboxNetApiSvc)": "Service réseau Xbox Live",
-    "Xbox Accessory Management Service": "Service de gestion des accessoires Xbox",
-    "Xbox Live Auth Manager": "Gestionnaire d'authentification Xbox Live",
-    "Xbox Live Game Save": "Sauvegarde de jeux Xbox Live",
-    "Xbox Live Networking Service": "Service réseau Xbox Live",
-    
-    // === WINDOWS - ASR (ATTACK SURFACE REDUCTION) ===
-    "Block executable content from email client and webmail": "Bloquer le contenu exécutable des emails",
     "Block Office applications from creating child processes": "Empêcher Office de créer des processus enfants",
     "Block credential stealing from LSASS": "Bloquer le vol d'identifiants depuis LSASS",
     "Block JavaScript/VBScript from launching downloaded content": "Bloquer JS/VBScript de lancer du contenu téléchargé",
