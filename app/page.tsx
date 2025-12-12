@@ -26,36 +26,9 @@ import Link from "next/link";
           Version 0.1.0 &mdash; © 2025 Security Scanner<br />
           <span className="text-gray-400">Développé par yanntanguy-del</span>
         </div>
-      </div>
-    </main>
-  );
-}
-    "Password must meet complexity requirements": "Le mot de passe doit respecter les exigences de complexité",
-    "Store passwords using reversible encryption": "Stocker les mots de passe avec chiffrement réversible",
-    "Reset account lockout counter after": "Réinitialiser le compteur de verrouillage après",
-    "Enforce password history": "Appliquer l'historique des mots de passe",
-    "Maximum password age": "Durée de vie maximale du mot de passe",
-"use client";
-    "EnableFirewall (Private Profile)": "Activer le pare-feu (Profil Privé)",
-    "EnableFirewall (Public Profile)": "Activer le pare-feu (Profil Public)",
-    "Windows Firewall: Domain: Firewall state": "Pare-feu Windows : État (Domaine)",
-    "Windows Firewall: Private: Firewall state": "Pare-feu Windows : État (Privé)",
-    "Windows Firewall: Public: Firewall state": "Pare-feu Windows : État (Public)",
-    
-    // === WINDOWS - SMB ET RÉSEAU ===
-    "Configure SMB v1 client driver": "Configurer le pilote client SMB v1",
-    "Configure SMB v1 server": "Configurer le serveur SMB v1",
-    "WDigest Authentication": "Authentification WDigest",
-    "DNS Client: Turn off multicast name resolution (LLMNR)": "Désactiver la résolution de noms multicast (LLMNR)",
-    "Turn off multicast name resolution": "Désactiver la résolution de noms multicast (LLMNR)",
-    "Enable insecure guest logons": "Activer les connexions invité non sécurisées",
-    "Lanman Workstation: Enable insecure guest logons": "Activer les connexions invité non sécurisées",
-    "WLAN Settings: Auto-connect to suggested open hotspots": "Connexion auto aux hotspots Wi-Fi suggérés",
-    "DNS Client: Configure NetBIOS settings": "Configurer les paramètres NetBIOS",
-    "Hardened UNC Paths": "Chemins UNC renforcés",
-    
-    // === WINDOWS - MSS ET PROTECTIONS LEGACY ===
-    "Enable Structured Exception Handling Overwrite Protection (SEHOP)": "Activer la protection SEHOP",
+      </main>
+    );
+  }
     "NetBT NodeType configuration": "Configuration du type de nœud NetBT",
     "MSS: DisableIPSourceRouting IPv6": "Désactiver le routage source IPv6",
     "MSS: DisableIPSourceRouting IPv4": "Désactiver le routage source IPv4",
