@@ -60,44 +60,6 @@ export default function HomePage() {
     </div>
   );
 }
-    "User Account Control: Detect application installations and prompt for elevation": "UAC : Détecter les installations et demander l'élévation",
-    
-    // === WINDOWS - PARE-FEU ===
-    "EnableFirewall (Domain Profile)": "Activer le pare-feu (Profil Domaine)",
-    "EnableFirewall (Private Profile)": "Activer le pare-feu (Profil Privé)",
-    "EnableFirewall (Public Profile)": "Activer le pare-feu (Profil Public)",
-    "Windows Firewall: Domain: Firewall state": "Pare-feu Windows : État (Domaine)",
-    "Windows Firewall: Private: Firewall state": "Pare-feu Windows : État (Privé)",
-    "Windows Firewall: Public: Firewall state": "Pare-feu Windows : État (Public)",
-    
-    // === WINDOWS - SMB ET RÉSEAU ===
-    "Configure SMB v1 client driver": "Configurer le pilote client SMB v1",
-    "Configure SMB v1 server": "Configurer le serveur SMB v1",
-    "WDigest Authentication": "Authentification WDigest",
-    "DNS Client: Turn off multicast name resolution (LLMNR)": "Désactiver la résolution de noms multicast (LLMNR)",
-    "Turn off multicast name resolution": "Désactiver la résolution de noms multicast (LLMNR)",
-    "Enable insecure guest logons": "Activer les connexions invité non sécurisées",
-    "Lanman Workstation: Enable insecure guest logons": "Activer les connexions invité non sécurisées",
-    "WLAN Settings: Auto-connect to suggested open hotspots": "Connexion auto aux hotspots Wi-Fi suggérés",
-    "DNS Client: Configure NetBIOS settings": "Configurer les paramètres NetBIOS",
-    "Hardened UNC Paths": "Chemins UNC renforcés",
-    
-    // === WINDOWS - MSS ET PROTECTIONS LEGACY ===
-    "Enable Structured Exception Handling Overwrite Protection (SEHOP)": "Activer la protection SEHOP",
-    "NetBT NodeType configuration": "Configuration du type de nœud NetBT",
-    "MSS: DisableIPSourceRouting IPv6": "Désactiver le routage source IPv6",
-    "MSS: DisableIPSourceRouting IPv4": "Désactiver le routage source IPv4",
-    "MSS: EnableICMPRedirect - Allow ICMP redirects": "Autoriser les redirections ICMP",
-    
-    // === WINDOWS - DEVICE GUARD ET VBS ===
-    "Configure the behavior of the sudo command": "Configurer le comportement de la commande sudo",
-    "Device Guard: Turn On Virtualization Based Security": "Activer la sécurité basée sur la virtualisation (VBS)",
-    "Device Guard: Virtualization Based Protection of Code Integrity": "Protection de l'intégrité du code par VBS (HVCI)",
-    "Device Guard: Credential Guard Configuration": "Configuration de Credential Guard",
-    "Device Guard: Kernel-mode Hardware-enforced Stack Protection": "Protection matérielle de la pile en mode noyau",
-    "Local Security Authority: Configures LSASS to run as a protected process": "Configurer LSASS en processus protégé",
-    "Turn On Virtualization Based Security": "Activer la sécurité basée sur la virtualisation (VBS)",
-    "Virtualization Based Security": "Sécurité basée sur la virtualisation (VBS)",
     "Credential Guard Configuration": "Configuration de Credential Guard",
     "UEFI lock": "Verrouillage UEFI",
     
