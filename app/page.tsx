@@ -1,8 +1,8 @@
+<<<<<<< HEAD
 "use client";
 
 import Link from "next/link";
 
-export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-violet-950 via-black to-purple-950 text-white">
       <div className="bg-black/60 rounded-2xl shadow-xl p-10 max-w-xl w-full flex flex-col items-center">
@@ -35,33 +35,7 @@ export default function Home() {
     "Reset account lockout counter after": "Réinitialiser le compteur de verrouillage après",
     "Enforce password history": "Appliquer l'historique des mots de passe",
     "Maximum password age": "Durée de vie maximale du mot de passe",
-    "Minimum password age": "Durée de vie minimale du mot de passe",
-    
-    // === WINDOWS - OPTIONS DE SÉCURITÉ ===
-    "Accounts: Limit local account use of blank passwords to console logon only": "Limiter les mots de passe vides à la connexion console",
-    "Interactive logon: Machine inactivity limit": "Limite d'inactivité de la machine",
-    "Microsoft network client: Digitally sign communications (always)": "Client réseau : Signer numériquement les communications",
-    "Microsoft network server: Digitally sign communications (always)": "Serveur réseau : Signer numériquement les communications",
-    "Network security: Do not store LAN Manager hash value": "Ne pas stocker la valeur de hachage LAN Manager",
-    "Network security: LAN Manager authentication level": "Niveau d'authentification LAN Manager",
-    "Network access: Do not allow anonymous enumeration of SAM accounts": "Interdire l'énumération anonyme des comptes SAM",
-    "Network access: Do not allow anonymous enumeration of SAM accounts and shares": "Interdire l'énumération anonyme des comptes et partages",
-    "Network security: LDAP client signing requirements": "Exigences de signature du client LDAP",
-    "Audit: Force audit policy subcategory settings": "Forcer les paramètres de sous-catégorie d'audit",
-    
-    // === WINDOWS - UAC ===
-    "User Account Control: Admin Approval Mode for Built-in Administrator": "UAC : Mode d'approbation admin pour l'Administrateur intégré",
-    "User Account Control: Behavior of elevation prompt for administrators": "UAC : Comportement de l'invite d'élévation pour les admins",
-    "User Account Control: Run all administrators in Admin Approval Mode": "UAC : Exécuter tous les admins en mode d'approbation",
-    "User Account Control: Behavior for administrators with Administrator protection": "UAC : Comportement avec protection Administrateur",
-    "User Account Control: Configure type of Admin Approval Mode": "UAC : Configurer le type de mode d'approbation",
-    "User Account Control: Admin Approval Mode for the Built-in Administrator account": "UAC : Mode d'approbation admin pour le compte Administrateur",
-    "User Account Control: Behavior of the elevation prompt for administrators": "UAC : Comportement de l'invite d'élévation pour les administrateurs",
-    "User Account Control: Behavior of the elevation prompt for standard users": "UAC : Comportement de l'invite d'élévation pour les utilisateurs",
-    "User Account Control: Detect application installations and prompt for elevation": "UAC : Détecter les installations et demander l'élévation",
-    
-    // === WINDOWS - PARE-FEU ===
-    "EnableFirewall (Domain Profile)": "Activer le pare-feu (Profil Domaine)",
+"use client";
     "EnableFirewall (Private Profile)": "Activer le pare-feu (Profil Privé)",
     "EnableFirewall (Public Profile)": "Activer le pare-feu (Profil Public)",
     "Windows Firewall: Domain: Firewall state": "Pare-feu Windows : État (Domaine)",
@@ -177,6 +151,25 @@ export default function Home() {
     "Cloud Content: Turn off Microsoft consumer experiences": "Désactiver les expériences consommateur Microsoft",
     "Windows Installer: Allow user control over installs": "Contrôle utilisateur sur les installations",
     "Windows Installer: Always install with elevated privileges": "Toujours installer avec des privilèges élevés",
+=======
+export default function HomePage() {
+  return (
+    <main style={{ maxWidth: 500, margin: "60px auto", padding: 24, fontFamily: 'sans-serif', color: '#222', background: '#fff', borderRadius: 12, boxShadow: '0 2px 16px #0001' }}>
+      <h1 style={{ fontSize: 32, marginBottom: 16 }}>Security Scanner</h1>
+      <p style={{ fontSize: 18, marginBottom: 32 }}>
+        Security Scanner est une application gratuite qui analyse la sécurité de votre ordinateur Windows.<br />
+        <b>Installez l'application sur votre PC pour scanner et corriger les failles !</b>
+      </p>
+      <a href="https://github.com/yanntanguy-del/Project-security" target="_blank" rel="noopener" style={{ display: 'inline-block', padding: '16px 32px', fontSize: 18, fontWeight: 600, color: '#fff', background: '#6c47e6', borderRadius: 8, textDecoration: 'none', boxShadow: '0 2px 8px #6c47e633', transition: 'background 0.2s' }}>
+        Accéder au dépôt GitHub
+      </a>
+      <p style={{ marginTop: 32, fontSize: 14, color: '#666' }}>
+        © 2025 Security Scanner. Page d'accueil simple pour téléchargement.
+      </p>
+    </main>
+  );
+}
+>>>>>>> 74305a70dd73ac104696482566f869d417d7d628
     "Windows Logon Options: Disable automatic restart sign-on": "Désactiver la reconnexion automatique après redémarrage",
     "Apply UAC restrictions to local accounts on network logons": "Appliquer les restrictions UAC aux comptes locaux réseau",
     "Search: Allow indexing of encrypted files": "Autoriser l'indexation des fichiers chiffrés",
@@ -602,344 +595,67 @@ export default function HomePage() {
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      if (!res.ok) throw new Error("Erreur lors de l'analyse");
-      const data = await res.json();
-      setScanResult(data);
-      setAppState("results");
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Erreur inconnue");
-      setAppState("welcome");
-    }
-  };
 
-  const resetScan = () => {
-    setAppState("welcome");
-    setScanResult(null);
-    setFilter("all");
-    setExpandedFinding(null);
-  };
-
-  const visibleFindings = scanResult?.findings || [];
-  const filteredFindings = visibleFindings.filter((f) => filter === "all" || f.status === filter);
-  const passCount = visibleFindings.filter(f => f.status === "pass").length;
-  const failCount = visibleFindings.filter(f => f.status === "fail").length;
-  const unknownCount = visibleFindings.filter(f => f.status === "unknown").length;
-
-  // Page d'accueil
-  if (appState === "welcome") {
-    return (
-      <div className="min-h-screen bg-black text-white">
-        <div className="fixed inset-0 bg-gradient-to-br from-violet-950/40 via-black to-purple-950/30 pointer-events-none" />
-        
-        <div className="relative min-h-screen flex flex-col items-center justify-center px-6">
-          <div className="text-center max-w-2xl">
-            <div className="mb-8">
-              <span className="text-7xl">🛡️</span>
-            </div>
-            <h1 className="text-5xl font-bold mb-4 text-violet-400">Security Scanner</h1>
-            <p className="text-xl text-gray-400 mb-2">
-              Analysez la sécurité de votre système en quelques clics
-            </p>
-            <p className="text-sm text-gray-500 mb-12">
-              Basé sur Microsoft Security Baselines & CIS Benchmarks
-            </p>
-
-            {error && (
-              <div className="mb-6 p-4 bg-red-900/30 border border-red-500/30 rounded-xl text-red-400">
-                ❌ {error}
+        // Page d'accueil fidèle à l'ancienne version personnalisée, bouton GitHub et explications
+        return (
+          <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0f0a1a 0%, #1a0a2e 50%, #0f172a 100%)", color: "#fff", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif" }}>
+            <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: -1 }} />
+            <header style={{ padding: "2rem", textAlign: "center", borderBottom: "1px solid rgba(139,92,246,0.2)", backdropFilter: "blur(10px)", background: "rgba(15,10,26,0.7)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem", marginBottom: "0.5rem" }}>
+                <div style={{ width: 50, height: 50, background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", boxShadow: "0 4px 20px rgba(139,92,246,0.4)" }}>🛡️</div>
+                <h1 style={{ fontSize: "2rem", fontWeight: 700, background: "linear-gradient(135deg, #fff 0%, #c4b5fd 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Security Scanner</h1>
               </div>
-            )}
-
-            <button
-              onClick={startScan}
-              className="px-8 py-4 text-lg bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl transition-all hover:scale-105 shadow-lg shadow-violet-500/25"
-            >
-              🔍 Lancer l'analyse de sécurité
-            </button>
-
-            <p className="mt-8 text-xs text-gray-600">v{APP_VERSION}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Page de scan en cours
-  if (appState === "scanning") {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="fixed inset-0 bg-gradient-to-br from-violet-950/40 via-black to-purple-950/30 pointer-events-none" />
-        <div className="relative text-center">
-          <div className="w-16 h-16 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin mb-4 mx-auto" />
-          <h2 className="text-2xl font-bold mb-2 text-violet-400">Analyse en cours...</h2>
-          <p className="text-gray-400">Vérification des paramètres de sécurité</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Page des résultats
-  return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="fixed inset-0 bg-gradient-to-br from-violet-950/40 via-black to-purple-950/30 pointer-events-none" />
-      
-      {/* Header */}
-      <header className="relative border-b border-violet-500/20 bg-black/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🛡️</span>
-            <span className="text-xl font-bold text-violet-400">Security Scanner</span>
-          </div>
-          <button
-            onClick={resetScan}
-            className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-medium transition"
-          >
-            🔄 Nouvelle analyse
-          </button>
-        </div>
-      </header>
-
-      <main className="relative container mx-auto px-6 py-8">
-        {/* System Info */}
-        <div className="mb-6 p-4 rounded-xl bg-violet-900/20 border border-violet-500/30">
-          <div className="grid md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <span className="text-gray-400">Système : </span>
-              <span className="text-white font-medium">{scanResult?.system.osName}</span>
-            </div>
-            <div>
-              <span className="text-gray-400">Édition : </span>
-              <span className="text-white font-medium">{scanResult?.system.osEdition || "N/A"}</span>
-            </div>
-            <div>
-              <span className="text-gray-400">Machine : </span>
-              <span className="text-white font-medium">{scanResult?.system.manufacturer} {scanResult?.system.model}</span>
-            </div>
-            <div>
-              <span className="text-gray-400">Baseline : </span>
-              <span className="text-violet-400 font-medium">{scanResult?.baseline}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="p-4 rounded-xl bg-violet-900/20 border border-violet-500/30">
-            <p className="text-gray-400 text-sm">Total</p>
-            <p className="text-2xl font-bold text-white">{visibleFindings.length}</p>
-          </div>
-          <div className="p-4 rounded-xl bg-green-900/20 border border-green-500/30">
-            <p className="text-gray-400 text-sm">Conformes</p>
-            <p className="text-2xl font-bold text-green-400">{passCount}</p>
-          </div>
-          <div className="p-4 rounded-xl bg-red-900/20 border border-red-500/30">
-            <p className="text-gray-400 text-sm">Non conformes</p>
-            <p className="text-2xl font-bold text-red-400">{failCount}</p>
-          </div>
-          <div className="p-4 rounded-xl bg-yellow-900/20 border border-yellow-500/30">
-            <p className="text-gray-400 text-sm">Non vérifiés</p>
-            <p className="text-2xl font-bold text-yellow-400">{unknownCount}</p>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="flex gap-2 mb-6 flex-wrap">
-          {[
-            { key: "all", label: "Tous", count: visibleFindings.length },
-            { key: "pass", label: "✓ Conformes", count: passCount },
-            { key: "fail", label: "✗ Non conformes", count: failCount },
-            { key: "unknown", label: "? Non vérifiés", count: unknownCount },
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setFilter(tab.key as typeof filter)}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                filter === tab.key
-                  ? "bg-violet-600 text-white"
-                  : "bg-violet-900/30 text-gray-400 hover:bg-violet-900/50"
-              }`}
-            >
-              {tab.label} ({tab.count})
-            </button>
-          ))}
-        </div>
-
-        {/* Findings List */}
-        <div className="space-y-3">
-          {filteredFindings.map((finding) => (
-            <div
-              key={finding.id}
-              className={`rounded-xl border transition-all ${
-                finding.status === "pass" 
-                  ? "bg-green-900/10 border-green-500/30" 
-                  : finding.status === "fail"
-                  ? "bg-red-900/10 border-red-500/30"
-                  : "bg-yellow-900/10 border-yellow-500/30"
-              }`}
-            >
-              <button
-                onClick={() => setExpandedFinding(expandedFinding === finding.id ? null : finding.id)}
-                className="w-full p-4 flex items-center gap-4 text-left"
-              >
-                {/* Status Icon */}
-                <span className={`text-xl ${
-                  finding.status === "pass" ? "text-green-400" :
-                  finding.status === "fail" ? "text-red-400" : "text-yellow-400"
-                }`}>
-                  {finding.status === "pass" ? "✓" : finding.status === "fail" ? "✗" : "?"}
-                </span>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className="text-xs font-mono text-gray-500">{finding.id}</span>
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                      finding.severity === "Critical" || finding.severity === "Critique" ? "bg-red-500/20 text-red-400" :
-                      finding.severity === "High" || finding.severity === "Élevée" ? "bg-orange-500/20 text-orange-400" :
-                      finding.severity === "Medium" || finding.severity === "Moyenne" ? "bg-yellow-500/20 text-yellow-400" :
-                      finding.severity === "Low" || finding.severity === "Faible" ? "bg-green-500/20 text-green-400" :
-                      "bg-blue-500/20 text-blue-400"
-                    }`}>
-                      {finding.severity || "Moyenne"}
-                    </span>
-                  </div>
-                  <p className="font-medium text-white truncate">{translateFindingName(finding.name)}</p>
+              <span style={{ color: "#a78bfa", fontSize: "0.875rem", fontWeight: 500 }}>Version 0.1.0</span>
+            </header>
+            <main style={{ maxWidth: 900, margin: "0 auto", padding: "4rem 2rem" }}>
+              <section style={{ textAlign: "center", marginBottom: "3rem" }}>
+                <h2 style={{ fontSize: "2.5rem", fontWeight: 700, marginBottom: "1.5rem", lineHeight: 1.2 }}>
+                  Security Scanner
+                </h2>
+                <p style={{ fontSize: "1.25rem", color: "#94a3b8", maxWidth: 700, margin: "0 auto 2.5rem", lineHeight: 1.7 }}>
+                  Analysez la sécurité de votre système en quelques clics.<br />
+                  Application locale, gratuite, basée sur les recommandations Microsoft Security Baselines & CIS Benchmarks.
+                </p>
+                <a href="https://github.com/yanntanguy-del/Project-security" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: "0.75rem", padding: "1.25rem 3rem", fontSize: "1.125rem", fontWeight: 600, color: "#fff", background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)", border: "none", borderRadius: 16, cursor: "pointer", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 30px rgba(139,92,246,0.4)" }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: 24, height: 24 }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Accéder au dépôt GitHub
+                </a>
+                <p style={{ marginTop: "1rem", color: "#64748b", fontSize: "0.875rem" }}>Cliquez sur le bouton pour installer l'application depuis GitHub</p>
+              </section>
+              <section style={{ marginBottom: "2rem" }}>
+                <h2 style={{ textAlign: "center", fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.5rem", color: "#fff" }}>Fonctionnalités principales</h2>
+                <div style={{ background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 20, padding: "2rem" }}>
+                  <ul style={{ color: "#94a3b8", lineHeight: 1.8, fontSize: "1.1rem", marginBottom: 0, listStyle: "disc inside" }}>
+                    <li>Analyse complète du registre Windows et des paramètres de sécurité</li>
+                    <li>Détection automatique de la version de Windows (Home, Pro, Enterprise)</li>
+                    <li>Rapport détaillé avec codes couleur (vert, rouge, jaune)</li>
+                    <li>Instructions claires pour corriger chaque vulnérabilité</li>
+                    <li>Interface 100% française, accessible à tous</li>
+                  </ul>
                 </div>
-
-                {/* Arrow */}
-                <span className={`text-gray-500 transition-transform ${expandedFinding === finding.id ? "rotate-180" : ""}`}>
-                  ▼
-                </span>
-              </button>
-
-              {/* Expanded Content */}
-              {expandedFinding === finding.id && (
-                <div className="px-4 pb-4 pt-0 border-t border-white/10 mt-2">
-                  {/* Explication pour les non vérifiés */}
-                  {finding.status === "unknown" && (
-                    <div className="mt-4 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                      <p className="text-xs text-yellow-400 mb-2 font-semibold">
-                        {getUnknownReason(finding).icon} Pourquoi cette analyse n'a pas pu être réalisée ?
-                      </p>
-                      <p className="text-sm text-gray-300 mb-2">
-                        <strong>Raison :</strong> {getUnknownReason(finding).reason}
-                      </p>
-                      <p className="text-sm text-gray-300">
-                        <strong>Solution :</strong> {getUnknownReason(finding).solution}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Description - Explication simple */}
-                  <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
-                    <p className="text-xs text-blue-400 mb-2 font-semibold">💡 C'est quoi ?</p>
-                    <p className="text-sm text-gray-300">{getSimpleExplanation(finding)}</p>
+              </section>
+              <section style={{ marginBottom: "2rem" }}>
+                <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 16, padding: "1.5rem 2rem" }}>
+                  <div style={{ fontSize: "2rem", flexShrink: 0 }}>ℹ️</div>
+                  <div>
+                    <h3 style={{ color: "#fff", fontSize: "1.125rem", marginBottom: "0.5rem" }}>Comment installer ?</h3>
+                    <p style={{ color: "#94a3b8", lineHeight: 1.6 }}>
+                      1. Cliquez sur le bouton ci-dessus pour accéder au dépôt GitHub<br />
+                      2. Téléchargez le projet (bouton vert "Code" &rarr; "Download ZIP")<br />
+                      3. Décompressez l'archive et suivez le guide d'installation dans le README
+                    </p>
                   </div>
-
-                  {/* Risque */}
-                  {finding.status === "fail" && finding.risk && (
-                    <div className="mt-4 p-3 rounded-lg bg-orange-500/10 border border-orange-500/30">
-                      <p className="text-xs text-orange-400 mb-2 font-semibold">⚠️ Risque</p>
-                      <p className="text-sm text-gray-300">{finding.risk}</p>
-                    </div>
-                  )}
-
-                  {/* Valeurs */}
-                  <div className="grid md:grid-cols-2 gap-4 mt-4">
-                    <div className="p-3 rounded-lg bg-green-500/10">
-                      <p className="text-xs text-green-400 mb-1">✓ Valeur recommandée</p>
-                      <code className="text-sm text-white">{finding.recommendedValue ?? "N/A"}</code>
-                    </div>
-                    <div className={`p-3 rounded-lg ${finding.status === "pass" ? "bg-green-500/10" : "bg-red-500/10"}`}>
-                      <p className={`text-xs mb-1 ${finding.status === "pass" ? "text-green-400" : "text-red-400"}`}>
-                        {finding.status === "pass" ? "✓" : "✗"} Valeur actuelle
-                      </p>
-                      <code className="text-sm text-white">{finding.currentValue ?? "Non définie"}</code>
-                    </div>
-                  </div>
-
-                  {/* Remédiation */}
-                  {finding.remediation && finding.status === "fail" && (
-                    <div className="mt-4 p-3 rounded-lg bg-violet-500/10 border border-violet-500/30">
-                      <p className="text-xs text-violet-400 mb-3 font-semibold">🔧 Comment corriger ?</p>
-                      {typeof finding.remediation === "string" ? (
-                        <div className="relative">
-                          <button
-                            onClick={() => copyToClipboard(finding.remediation as string, `${finding.id}-string`)}
-                            className="absolute top-2 right-2 p-1.5 rounded bg-gray-700/50 hover:bg-gray-600/50 transition-colors z-10"
-                            title="Copier le code"
-                          >
-                            {copiedCode === `${finding.id}-string` ? (
-                              <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                            ) : (
-                              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                              </svg>
-                            )}
-                          </button>
-                          <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono bg-black/30 p-2 pr-10 rounded">
-                            {finding.remediation}
-                          </pre>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {finding.remediation.default && (
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">💻 Commande PowerShell :</p>
-                              <div className="relative">
-                                <button
-                                  onClick={() => copyToClipboard(finding.remediation && typeof finding.remediation === 'object' ? finding.remediation.default || '' : '', `${finding.id}-powershell`)}
-                                  className="absolute top-2 right-2 p-1.5 rounded bg-gray-700/50 hover:bg-gray-600/50 transition-colors z-10"
-                                  title="Copier le code"
-                                >
-                                  {copiedCode === `${finding.id}-powershell` ? (
-                                    <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                  ) : (
-                                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                    </svg>
-                                  )}
-                                </button>
-                                <pre className="text-sm text-green-300 whitespace-pre-wrap font-mono bg-black/30 p-2 pr-10 rounded">
-                                  {finding.remediation.default}
-                                </pre>
-                              </div>
-                            </div>
-                          )}
-                          {finding.remediation.gpo && scanResult?.system.osEdition !== "Home" && (
-                            <div>
-                              <p className="text-xs text-gray-500 mb-1">🏢 Stratégie de groupe (GPO) :</p>
-                              <div className="relative">
-                                <button
-                                  onClick={() => copyToClipboard(finding.remediation && typeof finding.remediation === 'object' ? finding.remediation.gpo || '' : '', `${finding.id}-gpo`)}
-                                  className="absolute top-2 right-2 p-1.5 rounded bg-gray-700/50 hover:bg-gray-600/50 transition-colors z-10"
-                                  title="Copier le chemin GPO"
-                                >
-                                  {copiedCode === `${finding.id}-gpo` ? (
-                                    <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                  ) : (
-                                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                    </svg>
-                                  )}
-                                </button>
-                                <p className="text-sm text-cyan-300 bg-black/30 p-2 pr-10 rounded">
-                                  {finding.remediation.gpo}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                </div>
+              </section>
+            </main>
+            <footer style={{ textAlign: "center", padding: "2rem", borderTop: "1px solid rgba(139,92,246,0.2)", marginTop: "4rem", color: "#64748b", fontSize: "0.875rem" }}>
+              <p>© 2025 Security Scanner. Outil d'analyse de sécurité.</p>
+            </footer>
+          </div>
+        );
+      }
                     </div>
                   )}
 
