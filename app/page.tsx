@@ -1,63 +1,65 @@
-// app/page.tsx - Interface principale avec style violet original
-"use client";
+// app/page.tsx - Landing page statique Vercel
 
-import { useState } from "react";
-
-const APP_VERSION = "0.1.0";
-
-interface Finding {
-  id: string;
-  name: string;
-  category: string;
-  method: string;
-  recommendedValue?: string;
-  currentValue?: string;
-  status: "pass" | "fail" | "unknown";
-  severity: string;
-  description?: string;
-  risk?: string;
-  compatibility?: string;
-  skipReason?: string;
-  defaultValue?: string;
-  remediation?: string | {
-    default?: string;
-    gpo?: string;
-    intune?: string;
-    manual?: string;
-  };
+export default function HomePage() {
+  return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0f0a1a 0%, #1a0a2e 50%, #0f172a 100%)", color: "#fff", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif" }}>
+      <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: -1 }} />
+      <header style={{ padding: "2rem", textAlign: "center", borderBottom: "1px solid rgba(139,92,246,0.2)", backdropFilter: "blur(10px)", background: "rgba(15,10,26,0.7)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem", marginBottom: "0.5rem" }}>
+          <div style={{ width: 50, height: 50, background: "linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", boxShadow: "0 4px 20px rgba(139,92,246,0.4)" }}>🛡️</div>
+          <h1 style={{ fontSize: "2rem", fontWeight: 700, background: "linear-gradient(135deg, #fff 0%, #c4b5fd 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Security Scanner</h1>
+        </div>
+        <span style={{ color: "#a78bfa", fontSize: "0.875rem", fontWeight: 500 }}>Version 0.1.0</span>
+      </header>
+      <main style={{ maxWidth: 900, margin: "0 auto", padding: "4rem 2rem" }}>
+        <section style={{ textAlign: "center", marginBottom: "3rem" }}>
+          <h2 style={{ fontSize: "2.5rem", fontWeight: 700, marginBottom: "1.5rem", lineHeight: 1.2 }}>
+            Security Scanner
+          </h2>
+          <p style={{ fontSize: "1.25rem", color: "#94a3b8", maxWidth: 700, margin: "0 auto 2.5rem", lineHeight: 1.7 }}>
+            Analysez la sécurité de votre système en quelques clics.<br />
+            Application locale, gratuite, basée sur les recommandations Microsoft Security Baselines & CIS Benchmarks.
+          </p>
+          <a href="https://github.com/yanntanguy-del/Project-security" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: "0.75rem", padding: "1.25rem 3rem", fontSize: "1.125rem", fontWeight: 600, color: "#fff", background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)", border: "none", borderRadius: 16, cursor: "pointer", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 30px rgba(139,92,246,0.4)" }}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: 24, height: 24 }}>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            Accéder au dépôt GitHub
+          </a>
+          <p style={{ marginTop: "1rem", color: "#64748b", fontSize: "0.875rem" }}>Cliquez sur le bouton pour installer l'application depuis GitHub</p>
+        </section>
+        <section style={{ marginBottom: "2rem" }}>
+          <h2 style={{ textAlign: "center", fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.5rem", color: "#fff" }}>Fonctionnalités principales</h2>
+          <div style={{ background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 20, padding: "2rem" }}>
+            <ul style={{ color: "#94a3b8", lineHeight: 1.8, fontSize: "1.1rem", marginBottom: 0, listStyle: "disc inside" }}>
+              <li>Analyse complète du registre Windows et des paramètres de sécurité</li>
+              <li>Détection automatique de la version de Windows (Home, Pro, Enterprise)</li>
+              <li>Rapport détaillé avec codes couleur (vert, rouge, jaune)</li>
+              <li>Instructions claires pour corriger chaque vulnérabilité</li>
+              <li>Interface 100% française, accessible à tous</li>
+            </ul>
+          </div>
+        </section>
+        <section style={{ marginBottom: "2rem" }}>
+          <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 16, padding: "1.5rem 2rem" }}>
+            <div style={{ fontSize: "2rem", flexShrink: 0 }}>ℹ️</div>
+            <div>
+              <h3 style={{ color: "#fff", fontSize: "1.125rem", marginBottom: "0.5rem" }}>Comment installer ?</h3>
+              <p style={{ color: "#94a3b8", lineHeight: 1.6 }}>
+                1. Cliquez sur le bouton ci-dessus pour accéder au dépôt GitHub<br />
+                2. Téléchargez le projet (bouton vert "Code" &rarr; "Download ZIP")<br />
+                3. Décompressez l'archive et suivez le guide d'installation dans le README
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer style={{ textAlign: "center", padding: "2rem", borderTop: "1px solid rgba(139,92,246,0.2)", marginTop: "4rem", color: "#64748b", fontSize: "0.875rem" }}>
+        <p>© 2025 Security Scanner. Outil d'analyse de sécurité.</p>
+      </footer>
+    </div>
+  );
 }
-
-interface SystemInfo {
-  osFamily: string;
-  osName: string;
-  osVersion: string;
-  osEdition?: string;
-  buildNumber?: string;
-  manufacturer?: string;
-  model?: string;
-}
-
-interface ScanResult {
-  system: SystemInfo;
-  baseline: string;
-  totalFindings: number;
-  findings: Finding[];
-  scannedAt: string;
-}
-
-type AppState = "welcome" | "scanning" | "results";
-
-// Fonction pour traduire les noms des findings en français
-const translateFindingName = (name: string): string => {
-  const translations: Record<string, string> = {
-    // =====================================
-    // === WINDOWS - POLITIQUES DE COMPTE ===
-    // =====================================
-    "Account lockout duration": "Durée de verrouillage du compte",
-    "Account lockout threshold": "Seuil de verrouillage du compte",
-    "Allow Administrator account lockout": "Autoriser le verrouillage du compte Administrateur",
-    "Length of password history maintained": "Historique des mots de passe conservés",
-    "Minimum password length": "Longueur minimale du mot de passe",
     "Password must meet complexity requirements": "Le mot de passe doit respecter les exigences de complexité",
     "Store passwords using reversible encryption": "Stocker les mots de passe avec chiffrement réversible",
     "Reset account lockout counter after": "Réinitialiser le compteur de verrouillage après",
