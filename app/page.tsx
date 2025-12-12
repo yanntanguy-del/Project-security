@@ -631,7 +631,7 @@ export default function HomePage() {
       const res = await fetch("/api/analyze", {
         method: "POST",
 
-        // Page d'accueil complète et améliorée pour Vercel
+        // Page d'accueil fidèle à l'ancienne version personnalisée, bouton GitHub et explications
         return (
           <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0f0a1a 0%, #1a0a2e 50%, #0f172a 100%)", color: "#fff", fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif" }}>
             <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: -1 }} />
@@ -645,94 +645,44 @@ export default function HomePage() {
             <main style={{ maxWidth: 900, margin: "0 auto", padding: "4rem 2rem" }}>
               <section style={{ textAlign: "center", marginBottom: "3rem" }}>
                 <h2 style={{ fontSize: "2.5rem", fontWeight: 700, marginBottom: "1.5rem", lineHeight: 1.2 }}>
-                  Analysez et <span style={{ background: "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>sécurisez</span><br />votre système
+                  Security Scanner
                 </h2>
                 <p style={{ fontSize: "1.25rem", color: "#94a3b8", maxWidth: 700, margin: "0 auto 2.5rem", lineHeight: 1.7 }}>
-                  Security Scanner est un outil gratuit qui analyse votre ordinateur pour détecter les vulnérabilités et vous aide à appliquer les meilleures pratiques de sécurité.
+                  Analysez la sécurité de votre système en quelques clics.<br />
+                  Application locale, gratuite, basée sur les recommandations Microsoft Security Baselines & CIS Benchmarks.
                 </p>
-                <a href="https://github.com/yanntanguy-del/Project-security" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: "0.75rem", padding: "1.25rem 3rem", fontSize: "1.125rem", fontWeight: 600, color: "#fff", background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);", border: "none", borderRadius: 16, cursor: "pointer", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 30px rgba(139,92,246,0.4)" }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: 24, height: 24 }}>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                  Accéder au dépôt GitHub
-                </a>
-                <p style={{ marginTop: "1rem", color: "#64748b", fontSize: "0.875rem" }}>Vous serez redirigé vers la page GitHub pour installer l'application</p>
-              </section>
-              <section style={{ marginBottom: "2rem" }}>
-                <h2 style={{ textAlign: "center", fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.5rem", color: "#fff" }}>Qu'est-ce que Security Scanner ?</h2>
-                <div style={{ background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 20, padding: "2rem" }}>
-                  <p style={{ color: "#94a3b8", lineHeight: 1.8, fontSize: "1.1rem", marginBottom: "1.5rem" }}>
-                    <strong style={{ color: "#fff" }}>Security Scanner</strong> est une application qui analyse automatiquement les paramètres de sécurité de votre ordinateur. Elle vérifie plus de 100 configurations différentes : pare-feu, antivirus, politiques de mot de passe, et bien d'autres.
-                  </p>
-                  <p style={{ color: "#94a3b8", lineHeight: 1.8, fontSize: "1.1rem", marginBottom: "1.5rem" }}>
-                    L'application génère un <strong style={{ color: "#fff" }}>rapport détaillé</strong> avec des codes couleur : <span style={{ color: "#22c55e" }}>vert</span> pour ce qui est conforme, <span style={{ color: "#ef4444" }}>rouge</span> pour ce qui nécessite attention, et <span style={{ color: "#eab308" }}>jaune</span> pour ce qui n'a pas pu être vérifié.
-                  </p>
-                  <p style={{ color: "#94a3b8", lineHeight: 1.8, fontSize: "1.1rem" }}>
-                    Pour chaque problème détecté, vous recevez des <strong style={{ color: "#fff" }}>instructions claires</strong> pour corriger les vulnérabilités. L'interface est entièrement en français et conçue pour être compréhensible, même sans connaissances techniques.
-                  </p>
-                </div>
-              </section>
-              <section style={{ marginBottom: "2rem" }}>
-                <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 16, padding: "1.5rem 2rem" }}>
-                  <div style={{ fontSize: "2rem", flexShrink: 0 }}>ℹ️</div>
-                  <div>
-                    <h3 style={{ color: "#fff", fontSize: "1.125rem", marginBottom: "0.5rem" }}>Comment obtenir l'application ?</h3>
-                    <p style={{ color: "#94a3b8", lineHeight: 1.6 }}>
-                      Cliquez sur le bouton ci-dessus pour accéder au dépôt GitHub. Suivez les instructions sur la page pour télécharger et installer l'application sur votre ordinateur.
-                    </p>
-                  </div>
-                </div>
-              </section>
-              <section style={{ marginBottom: "2rem" }}>
-                <h2 style={{ textAlign: "center", fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.5rem", color: "#fff" }}>Comment installer l'application ?</h2>
-                <div style={{ display: "flex", flexDirection: "column", gap: "2rem", maxWidth: 700, margin: "0 auto" }}>
-                  <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start" }}>
-                    <div style={{ flexShrink: 0, width: 50, height: 50, background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 700, boxShadow: "0 4px 20px rgba(139,92,246,0.4)" }}>1</div>
-                    <div style={{ flex: 1, paddingTop: "0.5rem" }}>
-                      <h4 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem", color: "#fff" }}>Accédez au dépôt GitHub</h4>
-                      <p style={{ color: "#94a3b8", lineHeight: 1.6 }}>
-                        Cliquez sur le bouton "Accéder au dépôt GitHub" ci-dessus. Vous serez redirigé vers la page du projet.
-                      </p>
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start" }}>
-                    <div style={{ flexShrink: 0, width: 50, height: 50, background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 700, boxShadow: "0 4px 20px rgba(139,92,246,0.4)" }}>2</div>
-                    <div style={{ flex: 1, paddingTop: "0.5rem" }}>
-                      <h4 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem", color: "#fff" }}>Téléchargez le fichier ZIP</h4>
-                      <p style={{ color: "#94a3b8", lineHeight: 1.6 }}>
-                        Sur la page GitHub, cliquez sur le bouton vert "Code" puis sélectionnez "Download ZIP" pour télécharger l'archive contenant l'application.
-                      </p>
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start" }}>
-                    <div style={{ flexShrink: 0, width: 50, height: 50, background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 700, boxShadow: "0 4px 20px rgba(139,92,246,0.4)" }}>3</div>
-                    <div style={{ flex: 1, paddingTop: "0.5rem" }}>
-                      <h4 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem", color: "#fff" }}>Extrayez l'archive</h4>
-                      <p style={{ color: "#94a3b8", lineHeight: 1.6 }}>
-                        Une fois le fichier ZIP téléchargé, faites un clic droit dessus et sélectionnez "Extraire tout..." pour décompresser les fichiers dans un dossier de votre choix.
-                      </p>
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start" }}>
-                    <div style={{ flexShrink: 0, width: 50, height: 50, background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: 700, boxShadow: "0 4px 20px rgba(139,92,246,0.4)" }}>4</div>
-                    <div style={{ flex: 1, paddingTop: "0.5rem" }}>
-                      <h4 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.5rem", color: "#fff" }}>Lancez l'application</h4>
-                      <p style={{ color: "#94a3b8", lineHeight: 1.6 }}>
-                        Ouvrez le dossier extrait et double-cliquez sur le fichier exécutable <strong>Security Scanner.exe</strong> pour démarrer l'application.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-              <section style={{ textAlign: "center", background: "linear-gradient(135deg, rgba(139,92,246,0.1) 0%, rgba(99,102,241,0.1) 100%)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 24, padding: "2rem" }}>
-                <h3 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1rem", color: "#fff" }}>Prêt à sécuriser votre système ?</h3>
-                <p style={{ color: "#94a3b8", marginBottom: "2rem", fontSize: "1.125rem" }}>Accédez au dépôt GitHub pour télécharger Security Scanner gratuitement.</p>
                 <a href="https://github.com/yanntanguy-del/Project-security" target="_blank" rel="noopener" style={{ display: "inline-flex", alignItems: "center", gap: "0.75rem", padding: "1.25rem 3rem", fontSize: "1.125rem", fontWeight: 600, color: "#fff", background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)", border: "none", borderRadius: 16, cursor: "pointer", textDecoration: "none", transition: "all 0.3s ease", boxShadow: "0 4px 30px rgba(139,92,246,0.4)" }}>
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: 24, height: 24 }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                   Accéder au dépôt GitHub
                 </a>
+                <p style={{ marginTop: "1rem", color: "#64748b", fontSize: "0.875rem" }}>Cliquez sur le bouton pour installer l'application depuis GitHub</p>
+              </section>
+              <section style={{ marginBottom: "2rem" }}>
+                <h2 style={{ textAlign: "center", fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.5rem", color: "#fff" }}>Fonctionnalités principales</h2>
+                <div style={{ background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.2)", borderRadius: 20, padding: "2rem" }}>
+                  <ul style={{ color: "#94a3b8", lineHeight: 1.8, fontSize: "1.1rem", marginBottom: 0, listStyle: "disc inside" }}>
+                    <li>Analyse complète du registre Windows et des paramètres de sécurité</li>
+                    <li>Détection automatique de la version de Windows (Home, Pro, Enterprise)</li>
+                    <li>Rapport détaillé avec codes couleur (vert, rouge, jaune)</li>
+                    <li>Instructions claires pour corriger chaque vulnérabilité</li>
+                    <li>Interface 100% française, accessible à tous</li>
+                  </ul>
+                </div>
+              </section>
+              <section style={{ marginBottom: "2rem" }}>
+                <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: 16, padding: "1.5rem 2rem" }}>
+                  <div style={{ fontSize: "2rem", flexShrink: 0 }}>ℹ️</div>
+                  <div>
+                    <h3 style={{ color: "#fff", fontSize: "1.125rem", marginBottom: "0.5rem" }}>Comment installer ?</h3>
+                    <p style={{ color: "#94a3b8", lineHeight: 1.6 }}>
+                      1. Cliquez sur le bouton ci-dessus pour accéder au dépôt GitHub<br />
+                      2. Téléchargez le projet (bouton vert "Code" &rarr; "Download ZIP")<br />
+                      3. Décompressez l'archive et suivez le guide d'installation dans le README
+                    </p>
+                  </div>
+                </div>
               </section>
             </main>
             <footer style={{ textAlign: "center", padding: "2rem", borderTop: "1px solid rgba(139,92,246,0.2)", marginTop: "4rem", color: "#64748b", fontSize: "0.875rem" }}>
