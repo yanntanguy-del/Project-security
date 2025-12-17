@@ -27,31 +27,18 @@ node --version
 
 **Note** : Vous téléchargez le code source du projet. Il faudra installer les dépendances et lancer l'application (voir les étapes suivantes).
 
-### 📁 Étape 2 : Naviguer vers le BON dossier
+### 📁 Étape 2 : Ouvrir le projet dans VS Code
 
-⚠️ **TRÈS IMPORTANT** : Après décompression du ZIP, vous devez ouvrir le dossier qui contient directement le fichier `package.json`.
+1. **Ouvrez Visual Studio Code** (ou votre éditeur de code préféré)
 
-**Structure après décompression :**
-Quand vous décompressez le ZIP téléchargé depuis GitHub, vous obtenez un dossier (généralement nommé `Project-security` ou `projet-security` selon votre système). À l'intérieur de ce dossier, vous devez voir directement :
-- Le fichier `package.json` ✅
-- Le fichier `README.md` ✅
-- Les dossiers `app/`, `components/`, `data/`, `lib/`, `main/`, `public/`, etc. ✅
+2. **Ouvrez le dossier décompressé** :
+   - Menu : **Fichier** → **Ouvrir le dossier**
+   - Naviguez jusqu'au dossier que vous avez décompressé (généralement nommé `Project-security` ou `projet-security`)
+   - Cliquez sur **Sélectionner un dossier**
 
-**Ce qu'il faut faire :**
-1. Ouvrez ce dossier dans VS Code (celui qui contient `package.json` directement)
-2. **NE PAS** ouvrir le sous-dossier `app/` seul
+3. **C'est tout !** Vous devriez maintenant voir les fichiers du projet dans l'explorateur de VS Code à gauche.
 
-💡 **Comment vérifier que vous êtes au bon endroit :**
-- Dans VS Code, regardez l'explorateur de fichiers à gauche
-- Vous devez voir `package.json` dans la liste des fichiers à la racine
-- Si vous ne voyez que des dossiers comme `app/`, `components/`, etc. sans voir `package.json`, vous êtes dans le mauvais dossier
-
-### 💻 Étape 3 : Ouvrir dans VS Code (ou votre éditeur)
-
-1. Ouvrez Visual Studio Code (ou votre éditeur de code préféré)
-2. **Fichier** → **Ouvrir le dossier**
-3. Naviguez jusqu'au dossier qui contient `package.json` (le dossier racine du projet)
-4. Cliquez sur **Sélectionner un dossier**
+💡 **Note** : Le fichier `package.json` est nécessaire pour installer les dépendances à l'étape suivante. Si vous ne le voyez pas dans VS Code, vérifiez que vous avez bien ouvert le dossier racine (celui qui contient aussi les dossiers `app/`, `components/`, `data/`, etc.), et non un sous-dossier comme `app/`.
 
 ### ⌨️ Étape 4 : Ouvrir un terminal
 
@@ -84,13 +71,13 @@ added 762 packages, and audited 763 packages in 60s
 
 ⚠️ Les avertissements `npm warn deprecated` sont normaux, vous pouvez les ignorer.
 
-### 🚀 Étape 6 : Lancer l'application
+### 🚀 Étape 5 : Lancer l'application
 
 ```bash
 npm run dev
 ```
 
-### Étape 7 : C'est prêt ! 🎉
+### ✅ Étape 6 : C'est prêt ! 🎉
 
 L'application Electron s'ouvre automatiquement et affiche directement l'interface d'analyse de sécurité.
 
