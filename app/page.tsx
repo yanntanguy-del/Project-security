@@ -22,7 +22,7 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <section className="w-full max-w-2xl bg-black/70 rounded-3xl shadow-2xl shadow-violet-900/40 p-12 flex flex-col items-center mb-12 border border-violet-900/30">
+      <section className="w-full max-w-2xl rounded-3xl p-12 flex flex-col items-center mb-16">
         <h1 className="text-5xl font-extrabold text-center mb-4 leading-tight drop-shadow-xl">
           Analysez et <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">sécurisez</span><br />
           votre système
@@ -61,31 +61,38 @@ export default function Home() {
 
       {/* Comment installer l'application ? */}
       <section className="w-full max-w-3xl bg-[#1a1033]/90 rounded-2xl shadow-lg p-8 mb-8 border border-violet-900/30">
-        <h2 className="text-2xl font-bold mb-6 text-center">Comment installer l'application&nbsp;?</h2>
-        <ol className="space-y-4">
-          <li className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-violet-600 flex items-center justify-center text-xl font-bold shadow-md">1</div>
+        <h2 className="text-3xl font-extrabold mb-8 text-center">Comment installer l'application&nbsp;?</h2>
+        <ol className="space-y-8">
+          <li className="flex items-start gap-6">
+            <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-2xl font-bold shadow-lg text-white">1</div>
             <div>
-              <span className="font-bold">Accédez à GitHub</span><br />
-              <span className="text-gray-300">Cliquez sur le bouton "Accéder au téléchargement" ci-dessus. Vous serez redirigé vers la page GitHub du projet.</span>
+              <span className="font-bold text-lg">Accédez à GitHub</span><br />
+              <span className="text-gray-300 text-base">Cliquez sur le bouton "Accéder au téléchargement" ci-dessus. Vous serez redirigé vers la page GitHub du projet.</span>
             </div>
           </li>
-          <li className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-violet-600 flex items-center justify-center text-xl font-bold shadow-md">2</div>
+          <li className="flex items-start gap-6">
+            <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-2xl font-bold shadow-lg text-white">2</div>
             <div>
-              <span className="font-bold">Téléchargez le fichier ZIP</span><br />
-              <span className="text-gray-300">Sur la page GitHub, cliquez sur le bouton vert "Code" puis sélectionnez "Download ZIP" pour télécharger l'archive contenant l'application.</span>
+              <span className="font-bold text-lg">Téléchargez le fichier ZIP</span><br />
+              <span className="text-gray-300 text-base">Sur la page GitHub, cliquez sur le bouton vert <b>"Code"</b> puis sélectionnez <b>"Download ZIP"</b> pour télécharger l'archive contenant l'application.</span>
             </div>
           </li>
-          <li className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-violet-600 flex items-center justify-center text-xl font-bold shadow-md">3</div>
+          <li className="flex items-start gap-6">
+            <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-2xl font-bold shadow-lg text-white">3</div>
             <div>
-              <span className="font-bold">Extrayez l'archive</span><br />
-              <span className="text-gray-300">Une fois le fichier ZIP téléchargé, faites un clic droit dessus et sélectionnez "Extraire tout..." pour décompresser les fichiers dans un dossier de votre choix.</span>
+              <span className="font-bold text-lg">Extrayez l'archive</span><br />
+              <span className="text-gray-300 text-base">Une fois le fichier ZIP téléchargé, faites un clic droit dessus et sélectionnez <b>"Extraire tout..."</b> pour décompresser les fichiers dans un dossier de votre choix.</span>
             </div>
           </li>
-        </ol>
-      </section>
+          <li className="flex items-start gap-6">
+            <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-2xl font-bold shadow-lg text-white">4</div>
+            <div>
+              <span className="font-bold text-lg">Lancez l'application</span><br />
+              <span className="text-gray-300 text-base">Ouvrez le dossier extrait et double-cliquez sur le fichier exécutable <b>Security Scanner.exe</b> pour démarrer l'application.</span>
+			</div>
+		  </li>
+		</ol>
+	  </section>
 
       {/* Footer */}
       <footer className="mt-8 text-xs text-gray-500 text-center">
