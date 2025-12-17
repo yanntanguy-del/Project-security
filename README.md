@@ -29,23 +29,22 @@ node --version
 
 ### 📁 Étape 2 : Naviguer vers le BON dossier
 
-⚠️ **TRÈS IMPORTANT** : Après décompression, vous aurez cette structure :
-```
-projet-security/                    ← C'EST CE DOSSIER À OUVRIR !
-├── app/                            ← PAS celui-ci !
-├── components/
-├── data/
-├── lib/
-├── main/
-├── public/
-├── package.json                   ← Le fichier doit être visible ici
-├── README.md
-└── ...
-```
+⚠️ **TRÈS IMPORTANT** : Après décompression du ZIP, vous devez ouvrir le dossier qui contient directement le fichier `package.json`.
 
-**Vous devez ouvrir le dossier qui contient `package.json`** (le dossier racine, qui peut s'appeler `projet-security` ou `Project-security` selon votre système), pas le dossier `app` !
+**Structure après décompression :**
+Quand vous décompressez le ZIP téléchargé depuis GitHub, vous obtenez un dossier (généralement nommé `Project-security` ou `projet-security` selon votre système). À l'intérieur de ce dossier, vous devez voir directement :
+- Le fichier `package.json` ✅
+- Le fichier `README.md` ✅
+- Les dossiers `app/`, `components/`, `data/`, `lib/`, `main/`, `public/`, etc. ✅
 
-💡 **Comment vérifier** : Dans l'explorateur de fichiers, vous devez voir `package.json` directement dans le dossier que vous ouvrez, pas dans un sous-dossier. Si vous voyez seulement le dossier `app` sans voir `package.json`, vous êtes dans le mauvais dossier.
+**Ce qu'il faut faire :**
+1. Ouvrez ce dossier dans VS Code (celui qui contient `package.json` directement)
+2. **NE PAS** ouvrir le sous-dossier `app/` seul
+
+💡 **Comment vérifier que vous êtes au bon endroit :**
+- Dans VS Code, regardez l'explorateur de fichiers à gauche
+- Vous devez voir `package.json` dans la liste des fichiers à la racine
+- Si vous ne voyez que des dossiers comme `app/`, `components/`, etc. sans voir `package.json`, vous êtes dans le mauvais dossier
 
 ### 💻 Étape 3 : Ouvrir dans VS Code (ou votre éditeur)
 
