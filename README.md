@@ -23,23 +23,29 @@ node --version
 
 1. Cliquez sur le bouton vert **"Code"** en haut de cette page GitHub
 2. Cliquez sur **"Download ZIP"**
-3. Décompressez le fichier ZIP téléchargé dans un dossier de votre choix
+3. Décompressez le fichier ZIP téléchargé dans un dossier de votre choix (par exemple sur votre Bureau ou dans Documents)
+
+**Note** : Vous téléchargez le code source du projet. Il faudra installer les dépendances et lancer l'application (voir les étapes suivantes).
 
 ### 📁 Étape 2 : Naviguer vers le BON dossier
 
 ⚠️ **TRÈS IMPORTANT** : Après décompression, vous aurez cette structure :
 ```
-Project-security-feat-coding-interfaces/
-└── Project-security-feat-coding-interfaces/   ← C'EST CE DOSSIER !
-    ├── app/                                    ← PAS celui-ci !
-    ├── components/
-    ├── data/
-    ├── main/
-    ├── package.json                           ← Le fichier doit être visible ici
-    └── ...
+projet-security/                    ← C'EST CE DOSSIER À OUVRIR !
+├── app/                            ← PAS celui-ci !
+├── components/
+├── data/
+├── lib/
+├── main/
+├── public/
+├── package.json                   ← Le fichier doit être visible ici
+├── README.md
+└── ...
 ```
 
-**Vous devez ouvrir le dossier qui contient `package.json`**, pas le dossier `app` !
+**Vous devez ouvrir le dossier qui contient `package.json`** (le dossier racine, qui peut s'appeler `projet-security` ou `Project-security` selon votre système), pas le dossier `app` !
+
+💡 **Comment vérifier** : Dans l'explorateur de fichiers, vous devez voir `package.json` directement dans le dossier que vous ouvrez, pas dans un sous-dossier. Si vous voyez seulement le dossier `app` sans voir `package.json`, vous êtes dans le mauvais dossier.
 
 ### 💻 Étape 3 : Ouvrir dans VS Code (ou votre éditeur)
 
@@ -63,6 +69,8 @@ Ou sur macOS/Linux :
 ```
 user@computer:~/projet-security$
 ```
+
+**Vérification** : Tapez `dir` (Windows) ou `ls` (macOS/Linux) dans le terminal. Vous devez voir `package.json` dans la liste, pas seulement le dossier `app`.
 
 ### 📦 Étape 5 : Installer les dépendances
 
