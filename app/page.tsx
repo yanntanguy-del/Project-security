@@ -1,11 +1,38 @@
 "use client";
 
-
-
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+// Déclaration de type pour window.electronAPI (exposé par preload.js)
+declare global {
+  interface Window {
+    electronAPI?: {
+      on: (channel: string, callback: (...args: any[]) => void) => void;
+      send: (channel: string, args?: any) => void;
+      executeCommand: (command: string) => Promise<any>;
+    };
+  }
+}
+
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Détecter si on est dans Electron (via window.electronAPI exposé par preload.js)
+    if (typeof window !== "undefined" && window.electronAPI) {
+      // Rediriger vers la page de l'application si on est dans Electron
+      router.push("/findings");
+    }
+  }, [router]);
+
+  // Si on est dans Electron, ne rien afficher (redirection en cours)
+  if (typeof window !== "undefined" && window.electronAPI) {
+    return null;
+  }
+
+  // Sinon, afficher la landing page Vercel
   return (
     <main className="min-h-screen w-full bg-gradient-to-br from-[#12092b] via-[#18102e] to-[#0a0612] text-white flex flex-col items-center py-12 px-2">
       {/* Header */}

@@ -19,13 +19,13 @@ node --version
 
 ## 🚀 Installation (étape par étape)
 
-### Étape 1 : Télécharger le projet
+### 📥 Étape 1 : Télécharger le projet
 
-1. Cliquez sur le bouton vert **"Code"** en haut de cette page
+1. Cliquez sur le bouton vert **"Code"** en haut de cette page GitHub
 2. Cliquez sur **"Download ZIP"**
-3. Décompressez le fichier ZIP téléchargé
+3. Décompressez le fichier ZIP téléchargé dans un dossier de votre choix
 
-### Étape 2 : Naviguer vers le BON dossier
+### 📁 Étape 2 : Naviguer vers le BON dossier
 
 ⚠️ **TRÈS IMPORTANT** : Après décompression, vous aurez cette structure :
 ```
@@ -41,28 +41,30 @@ Project-security-feat-coding-interfaces/
 
 **Vous devez ouvrir le dossier qui contient `package.json`**, pas le dossier `app` !
 
-### Étape 3 : Ouvrir dans VS Code
+### 💻 Étape 3 : Ouvrir dans VS Code (ou votre éditeur)
 
-1. Ouvrez Visual Studio Code
+1. Ouvrez Visual Studio Code (ou votre éditeur de code préféré)
 2. **Fichier** → **Ouvrir le dossier**
-3. Naviguez jusqu'au dossier `Project-security-feat-coding-interfaces` (le deuxième niveau, celui avec `package.json`)
+3. Naviguez jusqu'au dossier qui contient `package.json` (le dossier racine du projet)
 4. Cliquez sur **Sélectionner un dossier**
 
-### Étape 4 : Ouvrir un terminal
+### ⌨️ Étape 4 : Ouvrir un terminal
 
 - Menu : **Terminal** → **Nouveau terminal**
-- Ou raccourci : `Ctrl + ù`
+- Ou raccourci : `Ctrl + ù` (Windows/Linux) ou `Cmd + ù` (macOS)
 
-Vérifiez que vous voyez quelque chose comme :
+**Vérifiez que vous êtes dans le bon dossier** : Vous devez voir `package.json` dans la liste des fichiers.
+
+Dans le terminal, vous devriez voir quelque chose comme :
 ```
-PS C:\...\Project-security-feat-coding-interfaces>
+PS C:\...\projet-security>
 ```
-Et **PAS** :
+Ou sur macOS/Linux :
 ```
-PS C:\...\Project-security-feat-coding-interfaces\app>    ← MAUVAIS !
+user@computer:~/projet-security$
 ```
 
-### Étape 5 : Installer les dépendances
+### 📦 Étape 5 : Installer les dépendances
 
 ```bash
 npm install
@@ -73,9 +75,9 @@ npm install
 added 762 packages, and audited 763 packages in 60s
 ```
 
-⚠️ Les avertissements `npm warn deprecated` sont normaux, ignorez-les.
+⚠️ Les avertissements `npm warn deprecated` sont normaux, vous pouvez les ignorer.
 
-### Étape 6 : Lancer l'application
+### 🚀 Étape 6 : Lancer l'application
 
 ```bash
 npm run dev
@@ -83,7 +85,11 @@ npm run dev
 
 ### Étape 7 : C'est prêt ! 🎉
 
-L'application Electron s'ouvre automatiquement. Si elle ne s'ouvre pas, allez sur http://localhost:3000 dans votre navigateur.
+L'application Electron s'ouvre automatiquement et affiche directement l'interface d'analyse de sécurité.
+
+**Important** : 
+- Dans l'application Electron, vous verrez directement la page d'analyse (pas la page d'accueil web)
+- Si l'application ne s'ouvre pas automatiquement, allez sur http://localhost:3000 dans votre navigateur (vous verrez la page de téléchargement)
 
 ---
 
@@ -141,14 +147,63 @@ C'est normal si vous fermez la fenêtre. Pour relancer : `npm run dev`
 
 ---
 
+### ❌ L'application affiche la page de téléchargement au lieu de l'interface d'analyse
+
+**Cause** : L'application n'a pas détecté qu'elle tourne dans Electron  
+**Solution** : 
+1. Vérifiez que vous avez bien exécuté `npm run dev` (pas juste `npm start`)
+2. Fermez l'application et relancez `npm run dev`
+3. L'application devrait automatiquement rediriger vers la page d'analyse
+
+---
+
+### ❌ Certains paramètres affichent "Non vérifié" avec un message sur les droits administrateur
+
+**Cause** : Certains paramètres Windows nécessitent des privilèges administrateur pour être lus  
+**Solution** : 
+1. Fermez l'application
+2. Faites un clic droit sur votre terminal/éditeur
+3. Sélectionnez "Exécuter en tant qu'administrateur" (Windows) ou utilisez `sudo` (macOS/Linux)
+4. Relancez `npm run dev`
+5. Relancez le scan dans l'application
+
+---
+
 ## 📖 Utilisation
 
-1. **Lancer un scan** : Cliquez sur "Lancer l'analyse de sécurité"
-2. **Voir les résultats** : Les failles sont listées par catégorie et sévérité
+### Première utilisation
+
+1. **Lancer l'application** : Exécutez `npm run dev` dans le terminal
+2. **L'interface s'ouvre automatiquement** : L'application Electron affiche directement la page d'analyse de sécurité
+3. **Le scan démarre automatiquement** : L'application analyse votre système dès l'ouverture
+
+### Utiliser l'application
+
+1. **Voir les résultats** : 
+   - Les résultats s'affichent automatiquement après le scan
+   - Les failles sont listées par statut : ✓ Conformes (vert), ✗ Non conformes (rouge), ? Non vérifiés (jaune)
+   - Utilisez les filtres en haut pour voir uniquement les failles qui vous intéressent
+
+2. **Comprendre une faille** : 
+   - Cliquez sur une faille pour voir les détails complets
+   - Chaque faille contient :
+     - 💡 **C'est quoi ?** : Explication simple et accessible du paramètre
+     - ⚠️ **Pourquoi c'est important ?** : Risques si non corrigé
+     - 🔧 **Comment activer cette protection ?** : Instructions de remédiation
+
 3. **Corriger une faille** : 
-   - Cliquez sur une faille pour voir les détails
-   - Cliquez sur "Corriger" pour appliquer la remédiation
-   - ⚠️ Certaines corrections nécessitent les droits administrateur
+   - Copiez la commande PowerShell fournie dans la section "Comment activer cette protection ?"
+   - Ouvrez PowerShell en tant qu'**administrateur** (clic droit → Exécuter en tant qu'administrateur)
+   - Collez et exécutez la commande
+   - ⚠️ **Important** : Certaines corrections nécessitent les droits administrateur
+
+4. **Relancer un scan** : Cliquez sur le bouton "🔄 Relancer" en haut à droite pour réanalyser votre système
+
+### Notes importantes
+
+- **Droits administrateur** : Pour analyser certains paramètres système, vous devrez peut-être exécuter l'application en tant qu'administrateur
+- **Certaines protections ne sont pas disponibles** : Si vous voyez "Non vérifié", consultez les détails pour comprendre pourquoi (édition Windows incompatible, matériel non supporté, etc.)
+- **Relancez le scan après correction** : Après avoir appliqué une correction, relancez le scan pour vérifier que le problème est résolu
 
 ---
 
@@ -159,6 +214,15 @@ C'est normal si vous fermez la fenêtre. Pour relancer : `npm run dev`
 | Windows | 10 (22H2), 11 (22H2, 24H2) |
 | macOS | Sonoma (14), Sequoia (15) |
 | Linux | Ubuntu 24.04, Debian 12, Fedora 40, Arch |
+
+---
+
+## 🌐 Différence entre la version web et l'application Electron
+
+- **Version web (Vercel)** : Affiche une page de téléchargement avec des informations sur le projet
+- **Application Electron** : Affiche directement l'interface d'analyse de sécurité et permet de scanner votre système
+
+Quand vous lancez `npm run dev`, l'application Electron détecte automatiquement qu'elle tourne dans Electron et affiche l'interface d'analyse au lieu de la page de téléchargement.
 
 ---
 
