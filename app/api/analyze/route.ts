@@ -387,6 +387,8 @@ async function getCurrentValueWindows(finding: any): Promise<{ currentValue: str
       const cmd = `try { $v=(Get-ItemProperty -Path \"${regPath.replace(/\"/g, "\\\"")}\" -Name \"${regItem.replace(/\"/g, "\\\"")}\" -ErrorAction Stop).${regItem}; Write-Output $v } catch { Write-Output "__NOT_SET__" }`;
       const out = await execPowerShell(cmd);
       if (out.includes("__NOT_SET__")) {
+        const def = finding?.defaultValue != null ? String(finding.defaultValue) : "";
+        if (def) return { currentValue: def };
         return { currentValue: "Non configuré", skipReason: "registry_not_configured" };
       }
       return { currentValue: out };
@@ -455,6 +457,27 @@ async function getCurrentValueWindows(finding: any): Promise<{ currentValue: str
         return { currentValue: "Droits admin requis", skipReason: "admin_required" };
       }
       if (out.includes("__NOT_SET__")) {
+        const def = finding?.defaultValue != null ? String(finding.defaultValue) : "";
+        if (def) return { currentValue: def };
+        return { currentValue: "Non configuré", skipReason: "registry_not_configured" };
+      }
+
+      return { currentValue: out };
+    }
+
+    if (method.toLowerCase() === "mppreference") {
+      const arg = String(finding?.methodArgument || "").trim();
+      if (!arg) return { currentValue: "Non vérifié", skipReason: "manual_check" };
+
+      const cmd = `try { $p=Get-MpPreference; $prop=$p.PSObject.Properties[\"${arg.replace(/\"/g, "\\\"")}\"]; if ($null -eq $prop) { Write-Output "__NOT_SET__" } else { $v=$prop.Value; if ($null -eq $v) { Write-Output "__NOT_SET__" } elseif ($v -is [System.Array]) { $v | ConvertTo-Json -Compress } else { Write-Output $v } } } catch { Write-Output "__ERROR__" }`;
+      const out = await execPowerShell(cmd);
+
+      if (out.includes("__ERROR__")) {
+        return { currentValue: "Droits admin requis", skipReason: "admin_required" };
+      }
+      if (out.includes("__NOT_SET__")) {
+        const def = finding?.defaultValue != null ? String(finding.defaultValue) : "";
+        if (def) return { currentValue: def };
         return { currentValue: "Non configuré", skipReason: "registry_not_configured" };
       }
 
