@@ -1,19 +1,36 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
-const serve = require('electron-serve');
 const path = require("path");
 const { exec } = require("child_process");
 const util = require("util");
 const execPromise = util.promisify(exec);
 
-const appServe = app.isPackaged ? serve({
-  directory: path.join(__dirname, "../out")
-}) : null;
+async function startNextServer() {
+  const next = require("next");
+  const http = require("http");
 
+  const projectDir = path.join(__dirname, "..");
+  process.chdir(projectDir);
+
+  const nextApp = next({ dev: false, dir: projectDir });
+  const handle = nextApp.getRequestHandler();
+  await nextApp.prepare();
+
+  const server = http.createServer((req, res) => handle(req, res));
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => resolve());
+  });
+
+  const address = server.address();
+  const port = address && typeof address === "object" ? address.port : 0;
+  return { server, port };
+}
 
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
+
     show: false, // Don't show until ready
     webPreferences: {
       preload: path.join(__dirname, "preload.js")
@@ -25,14 +42,26 @@ const createWindow = () => {
   };
 
   if (app.isPackaged) {
-    appServe(win).then(() => {
-      win.loadURL("app://-");
-      win.webContents.once("did-finish-load", showWhenReady);
-    });
+    startNextServer()
+      .then(({ server, port }) => {
+        win.on("closed", () => {
+          try {
+            server.close();
+          } catch {
+            // ignore
+          }
+        });
+        win.loadURL(`http://127.0.0.1:${port}`);
+        win.webContents.once("did-finish-load", showWhenReady);
+      })
+      .catch(() => {
+        app.quit();
+      });
   } else {
     win.loadURL("http://localhost:3000");
     // win.webContents.openDevTools(); // Disabled by default
     win.webContents.once("did-finish-load", showWhenReady);
+
     win.webContents.on("did-fail-load", (e, code, desc) => {
       win.webContents.reloadIgnoringCache();
     });
