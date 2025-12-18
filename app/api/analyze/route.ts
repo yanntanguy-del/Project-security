@@ -8,7 +8,6 @@ import { promisify } from "util";
 const execFileAsync = promisify(execFile);
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 type BaselineFile = {
   metadata?: Record<string, any>;
@@ -270,10 +269,26 @@ function loadBaselineFromDisk(subDir: string, filename: string): BaselineFile {
     return { findings: [] };
   }
 
-  const p = path.join(process.cwd(), "data", "baselines", subDir, filename);
-  if (!fs.existsSync(p)) {
-    throw new Error(`Baseline introuvable: ${p}`);
+  const candidates: string[] = [];
+  candidates.push(path.join(process.cwd(), "data", "baselines", subDir, filename));
+
+  const resourcesPath = (process as any).resourcesPath ? String((process as any).resourcesPath) : "";
+  if (resourcesPath) {
+    candidates.push(path.join(resourcesPath, "data", "baselines", subDir, filename));
   }
+
+  let p = "";
+  for (const c of candidates) {
+    if (fs.existsSync(c)) {
+      p = c;
+      break;
+    }
+  }
+
+  if (!p) {
+    throw new Error(`Baseline introuvable: ${candidates.join(" | ")}`);
+  }
+
   const raw = fs.readFileSync(p, "utf8");
   const parsed = JSON.parse(raw);
   return parsed as BaselineFile;
