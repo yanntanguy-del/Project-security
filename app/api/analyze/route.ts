@@ -62,17 +62,24 @@ type WindowsEvalContext = {
   getServiceStartType: (serviceName: string) => Promise<string | null>;
 };
 
+ type WindowsEvalPrefetch = {
+   registryItemsByPath: Map<string, Set<string>>;
+   serviceNames: Set<string>;
+ };
+
 type PosixEvalContext = {
   exec: (command: string) => Promise<string>;
   readFile: (filePath: string) => Promise<string>;
 };
 
-function createWindowsEvalContext() {
+function createWindowsEvalContext(prefetch?: WindowsEvalPrefetch) {
   let netAccountsPromise: Promise<string> | null = null;
   let seceditMapPromise: Promise<Map<string, string>> | null = null;
   let mpPreferencePromise: Promise<Record<string, any>> | null = null;
   const registryPathCache = new Map<string, Promise<Record<string, any> | null>>();
   let serviceMapPromise: Promise<Map<string, string>> | null = null;
+
+  const psSingleQuoted = (s: string) => `'${String(s || "").replace(/'/g, "''")}'`;
 
   const ctx: WindowsEvalContext = {
     getNetAccountsOutput: async () => {
@@ -128,7 +135,18 @@ function createWindowsEvalContext() {
 
       let propsPromise = registryPathCache.get(p);
       if (!propsPromise) {
-        const cmd = `try { Get-ItemProperty -Path \"${p.replace(/\"/g, "\\\"")}\" -ErrorAction Stop | ConvertTo-Json -Compress -Depth 4 } catch { Write-Output \"__ERROR__\" }`;
+        const items = prefetch?.registryItemsByPath?.get(p);
+        const names = items && items.size ? Array.from(items) : [item];
+        const nameList = names.map(psSingleQuoted).join(", ");
+
+        const cmd =
+          "try { " +
+          `$p=${psSingleQuoted(p)}; ` +
+          `$names=@(${nameList}); ` +
+          "$o=@{}; " +
+          "foreach($n in $names){ try { $o[$n]=Get-ItemPropertyValue -Path $p -Name $n -ErrorAction Stop } catch { $o[$n]=$null } } " +
+          "$o | ConvertTo-Json -Compress -Depth 4 " +
+          "} catch { Write-Output '__ERROR__' }";
         propsPromise = (async () => {
           const out = await execPowerShell(cmd);
           if (out.includes("__ERROR__")) return null;
@@ -151,7 +169,13 @@ function createWindowsEvalContext() {
 
       if (!serviceMapPromise) {
         serviceMapPromise = (async () => {
-          const cmd = `try { Get-Service | Select-Object Name, StartType | ConvertTo-Json -Compress } catch { Write-Output "__ERROR__" }`;
+          const names = prefetch?.serviceNames && prefetch.serviceNames.size ? Array.from(prefetch.serviceNames) : [];
+          const nameList = names.map(psSingleQuoted).join(", ");
+          const cmd =
+            "try { " +
+            (names.length ? `Get-Service -Name @(${nameList}) -ErrorAction SilentlyContinue | ` : "Get-Service | ") +
+            "Select-Object Name, StartType | ConvertTo-Json -Compress " +
+            "} catch { Write-Output '__ERROR__' }";
           const out = await execPowerShell(cmd);
           if (out.includes("__ERROR__")) return new Map<string, string>();
           try {
@@ -273,6 +297,7 @@ async function execPowerShell(command: string, timeoutMs = 60000): Promise<strin
     encoding: "utf8",
     timeout: timeoutMs,
     windowsHide: true,
+    maxBuffer: 10 * 1024 * 1024,
   });
 
   return String(stdout ?? "").trim();
@@ -283,6 +308,7 @@ async function execPosixShell(command: string, timeoutMs = 60000): Promise<strin
   const { stdout } = await execFileAsync(shellPath, ["-lc", command], {
     encoding: "utf8",
     timeout: timeoutMs,
+    maxBuffer: 10 * 1024 * 1024,
   });
   return String(stdout ?? "").trim();
 }
@@ -656,6 +682,27 @@ async function getCurrentValueWindows(
       }
     }
 
+    if (method.toLowerCase() === "mppreferenceasr") {
+      const ruleId = String(finding?.methodArgument || "").trim().toLowerCase();
+      if (!ruleId) return { currentValue: "Non vérifié", skipReason: "manual_check" };
+
+      try {
+        const mp = await ctx.getMpPreference();
+        const ids = (mp as any)?.AttackSurfaceReductionRules_Ids;
+        const actions = (mp as any)?.AttackSurfaceReductionRules_Actions;
+
+        const idsArr = Array.isArray(ids) ? ids.map((x: any) => String(x || "").toLowerCase()) : [];
+        const actionsArr = Array.isArray(actions) ? actions : [];
+
+        const idx = idsArr.findIndex((x: string) => x === ruleId);
+        const v = idx >= 0 ? actionsArr[idx] : 0;
+
+        return { currentValue: String(v) };
+      } catch {
+        return { currentValue: "Droits admin requis", skipReason: "admin_required" };
+      }
+    }
+
     if (method.toLowerCase() === "mppreference") {
       const arg = String(finding?.methodArgument || "").trim();
       if (!arg) return { currentValue: "Non vérifié", skipReason: "manual_check" };
@@ -804,7 +851,30 @@ export async function POST() {
     const baselineFile = loadBaselineFromDisk(subDir, filename);
     const applicableRawFindings = applyBaselineVariants(baselineFile, system);
 
-    const windowsCtx = system.osFamily === "Windows" ? createWindowsEvalContext() : null;
+    const registryItemsByPath = new Map<string, Set<string>>();
+    const serviceNames = new Set<string>();
+    if (system.osFamily === "Windows") {
+      for (const raw of applicableRawFindings) {
+        const m = String(raw?.method || "").toLowerCase();
+        if (m === "registry") {
+          const p = String(raw?.registryPath || "");
+          const item = String(raw?.registryItem || "");
+          if (!p || !item) continue;
+          const set = registryItemsByPath.get(p) ?? new Set<string>();
+          set.add(item);
+          registryItemsByPath.set(p, set);
+        }
+        if (m === "service") {
+          const svc = String(raw?.methodArgument || "").trim();
+          if (svc) serviceNames.add(svc);
+        }
+      }
+    }
+
+    const windowsCtx =
+      system.osFamily === "Windows"
+        ? createWindowsEvalContext({ registryItemsByPath, serviceNames })
+        : null;
     const posixCtx = system.osFamily === "Linux" || system.osFamily === "macOS" ? createPosixEvalContext() : null;
 
     const findings = await mapWithConcurrency(

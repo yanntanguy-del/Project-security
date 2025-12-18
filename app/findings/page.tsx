@@ -575,10 +575,20 @@ export default function FindingsPage() {
   const [expandedFinding, setExpandedFinding] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
+  const normalizePowerShellRemediation = (cmd: string) => {
+    let out = String(cmd || "");
+    out = out.replace(/\s+-Type\s+DWord\b/gi, "");
+    out = out.replace(/\s+-Type\s+DWORD\b/gi, "");
+    if (/^\s*Set-ItemProperty\b/i.test(out) && !/\s-Force\b/i.test(out)) {
+      out = `${out} -Force`;
+    }
+    return out.trim();
+  };
+
   // Fonction pour copier le code dans le presse-papiers
   const copyToClipboard = async (code: string, id: string) => {
     try {
-      await navigator.clipboard.writeText(code);
+      await navigator.clipboard.writeText(normalizePowerShellRemediation(code));
       setCopiedCode(id);
       setTimeout(() => setCopiedCode(null), 2000);
     } catch (err) {
@@ -992,7 +1002,7 @@ export default function FindingsPage() {
                                   <p className="text-xs text-gray-500 mb-1">💻 Commande PowerShell :</p>
                                   <div className="relative">
                                     <button
-                                      onClick={() => copyToClipboard(finding.remediation && typeof finding.remediation === 'object' ? finding.remediation.default || '' : '', `${finding.id}-powershell`)}
+                                      onClick={() => copyToClipboard(finding.remediation && typeof finding.remediation === 'object' ? normalizePowerShellRemediation(finding.remediation.default || '') : '', `${finding.id}-powershell`)}
                                       className="absolute top-2 right-2 p-1.5 rounded bg-gray-700/50 hover:bg-gray-600/50 transition-colors"
                                       title="Copier le code"
                                     >
@@ -1007,7 +1017,7 @@ export default function FindingsPage() {
                                       )}
                                     </button>
                                     <pre className="text-sm text-green-300 whitespace-pre-wrap font-mono bg-black/30 p-2 pr-10 rounded">
-                                      {finding.remediation.default}
+                                      {normalizePowerShellRemediation(finding.remediation.default)}
                                     </pre>
                                   </div>
                                 </div>
