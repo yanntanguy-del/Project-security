@@ -58,6 +58,8 @@ type WindowsEvalContext = {
   getNetAccountsOutput: () => Promise<string>;
   getSeceditMap: () => Promise<Map<string, string>>;
   getMpPreference: () => Promise<Record<string, any>>;
+  getRegistryValue: (registryPath: string, registryItem: string) => Promise<any>;
+  getServiceStartType: (serviceName: string) => Promise<string | null>;
 };
 
 type PosixEvalContext = {
@@ -69,6 +71,8 @@ function createWindowsEvalContext() {
   let netAccountsPromise: Promise<string> | null = null;
   let seceditMapPromise: Promise<Map<string, string>> | null = null;
   let mpPreferencePromise: Promise<Record<string, any>> | null = null;
+  const registryPathCache = new Map<string, Promise<Record<string, any> | null>>();
+  let serviceMapPromise: Promise<Map<string, string>> | null = null;
 
   const ctx: WindowsEvalContext = {
     getNetAccountsOutput: async () => {
@@ -116,6 +120,58 @@ function createWindowsEvalContext() {
         })();
       }
       return mpPreferencePromise;
+    },
+    getRegistryValue: async (registryPath: string, registryItem: string) => {
+      const p = String(registryPath || "");
+      const item = String(registryItem || "");
+      if (!p || !item) return null;
+
+      let propsPromise = registryPathCache.get(p);
+      if (!propsPromise) {
+        const cmd = `try { Get-ItemProperty -Path \"${p.replace(/\"/g, "\\\"")}\" -ErrorAction Stop | ConvertTo-Json -Compress -Depth 4 } catch { Write-Output \"__ERROR__\" }`;
+        propsPromise = (async () => {
+          const out = await execPowerShell(cmd);
+          if (out.includes("__ERROR__")) return null;
+          try {
+            return JSON.parse(out) as Record<string, any>;
+          } catch {
+            return null;
+          }
+        })();
+        registryPathCache.set(p, propsPromise);
+      }
+
+      const props = await propsPromise;
+      if (!props) return null;
+      return (props as any)[item] ?? null;
+    },
+    getServiceStartType: async (serviceName: string) => {
+      const name = String(serviceName || "").trim();
+      if (!name) return null;
+
+      if (!serviceMapPromise) {
+        serviceMapPromise = (async () => {
+          const cmd = `try { Get-Service | Select-Object Name, StartType | ConvertTo-Json -Compress } catch { Write-Output "__ERROR__" }`;
+          const out = await execPowerShell(cmd);
+          if (out.includes("__ERROR__")) return new Map<string, string>();
+          try {
+            const parsed = JSON.parse(out);
+            const arr = Array.isArray(parsed) ? parsed : parsed ? [parsed] : [];
+            const map = new Map<string, string>();
+            for (const s of arr) {
+              const n = String(s?.Name || "");
+              const st = String(s?.StartType || "");
+              if (n) map.set(n, st);
+            }
+            return map;
+          } catch {
+            return new Map<string, string>();
+          }
+        })();
+      }
+
+      const map = await serviceMapPromise;
+      return map.get(name) ?? null;
     },
   };
 
@@ -286,6 +342,7 @@ async function detectSystemInfo() {
   if (platform === "darwin") {
     const productName = await execPosixShell("sw_vers -productName 2>/dev/null || echo 'macOS'");
     const productVersion = await execPosixShell("sw_vers -productVersion 2>/dev/null || echo ''");
+    const model = await execPosixShell("sysctl -n hw.model 2>/dev/null || echo ''");
     const arch = os.arch();
     return {
       osFamily: "macOS",
@@ -294,7 +351,7 @@ async function detectSystemInfo() {
       osEdition: arch === "arm64" ? "Apple Silicon" : "Intel",
       buildNumber: String(productVersion || ""),
       manufacturer: "Apple",
-      model: "",
+      model: String(model || "").trim(),
       platform,
     };
   }
@@ -303,6 +360,8 @@ async function detectSystemInfo() {
     let osName = "Linux";
     let osVersion = os.release();
     let osEdition = "";
+    let manufacturer = "";
+    let model = "";
     try {
       const raw = fs.readFileSync("/etc/os-release", "utf8");
       const o = parseOsRelease(raw);
@@ -312,14 +371,26 @@ async function detectSystemInfo() {
     } catch {
       // ignore
     }
+
+    try {
+      manufacturer = fs.readFileSync("/sys/devices/virtual/dmi/id/sys_vendor", "utf8").trim();
+    } catch {
+      // ignore
+    }
+    try {
+      model = fs.readFileSync("/sys/devices/virtual/dmi/id/product_name", "utf8").trim();
+    } catch {
+      // ignore
+    }
+
     return {
       osFamily: "Linux",
       osName,
       osVersion,
       osEdition,
       buildNumber: "",
-      manufacturer: "",
-      model: "",
+      manufacturer,
+      model,
       platform,
     };
   }
@@ -416,6 +487,7 @@ function applyBaselineVariants(baseline: BaselineFile, system: { osEdition: stri
 
   const editionKey = system.osEdition || "";
   const manufacturer = (system.manufacturer || "").toLowerCase();
+  const model = ((system as any).model || "").toLowerCase();
 
   const excluded = new Set<string>();
   const additional: any[] = [];
@@ -426,7 +498,8 @@ function applyBaselineVariants(baseline: BaselineFile, system: { osEdition: stri
 
   const vendorKeys = Object.keys(variants).filter((k) => k && k !== "Home" && k !== "Pro" && k !== "Enterprise" && k !== "Education");
   for (const key of vendorKeys) {
-    if (manufacturer && manufacturer.includes(key.toLowerCase())) {
+    const k = key.toLowerCase();
+    if ((manufacturer && manufacturer.includes(k)) || (model && model.includes(k))) {
       if (variants[key]?.excludeFindings) {
         for (const id of variants[key]!.excludeFindings!) excluded.add(String(id));
       }
@@ -503,25 +576,25 @@ async function getCurrentValueWindows(
       const regItem = String(finding?.registryItem || "");
       if (!regPath || !regItem) return { currentValue: "Non configuré", skipReason: "registry_not_configured" };
 
-      const cmd = `try { $v=(Get-ItemProperty -Path \"${regPath.replace(/\"/g, "\\\"")}\" -Name \"${regItem.replace(/\"/g, "\\\"")}\" -ErrorAction Stop).${regItem}; Write-Output $v } catch { Write-Output "__NOT_SET__" }`;
-      const out = await execPowerShell(cmd);
-      if (out.includes("__NOT_SET__")) {
+      const v = await ctx.getRegistryValue(regPath, regItem);
+      if (v == null) {
         const def = finding?.defaultValue != null ? String(finding.defaultValue) : "";
         if (def) return { currentValue: def };
         return { currentValue: "Non configuré", skipReason: "registry_not_configured" };
       }
-      return { currentValue: out };
+
+      return { currentValue: String(v) };
     }
 
     if (method.toLowerCase() === "service") {
       const svc = String(finding?.methodArgument || "");
       if (!svc) return { currentValue: "Service inconnu", skipReason: "service_not_installed" };
-      const cmd = `try { $s=Get-Service -Name \"${svc.replace(/\"/g, "\\\"")}\" -ErrorAction Stop; Write-Output $s.StartType } catch { Write-Output "__NOT_INSTALLED__" }`;
-      const out = await execPowerShell(cmd);
-      if (out.includes("__NOT_INSTALLED__")) {
+
+      const st = await ctx.getServiceStartType(svc);
+      if (st == null) {
         return { currentValue: "Service non installé", skipReason: "service_not_installed" };
       }
-      return { currentValue: out };
+      return { currentValue: String(st) };
     }
 
     if (method.toLowerCase() === "accountpolicy") {
