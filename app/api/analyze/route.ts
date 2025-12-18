@@ -60,6 +60,11 @@ type WindowsEvalContext = {
   getMpPreference: () => Promise<Record<string, any>>;
 };
 
+type PosixEvalContext = {
+  exec: (command: string) => Promise<string>;
+  readFile: (filePath: string) => Promise<string>;
+};
+
 function createWindowsEvalContext() {
   let netAccountsPromise: Promise<string> | null = null;
   let seceditMapPromise: Promise<Map<string, string>> | null = null;
@@ -111,6 +116,34 @@ function createWindowsEvalContext() {
         })();
       }
       return mpPreferencePromise;
+    },
+  };
+
+  return ctx;
+}
+
+function createPosixEvalContext() {
+  const commandCache = new Map<string, Promise<string>>();
+  const fileCache = new Map<string, Promise<string>>();
+
+  const ctx: PosixEvalContext = {
+    exec: async (command: string) => {
+      const key = String(command || "");
+      const existing = commandCache.get(key);
+      if (existing) return existing;
+
+      const p = execPosixShell(key);
+      commandCache.set(key, p);
+      return p;
+    },
+    readFile: async (filePath: string) => {
+      const key = String(filePath || "");
+      const existing = fileCache.get(key);
+      if (existing) return existing;
+
+      const p = fs.promises.readFile(key, "utf8");
+      fileCache.set(key, p);
+      return p;
     },
   };
 
@@ -581,14 +614,17 @@ async function getCurrentValueWindows(
   }
 }
 
-async function getCurrentValueLinux(finding: any): Promise<{ currentValue: string; skipReason?: string }> {
+async function getCurrentValueLinux(
+  finding: any,
+  ctx: PosixEvalContext,
+): Promise<{ currentValue: string; skipReason?: string }> {
   const method = String(finding?.method || "").toLowerCase();
 
   if (method === "command") {
     const cmd = String(finding?.command || "");
     if (!cmd) return { currentValue: "Non vérifié", skipReason: "manual_check" };
     try {
-      const out = await execPosixShell(cmd);
+      const out = await ctx.exec(cmd);
       const trimmed = String(out || "").trim();
       // Certaines commandes "booléennes" (ex: grep -q) ne renvoient rien mais sortent avec code 0
       // Dans ce cas, on considère que la condition est vraie.
@@ -603,7 +639,7 @@ async function getCurrentValueLinux(finding: any): Promise<{ currentValue: strin
     const pattern = String(finding?.pattern || "");
     if (!p) return { currentValue: "Non vérifié", skipReason: "manual_check" };
     try {
-      const content = fs.readFileSync(p, "utf8");
+      const content = await ctx.readFile(p);
       if (pattern) {
         const ok = content.toLowerCase().includes(pattern.toLowerCase());
         return { currentValue: ok ? "configured" : "not configured" };
@@ -617,7 +653,10 @@ async function getCurrentValueLinux(finding: any): Promise<{ currentValue: strin
   return { currentValue: "Non vérifié", skipReason: "manual_check" };
 }
 
-async function getCurrentValueMacOS(finding: any): Promise<{ currentValue: string; skipReason?: string }> {
+async function getCurrentValueMacOS(
+  finding: any,
+  ctx: PosixEvalContext,
+): Promise<{ currentValue: string; skipReason?: string }> {
   const method = String(finding?.method || "").toLowerCase();
 
   if (method === "command") {
@@ -632,7 +671,7 @@ async function getCurrentValueMacOS(finding: any): Promise<{ currentValue: strin
     }
 
     try {
-      const out = await execPosixShell(cmd);
+      const out = await ctx.exec(cmd);
       const trimmed = String(out || "").trim();
       // Beaucoup de checks macOS utilisent grep -q : sortie vide + exit code 0 = succès
       return { currentValue: trimmed ? out : String(finding?.recommendedValue ?? "true") };
@@ -648,7 +687,7 @@ async function getCurrentValueMacOS(finding: any): Promise<{ currentValue: strin
 
     const cmd = `defaults read ${JSON.stringify(domain)} ${JSON.stringify(key)} 2>/dev/null || echo '__NOT_SET__'`;
     try {
-      const out = await execPosixShell(cmd);
+      const out = await ctx.exec(cmd);
       if (out.includes("__NOT_SET__")) {
         return { currentValue: "Non configuré", skipReason: "registry_not_configured" };
       }
@@ -693,6 +732,7 @@ export async function POST() {
     const applicableRawFindings = applyBaselineVariants(baselineFile, system);
 
     const windowsCtx = system.osFamily === "Windows" ? createWindowsEvalContext() : null;
+    const posixCtx = system.osFamily === "Linux" || system.osFamily === "macOS" ? createPosixEvalContext() : null;
 
     const findings = await mapWithConcurrency(
       applicableRawFindings,
@@ -717,7 +757,7 @@ export async function POST() {
             status = "unknown";
           }
         } else if (system.osFamily === "Linux") {
-          const cur = await getCurrentValueLinux(raw);
+          const cur = await getCurrentValueLinux(raw, posixCtx!);
           currentValue = cur.currentValue;
           skipReason = cur.skipReason;
 
@@ -730,7 +770,7 @@ export async function POST() {
             status = "unknown";
           }
         } else if (system.osFamily === "macOS") {
-          const cur = await getCurrentValueMacOS(raw);
+          const cur = await getCurrentValueMacOS(raw, posixCtx!);
           currentValue = cur.currentValue;
           skipReason = cur.skipReason;
 
