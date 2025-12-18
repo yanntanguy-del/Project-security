@@ -778,6 +778,27 @@ export default function FindingsPage() {
         {/* Results */}
         {scanResult && !loading && (
           <>
+            <div className="mb-6 p-4 rounded-xl bg-violet-900/10 border border-violet-500/20">
+              <p className="text-sm text-gray-400 mb-2">Informations de l'ordinateur</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                <p className="text-gray-200">
+                  <span className="text-gray-400">OS :</span> {scanResult.system.osName} {scanResult.system.osVersion}
+                </p>
+                <p className="text-gray-200">
+                  <span className="text-gray-400">Édition :</span> {scanResult.system.osEdition || "Inconnue"}
+                </p>
+                <p className="text-gray-200">
+                  <span className="text-gray-400">Build :</span> {scanResult.system.buildNumber || "Inconnu"}
+                </p>
+                <p className="text-gray-200">
+                  <span className="text-gray-400">Fabricant / Modèle :</span> {scanResult.system.manufacturer || ""}{scanResult.system.manufacturer && scanResult.system.model ? " " : ""}{scanResult.system.model || "Inconnu"}
+                </p>
+                <p className="text-gray-200 md:col-span-2">
+                  <span className="text-gray-400">Baseline :</span> {scanResult.baseline || ""}
+                </p>
+              </div>
+            </div>
+
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <div className="p-4 rounded-xl bg-violet-900/20 border border-violet-500/30">
