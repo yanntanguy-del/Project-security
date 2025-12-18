@@ -54,6 +54,89 @@ type ScanResult = {
   findings: Array<ScanFinding & { status: "pass" | "fail" | "unknown" }>;
 };
 
+type WindowsEvalContext = {
+  getNetAccountsOutput: () => Promise<string>;
+  getSeceditMap: () => Promise<Map<string, string>>;
+  getMpPreference: () => Promise<Record<string, any>>;
+};
+
+function createWindowsEvalContext() {
+  let netAccountsPromise: Promise<string> | null = null;
+  let seceditMapPromise: Promise<Map<string, string>> | null = null;
+  let mpPreferencePromise: Promise<Record<string, any>> | null = null;
+
+  const ctx: WindowsEvalContext = {
+    getNetAccountsOutput: async () => {
+      if (!netAccountsPromise) {
+        netAccountsPromise = execPowerShell("net accounts | Out-String");
+      }
+      return netAccountsPromise;
+    },
+    getSeceditMap: async () => {
+      if (!seceditMapPromise) {
+        seceditMapPromise = (async () => {
+          const cmd =
+            "try { $p=Join-Path $env:TEMP 'secpol_hk.cfg'; secedit /export /cfg $p | Out-Null; $c=Get-Content -Path $p -ErrorAction Stop; Remove-Item -Path $p -Force -ErrorAction SilentlyContinue; $c } catch { '__ERROR__' }";
+          const out = await execPowerShell(cmd);
+          if (out.includes("__ERROR__")) {
+            throw new Error("secedit_export_failed");
+          }
+
+          const map = new Map<string, string>();
+          for (const line of String(out || "").split(/\r?\n/)) {
+            const m = line.match(/^\s*([^;#\[][^=]+?)\s*=\s*(.*?)\s*$/);
+            if (!m) continue;
+            map.set(String(m[1]).trim(), String(m[2]).trim());
+          }
+          return map;
+        })();
+      }
+
+      return seceditMapPromise;
+    },
+    getMpPreference: async () => {
+      if (!mpPreferencePromise) {
+        mpPreferencePromise = (async () => {
+          const cmd =
+            "try { Get-MpPreference | ConvertTo-Json -Compress -Depth 6 } catch { '__ERROR__' }";
+          const out = await execPowerShell(cmd);
+          if (out.includes("__ERROR__")) {
+            throw new Error("mppreference_failed");
+          }
+          try {
+            return JSON.parse(out) as Record<string, any>;
+          } catch {
+            throw new Error("mppreference_parse_failed");
+          }
+        })();
+      }
+      return mpPreferencePromise;
+    },
+  };
+
+  return ctx;
+}
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  mapper: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  const out = new Array<R>(items.length);
+  let i = 0;
+
+  const workers = Array.from({ length: Math.max(1, concurrency) }, async () => {
+    while (true) {
+      const idx = i++;
+      if (idx >= items.length) break;
+      out[idx] = await mapper(items[idx]!, idx);
+    }
+  });
+
+  await Promise.all(workers);
+  return out;
+}
+
 function normalizeWindowsEdition(editionRaw: string): string {
   const ed = String(editionRaw || "").trim();
   const low = ed.toLowerCase();
@@ -375,7 +458,10 @@ function compareValues(current: string, recommended: string, operator: string | 
   return curLow === recLow;
 }
 
-async function getCurrentValueWindows(finding: any): Promise<{ currentValue: string; skipReason?: string }> {
+async function getCurrentValueWindows(
+  finding: any,
+  ctx: WindowsEvalContext,
+): Promise<{ currentValue: string; skipReason?: string }> {
   const method = String(finding?.method || "");
 
   try {
@@ -406,7 +492,7 @@ async function getCurrentValueWindows(finding: any): Promise<{ currentValue: str
     }
 
     if (method.toLowerCase() === "accountpolicy") {
-      const out = await execPowerShell("net accounts | Out-String");
+      const out = await ctx.getNetAccountsOutput();
       const name = String(finding?.name || "").toLowerCase();
 
       const getLineValue = (regex: RegExp) => {
@@ -450,38 +536,39 @@ async function getCurrentValueWindows(finding: any): Promise<{ currentValue: str
       const key = String(parts[parts.length - 1] || "").trim();
       if (!key) return { currentValue: "Non vérifié", skipReason: "manual_check" };
 
-      const cmd = `try { $p=Join-Path $env:TEMP \"secpol_hk.cfg\"; secedit /export /cfg $p | Out-Null; $c=Get-Content -Path $p -ErrorAction Stop; $m=$c | Where-Object { $_ -match \"^${key}\s*=\s*(.+)$\" }; if ($m) { ($m -split '=')[1].Trim() } else { \"__NOT_SET__\" } } catch { \"__ERROR__\" }`;
-      const out = await execPowerShell(cmd);
-
-      if (out.includes("__ERROR__")) {
+      try {
+        const map = await ctx.getSeceditMap();
+        const v = map.get(key);
+        if (v == null || v === "") {
+          const def = finding?.defaultValue != null ? String(finding.defaultValue) : "";
+          if (def) return { currentValue: def };
+          return { currentValue: "Non configuré", skipReason: "registry_not_configured" };
+        }
+        return { currentValue: String(v) };
+      } catch {
         return { currentValue: "Droits admin requis", skipReason: "admin_required" };
       }
-      if (out.includes("__NOT_SET__")) {
-        const def = finding?.defaultValue != null ? String(finding.defaultValue) : "";
-        if (def) return { currentValue: def };
-        return { currentValue: "Non configuré", skipReason: "registry_not_configured" };
-      }
-
-      return { currentValue: out };
     }
 
     if (method.toLowerCase() === "mppreference") {
       const arg = String(finding?.methodArgument || "").trim();
       if (!arg) return { currentValue: "Non vérifié", skipReason: "manual_check" };
 
-      const cmd = `try { $p=Get-MpPreference; $prop=$p.PSObject.Properties[\"${arg.replace(/\"/g, "\\\"")}\"]; if ($null -eq $prop) { Write-Output "__NOT_SET__" } else { $v=$prop.Value; if ($null -eq $v) { Write-Output "__NOT_SET__" } elseif ($v -is [System.Array]) { $v | ConvertTo-Json -Compress } else { Write-Output $v } } } catch { Write-Output "__ERROR__" }`;
-      const out = await execPowerShell(cmd);
+      try {
+        const mp = await ctx.getMpPreference();
+        const v = (mp as any)?.[arg];
+        if (v == null) {
+          const def = finding?.defaultValue != null ? String(finding.defaultValue) : "";
+          if (def) return { currentValue: def };
+          return { currentValue: "Non configuré", skipReason: "registry_not_configured" };
+        }
 
-      if (out.includes("__ERROR__")) {
+        if (Array.isArray(v)) return { currentValue: JSON.stringify(v) };
+        if (typeof v === "object") return { currentValue: JSON.stringify(v) };
+        return { currentValue: String(v) };
+      } catch {
         return { currentValue: "Droits admin requis", skipReason: "admin_required" };
       }
-      if (out.includes("__NOT_SET__")) {
-        const def = finding?.defaultValue != null ? String(finding.defaultValue) : "";
-        if (def) return { currentValue: def };
-        return { currentValue: "Non configuré", skipReason: "registry_not_configured" };
-      }
-
-      return { currentValue: out };
     }
 
     return { currentValue: "Non vérifié", skipReason: "manual_check" };
@@ -605,65 +692,69 @@ export async function POST() {
     const baselineFile = loadBaselineFromDisk(subDir, filename);
     const applicableRawFindings = applyBaselineVariants(baselineFile, system);
 
-    const findings: ScanResult["findings"] = [];
+    const windowsCtx = system.osFamily === "Windows" ? createWindowsEvalContext() : null;
 
-    for (const raw of applicableRawFindings) {
-      const f = normalizeFinding(raw);
+    const findings = await mapWithConcurrency(
+      applicableRawFindings,
+      system.osFamily === "Windows" ? 6 : 10,
+      async (raw) => {
+        const f = normalizeFinding(raw);
 
-      let status: "pass" | "fail" | "unknown" = "unknown";
-      let currentValue = f.currentValue || "";
-      let skipReason = f.skipReason;
+        let status: "pass" | "fail" | "unknown" = "unknown";
+        let currentValue = f.currentValue || "";
+        let skipReason = f.skipReason;
 
-      if (system.osFamily === "Windows") {
-        const cur = await getCurrentValueWindows(raw);
-        currentValue = cur.currentValue;
-        skipReason = cur.skipReason;
+        if (system.osFamily === "Windows") {
+          const cur = await getCurrentValueWindows(raw, windowsCtx!);
+          currentValue = cur.currentValue;
+          skipReason = cur.skipReason;
 
-        if (!skipReason && f.recommendedValue != null) {
-          const pr = parseRecommendedOperator(f.operator, String(f.recommendedValue));
-          const ok = compareValues(currentValue, pr.recommended, pr.operator);
-          status = ok ? "pass" : "fail";
+          if (!skipReason && f.recommendedValue != null) {
+            const pr = parseRecommendedOperator(f.operator, String(f.recommendedValue));
+            const ok = compareValues(currentValue, pr.recommended, pr.operator);
+            status = ok ? "pass" : "fail";
+          } else {
+            status = "unknown";
+          }
+        } else if (system.osFamily === "Linux") {
+          const cur = await getCurrentValueLinux(raw);
+          currentValue = cur.currentValue;
+          skipReason = cur.skipReason;
+
+          if (!skipReason && f.recommendedValue != null) {
+            const pr = parseRecommendedOperator(f.operator, String(f.recommendedValue));
+            const inferredOp = f.operator ? pr.operator : (Number.isNaN(Number(currentValue)) ? "contains" : pr.operator);
+            const ok = compareValues(currentValue, pr.recommended, inferredOp);
+            status = ok ? "pass" : "fail";
+          } else {
+            status = "unknown";
+          }
+        } else if (system.osFamily === "macOS") {
+          const cur = await getCurrentValueMacOS(raw);
+          currentValue = cur.currentValue;
+          skipReason = cur.skipReason;
+
+          if (!skipReason && f.recommendedValue != null) {
+            const pr = parseRecommendedOperator(f.operator, String(f.recommendedValue));
+            const ok = compareValues(currentValue, pr.recommended, pr.operator);
+            status = ok ? "pass" : "fail";
+          } else {
+            status = "unknown";
+          }
         } else {
           status = "unknown";
+          currentValue = "Non supporté";
+          skipReason = "manual_check";
         }
-      } else if (system.osFamily === "Linux") {
-        const cur = await getCurrentValueLinux(raw);
-        currentValue = cur.currentValue;
-        skipReason = cur.skipReason;
 
-        if (!skipReason && f.recommendedValue != null) {
-          const pr = parseRecommendedOperator(f.operator, String(f.recommendedValue));
-          const inferredOp = f.operator ? pr.operator : (Number.isNaN(Number(currentValue)) ? "contains" : pr.operator);
-          const ok = compareValues(currentValue, pr.recommended, inferredOp);
-          status = ok ? "pass" : "fail";
-        } else {
-          status = "unknown";
-        }
-      } else if (system.osFamily === "macOS") {
-        const cur = await getCurrentValueMacOS(raw);
-        currentValue = cur.currentValue;
-        skipReason = cur.skipReason;
-
-        if (!skipReason && f.recommendedValue != null) {
-          const pr = parseRecommendedOperator(f.operator, String(f.recommendedValue));
-          const ok = compareValues(currentValue, pr.recommended, pr.operator);
-          status = ok ? "pass" : "fail";
-        } else {
-          status = "unknown";
-        }
-      } else {
-        status = "unknown";
-        currentValue = "Non supporté";
-        skipReason = "manual_check";
-      }
-
-      findings.push({
-        ...f,
-        currentValue,
-        skipReason,
-        status,
-      });
-    }
+        return {
+          ...f,
+          currentValue,
+          skipReason,
+          status,
+        };
+      },
+    );
 
     const payload: ScanResult = {
       system: {
