@@ -248,7 +248,7 @@
       "method": "MpPreference",
       "methodArgument": "PUAProtection",
       "severity": "Medium",
-      "defaultValue": "0",
+      "defaultValue": "false",
       "recommendedValue": "1",
       "operator": ">=",
       "description": "Activer la détection des applications potentiellement indésirables (PUA)",
