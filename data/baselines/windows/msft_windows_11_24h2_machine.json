@@ -1012,7 +1012,7 @@
       "registryPath": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NetBT\\Parameters",
       "registryItem": "NodeType",
       "severity": "Medium",
-      "defaultValue": "0",
+      "defaultValue": "Not set",
       "recommendedValue": "2",
       "operator": "=",
       "description": "NetBIOS est un ancien protocole réseau. Ce paramètre configure comment votre PC résout les noms NetBIOS.",
