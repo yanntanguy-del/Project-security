@@ -757,14 +757,25 @@
       "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System",
       "registryItem": "EnableSmartScreen",
       "severity": "Medium",
-      "defaultValue": "1",
-      "recommendedValue": "1",
-      "operator": "=",
       "description": "SmartScreen vérifie les fichiers téléchargés et les programmes exécutés en les comparant à  une liste de menaces connues dans le cloud Microsoft.",
       "risk": "Sans SmartScreen, vous pouvez exécuter des fichiers dangereux sans avertissement. SmartScreen bloque les virus connus et vous avertit des fichiers suspects avant qu'ils ne s'exécutent.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System' -Name 'EnableSmartScreen' -Value 1 -Type DWord"
       }
+    },
+    {
+      "id": "10993",
+      "category": "Administrative Templates: Windows Components",
+      "name": "Microsoft Defender Antivirus: Network Protection",
+      "method": "MpPreference",
+      "methodArgument": "EnableNetworkProtection",
+      "severity": "Medium",
+      "defaultValue": "false",
+      "recommendedValue": "1",
+      "operator": "=",
+      "description": "La protection réseau bloque les connexions vers des sites web dangereux connus pour héberger des virus (malwares) ou des arnaques (phishing).",
+      "risk": "Sans cette protection, vous pouvez accéder à  des sites dangereux et télécharger des virus. La protection réseau vous arrête AVANT d'atteindre le site dangereux.",
+      "compatibility": "Disponible sur Windows 10/11 Pro, Enterprise et Education. Nécessite Microsoft Defender Antivirus actif (pas compatible avec un antivirus tiers).",
       "remediation": {
         "default": "Set-MpPreference -EnableNetworkProtection Enabled"
       }
