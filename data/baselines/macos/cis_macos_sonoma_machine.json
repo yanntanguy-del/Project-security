@@ -594,7 +594,9 @@
       "method": "command",
       "command": "tmutil destinationinfo 2>/dev/null | grep -c 'Encrypted: true' || echo '0'",
       "severity": "High",
+      "defaultValue": "0",
       "recommendedValue": "1",
+      "operator": ">=",
       "description": "Les sauvegardes Time Machine doivent être chiffrées",
       "remediation": {
         "gui": "Préférences Système > Time Machine > Chiffrer les sauvegardes"
