@@ -283,7 +283,7 @@ function normalizeMacOsMajor(productVersion: string): string {
   return major || pv;
 }
 
-async function execPowerShell(command: string, timeoutMs = 30000): Promise<string> {
+async function execPowerShell(command: string, timeoutMs = 15000): Promise<string> {
   const ps = "powershell.exe";
   const args = [
     "-NoProfile",
@@ -303,7 +303,7 @@ async function execPowerShell(command: string, timeoutMs = 30000): Promise<strin
   return String(stdout ?? "").trim();
 }
 
-async function execPosixShell(command: string, timeoutMs = 30000): Promise<string> {
+async function execPosixShell(command: string, timeoutMs = 15000): Promise<string> {
   const shellPath = "/bin/bash";
   const { stdout } = await execFileAsync(shellPath, ["-lc", command], {
     encoding: "utf8",
@@ -879,7 +879,7 @@ export async function POST() {
 
     const findings = await mapWithConcurrency(
       applicableRawFindings,
-      system.osFamily === "Windows" ? 12 : 20,
+      system.osFamily === "Windows" ? 20 : 30,
       async (raw) => {
         const f = normalizeFinding(raw);
 
