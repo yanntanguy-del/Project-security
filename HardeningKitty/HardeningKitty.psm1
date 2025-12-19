@@ -820,7 +820,13 @@
             # JSON format
             $JsonContent = Get-Content -Path $FileFindingList -Raw
             $JsonData = ConvertFrom-Json -InputObject $JsonContent
-            $FindingList = $JsonData.findings | ForEach-Object {
+            # Get excluded findings for Home variant
+            $ExcludedFindings = @()
+            If ($JsonData.variants.Home.excludeFindings) {
+                $ExcludedFindings = $JsonData.variants.Home.excludeFindings
+            }
+            
+            $FindingList = $JsonData.findings | Where-Object { $_.id -notin $ExcludedFindings } | ForEach-Object {
                 [PSCustomObject]@{
                     ID = $_.id
                     Category = $_.category
@@ -1721,7 +1727,13 @@
             # JSON format
             $JsonContent = Get-Content -Path $FileFindingList -Raw
             $JsonData = ConvertFrom-Json -InputObject $JsonContent
-            $FindingList = $JsonData.findings | ForEach-Object {
+            # Get excluded findings for Home variant
+            $ExcludedFindings = @()
+            If ($JsonData.variants.Home.excludeFindings) {
+                $ExcludedFindings = $JsonData.variants.Home.excludeFindings
+            }
+            
+            $FindingList = $JsonData.findings | Where-Object { $_.id -notin $ExcludedFindings } | ForEach-Object {
                 [PSCustomObject]@{
                     ID = $_.id
                     Category = $_.category

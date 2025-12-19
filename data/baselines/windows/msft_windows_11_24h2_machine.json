@@ -17,6 +17,8 @@
         "10101",
         "10102",
         "10103",
+        "10620",
+        "10657",
         "10672",
         "10673",
         "10674",
@@ -26,7 +28,17 @@
         "10757",
         "10758",
         "10759",
+        "10971",
         "10993",
+        "11013",
+        "11014",
+        "ASR006",
+        "ASR007",
+        "ASR008",
+        "ASR009",
+        "ASR010",
+        "ASR011",
+        "ASR012",
         "ENT001",
         "ENT002"
       ],
@@ -633,79 +645,6 @@
       }
     },
     {
-      "id": "10672",
-      "category": "Administrative Templates: System",
-      "name": "Device Guard: Turn On Virtualization Based Security",
-      "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
-      "registryItem": "EnableVirtualizationBasedSecurity",
-      "severity": "Medium",
-      "defaultValue": "",
-      "recommendedValue": "1",
-      "operator": "=",
-      "description": "VBS crée une zone isolée dans la mémoire de votre PC grâce à  la virtualisation. Cette zone protégée est inaccessible même aux virus qui auraient des droits administrateur.",
-      "risk": "Sans VBS, un virus avec droits admin a accès à  toute la mémoire, y compris vos mots de passe. Avec VBS, ces données sensibles restent protégées même en cas d'infection.",
-      "remediation": {
-        "default": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'EnableVirtualizationBasedSecurity' -Value 1 -Type DWord",
-        "note": "Requiert Pro/Enterprise"
-      }
-    },
-    {
-      "id": "10673",
-      "category": "Administrative Templates: System",
-      "name": "Device Guard: Virtualization Based Protection of Code Integrity",
-      "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
-      "registryItem": "HypervisorEnforcedCodeIntegrity",
-      "severity": "Medium",
-      "defaultValue": "",
-      "recommendedValue": "1",
-      "operator": "=",
-      "description": "HVCI (aussi appelé 'Memory Integrity' dans les paramètres Windows) vérifie que tout code exécuté dans le noyau Windows est légitime et signé.",
-      "risk": "Les virus avancés (rootkits) essaient de s'injecter dans le cÃ…\"ur de Windows pour être invisibles. HVCI bloque ces tentatives en empêchant l'exécution de code non autorisé.",
-      "remediation": {
-        "default": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'HypervisorEnforcedCodeIntegrity' -Value 1 -Type DWord",
-        "note": "Requiert Pro/Enterprise. Un redémarrage est nécessaire."
-      }
-    },
-    {
-      "id": "10674",
-      "category": "Administrative Templates: System",
-      "name": "Device Guard: Credential Guard Configuration",
-      "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
-      "registryItem": "LsaCfgFlags",
-      "severity": "Medium",
-      "defaultValue": "",
-      "recommendedValue": "1",
-      "operator": "=",
-      "description": "Credential Guard isole vos identifiants Windows dans une zone protégée, inaccessible même aux programmes avec droits administrateur.",
-      "risk": "Sans cette protection, un attaquant qui accède à  votre PC peut voler vos identifiants stockés en mémoire et les utiliser pour accéder à  d'autres ressources.",
-      "remediation": {
-        "default": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'LsaCfgFlags' -Value 1 -Type DWord",
-        "note": "Requiert Enterprise uniquement. Un redémarrage est nécessaire."
-      }
-    },
-    {
-      "id": "10698",
-      "category": "Administrative Templates: System",
-      "name": "Device Guard: Kernel-mode Hardware-enforced Stack Protection",
-      "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard",
-      "registryItem": "ConfigureKernelShadowStacksLaunch",
-      "severity": "Medium",
-      "defaultValue": "",
-      "recommendedValue": "1",
-      "operator": "=",
-      "description": "Cette protection utilise votre processeur (Intel CET ou AMD) pour empêcher les attaques de type 'Return-Oriented Programming' qui détournent le flux d'exécution des programmes.",
-      "risk": "Les attaques ROP sont très utilisées pour contourner les protections et exécuter du code malveillant. Cette protection matérielle les rend beaucoup plus difficiles à  réaliser.",
-      "compatibility": "Nécessite un processeur Intel 11e génération+ (Tiger Lake) ou AMD Zen 3+ avec support CET (Control-flow Enforcement Technology). Non disponible sur les anciens processeurs.",
-      "remediation": {
-        "default": "New-Item -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Force | Out-Null; Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceGuard' -Name 'ConfigureKernelShadowStacksLaunch' -Value 1 -Type DWord",
-        "gpo": "Configuration ordinateur > Modèles d'administration > Système > Device Guard > Configurer Kernel-mode Hardware-enforced Stack Protection > Activé en mode audit"
-      }
-    },
-    {
       "id": "10700",
       "category": "Administrative Templates: System",
       "name": "Local Security Authority: Configures LSASS to run as a protected process",
@@ -771,23 +710,6 @@
       "risk": "Sans SmartScreen, vous pouvez exécuter des fichiers dangereux sans avertissement. SmartScreen bloque les virus connus et vous avertit des fichiers suspects avant qu'ils ne s'exécutent.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System' -Name 'EnableSmartScreen' -Value 1 -Type DWord"
-      }
-    },
-    {
-      "id": "10993",
-      "category": "Administrative Templates: Windows Components",
-      "name": "Microsoft Defender Antivirus: Network Protection",
-      "method": "MpPreference",
-      "methodArgument": "EnableNetworkProtection",
-      "severity": "Medium",
-      "defaultValue": "0",
-      "recommendedValue": "1",
-      "operator": "=",
-      "description": "La protection réseau bloque les connexions vers des sites web dangereux connus pour héberger des virus (malwares) ou des arnaques (phishing).",
-      "risk": "Sans cette protection, vous pouvez accéder à  des sites dangereux et télécharger des virus. La protection réseau vous arrête AVANT d'atteindre le site dangereux.",
-      "compatibility": "Disponible sur Windows 10/11 Pro, Enterprise et Education. Nécessite Microsoft Defender Antivirus actif (pas compatible avec un antivirus tiers).",
-      "remediation": {
-        "default": "Set-MpPreference -EnableNetworkProtection Enabled"
       }
     },
     {
@@ -889,36 +811,6 @@
       "description": "Niveau de chiffrement élevé pour les connexions RDP",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services' -Name 'MinEncryptionLevel' -Value 3 -Type DWord -Force"
-      }
-    },
-    {
-      "id": "11013",
-      "category": "Administrative Templates: Windows Components",
-      "name": "Microsoft Defender: Scan all downloaded files and attachments",
-      "method": "MpPreference",
-      "methodArgument": "DisableIOAVProtection",
-      "severity": "Medium",
-      "defaultValue": "False",
-      "recommendedValue": "0",
-      "operator": "=",
-      "description": "Analyser tous les fichiers téléchargés et pièces jointes. La valeur 0 (False) signifie que la protection est ACTIVÉE.",
-      "remediation": {
-        "default": "Set-MpPreference -DisableIOAVProtection 0"
-      }
-    },
-    {
-      "id": "11014",
-      "category": "Administrative Templates: Windows Components",
-      "name": "Microsoft Defender: Turn off real-time protection",
-      "method": "MpPreference",
-      "methodArgument": "DisableRealtimeMonitoring",
-      "severity": "High",
-      "defaultValue": "False",
-      "recommendedValue": "0",
-      "operator": "=",
-      "description": "Ne pas désactiver la protection en temps réel. La valeur 0 (False) signifie que la protection est ACTIVÉE.",
-      "remediation": {
-        "default": "Set-MpPreference -DisableRealtimeMonitoring 0"
       }
     },
     {
@@ -1227,40 +1119,6 @@
       "risk": "Les identifiants stockés peuvent être volés par un attaquant ayant accès au système.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows\\WinRM\\Service' -Name 'DisableRunAs' -Value 1 -Type DWord"
-      }
-    },
-    {
-      "id": "10620",
-      "category": "MS Security Guide",
-      "name": "Apply UAC restrictions to local accounts on network logons",
-      "method": "Registry",
-      "registryPath": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-      "registryItem": "LocalAccountTokenFilterPolicy",
-      "severity": "Medium",
-      "defaultValue": "",
-      "recommendedValue": "0",
-      "operator": "=",
-      "description": "Applique les restrictions UAC même pour les connexions réseau avec un compte local admin.",
-      "risk": "Sans ce paramètre, un attaquant avec des identifiants admin locaux peut se connecter à  distance avec tous les privilèges, contournant l'UAC.",
-      "remediation": {
-        "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System' -Name 'LocalAccountTokenFilterPolicy' -Value 0 -Type DWord"
-      }
-    },
-    {
-      "id": "10657",
-      "category": "Administrative Templates: Network",
-      "name": "DNS Client: Configure NetBIOS settings",
-      "method": "Registry",
-      "registryPath": "HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient",
-      "registryItem": "EnableNetbios",
-      "severity": "Medium",
-      "defaultValue": "",
-      "recommendedValue": "2",
-      "operator": "=",
-      "description": "Configure le comportement de NetBIOS sur TCP/IP. La valeur 2 désactive NetBIOS.",
-      "risk": "NetBIOS est un protocole ancien avec plusieurs vulnérabilités connues. Il est souvent exploité pour des attaques de type 'name poisoning'.",
-      "remediation": {
-        "default": "New-Item -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient' -Force; Set-ItemProperty -Path 'HKLM:\\Software\\Policies\\Microsoft\\Windows NT\\DNSClient' -Name 'EnableNetbios' -Value 2 -Type DWord"
       }
     },
     {
