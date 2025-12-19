@@ -216,16 +216,6 @@ C'est normal si vous fermez la fenêtre. Pour relancer : `npm run dev`
 
 Quand vous lancez `npm run dev`, l'application Electron détecte automatiquement qu'elle tourne dans Electron et affiche l'interface d'analyse au lieu de la page de téléchargement.
 
----
 
-## ⚠️ Note importante
-
-Cette version de démonstration expire le **30 décembre 2025**.
-
----
-
-## 📞 Support
-
-En cas de problème, créez une [Issue](https://github.com/yanntanguy-del/Project-security/issues) sur GitHub.
 
 
