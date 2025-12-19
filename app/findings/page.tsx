@@ -753,8 +753,8 @@ export default function FindingsPage() {
       <header className="relative border-b border-violet-500/20 bg-black/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
-            <span className="text-2xl">🛡️</span>
-            <span className="text-xl font-bold text-violet-400">HardeningKitty</span>
+            <img src="/security-logo.svg" alt="Security Scanner Logo" width="32" height="32" />
+            <span className="text-xl font-bold text-violet-400">Security Scanner</span>
           </Link>
           <button
             onClick={runScan}
