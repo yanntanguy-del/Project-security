@@ -49,8 +49,17 @@ export default function Home() {
       {/* Header */}
       <div className="flex flex-col items-center mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <div className="bg-[#2d225a] rounded-2xl p-3 shadow-2xl shadow-violet-900/40">
-            <img src="/security-logo.svg" alt="Security Scanner Logo" width="40" height="40" />
+          <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-violet-800 rounded-2xl flex items-center justify-center shadow-2xl shadow-gray-900/40 border border-violet-500/30">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L4 7V12C4 16.5 7 20 11 21.5V14H9V11H11V8.5C11 7.1 12.1 6 13.5 6H16V9H13.5C13.2 9 13 9.2 13 9.5V11H16V14H13V21.5C17 20 20 16.5 20 12V7L12 2Z" fill="white" opacity="0.9"/>
+              <path d="M12 2L4 7V12C4 16.5 7 20 11 21.5V14H9V11H11V8.5C11 7.1 12.1 6 13.5 6H16V9H13.5C13.2 9 13 9.2 13 9.5V11H16V14H13V21.5C17 20 20 16.5 20 12V7L12 2Z" fill="url(#shield-gradient)" opacity="0.3"/>
+              <defs>
+                <linearGradient id="shield-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.8"/>
+                  <stop offset="100%" stopColor="#6366f1" stopOpacity="0.4"/>
+                </linearGradient>
+              </defs>
+            </svg>
           </div>
           <div className="flex flex-col">
             <span className="text-3xl font-extrabold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-lg">Security Scanner</span>
