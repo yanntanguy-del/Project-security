@@ -752,10 +752,21 @@ export default function FindingsPage() {
       {/* Header */}
       <header className="relative border-b border-violet-500/20 bg-black/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
-            <img src="/security-logo.svg" alt="Security Scanner Logo" width="32" height="32" />
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-violet-800 rounded-xl flex items-center justify-center shadow-lg border border-violet-500/30">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L4 7V12C4 16.5 7 20 11 21.5V14H9V11H11V8.5C11 7.1 12.1 6 13.5 6H16V9H13.5C13.2 9 13 9.2 13 9.5V11H16V14H13V21.5C17 20 20 16.5 20 12V7L12 2Z" fill="white" opacity="0.9"/>
+                <path d="M12 2L4 7V12C4 16.5 7 20 11 21.5V14H9V11H11V8.5C11 7.1 12.1 6 13.5 6H16V9H13.5C13.2 9 13 9.2 13 9.5V11H16V14H13V21.5C17 20 20 16.5 20 12V7L12 2Z" fill="url(#shield-gradient)" opacity="0.3"/>
+                <defs>
+                  <linearGradient id="shield-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.8"/>
+                    <stop offset="100%" stopColor="#6366f1" stopOpacity="0.4"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
             <span className="text-xl font-bold text-violet-400">Security Scanner</span>
-          </Link>
+          </div>
           <button
             onClick={runScan}
             disabled={loading}
@@ -779,7 +790,10 @@ export default function FindingsPage() {
         {error && !loading && (
           <div className="text-center py-20">
             <p className="text-red-400 mb-4">❌ {error}</p>
-            <button onClick={runScan} className="px-6 py-2 rounded-lg bg-violet-600 hover:bg-violet-500">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-6 py-2 rounded-lg bg-violet-600 hover:bg-violet-500"
+            >
               Réessayer
             </button>
           </div>
