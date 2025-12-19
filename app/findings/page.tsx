@@ -575,10 +575,20 @@ export default function FindingsPage() {
   const [expandedFinding, setExpandedFinding] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
+  const normalizePowerShellRemediation = (cmd: string) => {
+    let out = String(cmd || "");
+    out = out.replace(/\s+-Type\s+DWord\b/gi, "");
+    out = out.replace(/\s+-Type\s+DWORD\b/gi, "");
+    if (/^\s*Set-ItemProperty\b/i.test(out) && !/\s-Force\b/i.test(out)) {
+      out = `${out} -Force`;
+    }
+    return out.trim();
+  };
+
   // Fonction pour copier le code dans le presse-papiers
   const copyToClipboard = async (code: string, id: string) => {
     try {
-      await navigator.clipboard.writeText(code);
+      await navigator.clipboard.writeText(normalizePowerShellRemediation(code));
       setCopiedCode(id);
       setTimeout(() => setCopiedCode(null), 2000);
     } catch (err) {
@@ -780,7 +790,7 @@ export default function FindingsPage() {
           <>
             <div className="mb-6 p-4 rounded-xl bg-violet-900/10 border border-violet-500/20">
               <p className="text-sm text-gray-400 mb-2">Informations de l'ordinateur</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                 <p className="text-gray-200">
                   <span className="text-gray-400">OS :</span> {scanResult.system.osName} {scanResult.system.osVersion}
                 </p>
@@ -800,7 +810,7 @@ export default function FindingsPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <div className="p-4 rounded-xl bg-violet-900/20 border border-violet-500/30">
                 <p className="text-gray-400 text-sm">Total</p>
                 <p className="text-2xl font-bold text-white">{visibleFindings.length}</p>
@@ -820,7 +830,7 @@ export default function FindingsPage() {
             </div>
 
             {/* Filters */}
-            <div className="flex gap-2 mb-6 flex-wrap">
+            <div className="flex flex-col sm:flex-row gap-2 mb-6">
               {[
                 { key: "all", label: "Tous", count: visibleFindings.length },
                 { key: "pass", label: "✓ Conformes", count: passCount },
@@ -946,7 +956,7 @@ export default function FindingsPage() {
 
                       {/* Valeurs - seulement si pas manuel */}
                       {finding.method !== "manual" && (
-                        <div className="grid md:grid-cols-2 gap-4 mt-4">
+                        <div className="grid sm:grid-cols-2 gap-4 mt-4">
                           <div className="p-3 rounded-lg bg-green-500/10">
                             <p className="text-xs text-green-400 mb-1">✓ Valeur recommandée</p>
                             <code className="text-sm text-white">{String(finding.recommendedValue ?? "N/A")}</code>
@@ -992,7 +1002,7 @@ export default function FindingsPage() {
                                   <p className="text-xs text-gray-500 mb-1">💻 Commande PowerShell :</p>
                                   <div className="relative">
                                     <button
-                                      onClick={() => copyToClipboard(finding.remediation && typeof finding.remediation === 'object' ? finding.remediation.default || '' : '', `${finding.id}-powershell`)}
+                                      onClick={() => copyToClipboard(finding.remediation && typeof finding.remediation === 'object' ? normalizePowerShellRemediation(finding.remediation.default || '') : '', `${finding.id}-powershell`)}
                                       className="absolute top-2 right-2 p-1.5 rounded bg-gray-700/50 hover:bg-gray-600/50 transition-colors"
                                       title="Copier le code"
                                     >
@@ -1007,7 +1017,7 @@ export default function FindingsPage() {
                                       )}
                                     </button>
                                     <pre className="text-sm text-green-300 whitespace-pre-wrap font-mono bg-black/30 p-2 pr-10 rounded">
-                                      {finding.remediation.default}
+                                      {normalizePowerShellRemediation(finding.remediation.default)}
                                     </pre>
                                   </div>
                                 </div>

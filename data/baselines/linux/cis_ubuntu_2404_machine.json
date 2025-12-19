@@ -95,7 +95,9 @@
       "method": "command",
       "command": "mount | grep -E '\\s/tmp\\s' | grep -c noexec || echo '0'",
       "severity": "Medium",
+      "defaultValue": "0",
       "recommendedValue": "1",
+      "operator": ">=",
       "description": "L'option noexec empêche l'exécution de binaires sur /tmp",
       "remediation": {
         "default": "Ajouter noexec aux options de /tmp dans /etc/fstab"
@@ -286,6 +288,7 @@
       "method": "command",
       "command": "awk -F: '($2 == \"\" ) { print $1 }' /etc/shadow 2>/dev/null | wc -l",
       "severity": "Critical",
+      "defaultValue": "0",
       "recommendedValue": "0",
       "operator": "=",
       "description": "Aucun compte ne doit avoir un mot de passe vide",
@@ -300,6 +303,7 @@
       "method": "command",
       "command": "awk -F: '($3 == 0 && $1 != \"root\") { print $1 }' /etc/passwd | wc -l",
       "severity": "Critical",
+      "defaultValue": "0",
       "recommendedValue": "0",
       "operator": "=",
       "description": "Seul root doit avoir l'UID 0",
@@ -314,7 +318,9 @@
       "method": "command",
       "command": "sshd -T 2>/dev/null | grep -i 'protocol' || echo 'default (2)'",
       "severity": "Critical",
+      "defaultValue": "2",
       "recommendedValue": "2",
+      "operator": "=",
       "description": "SSH doit utiliser uniquement le protocole 2",
       "remediation": {
         "default": "echo 'Protocol 2' | sudo tee -a /etc/ssh/sshd_config && sudo systemctl restart sshd"

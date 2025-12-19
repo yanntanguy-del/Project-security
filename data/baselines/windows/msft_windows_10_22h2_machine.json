@@ -248,7 +248,7 @@
       "method": "MpPreference",
       "methodArgument": "PUAProtection",
       "severity": "Medium",
-      "defaultValue": "0",
+      "defaultValue": "false",
       "recommendedValue": "1",
       "operator": ">=",
       "description": "Activer la détection des applications potentiellement indésirables (PUA)",
@@ -257,20 +257,6 @@
       }
     },
     {
-      "id": "11014",
-      "category": "Administrative Templates: Windows Components",
-      "name": "Microsoft Defender Antivirus: Real-time Protection: Turn off real-time protection",
-      "method": "MpPreference",
-      "methodArgument": "DisableRealtimeMonitoring",
-      "severity": "Medium",
-      "defaultValue": "0",
-      "recommendedValue": "0",
-      "operator": "=",
-      "description": "Ne pas désactiver la protection en temps réel",
-      "remediation": {
-        "default": "Set-MpPreference -DisableRealtimeMonitoring 0"
-      }
-    },
     {
       "id": "11005",
       "category": "Administrative Templates: Windows Components",

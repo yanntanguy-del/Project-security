@@ -30,8 +30,8 @@ const createWindow = () => {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
-
     show: false, // Don't show until ready
+    fullscreen: process.env.NODE_ENV === 'development' ? true : false, // Fullscreen in dev mode
     webPreferences: {
       preload: path.join(__dirname, "preload.js")
     }

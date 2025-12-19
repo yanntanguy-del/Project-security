@@ -49,8 +49,8 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <section className="w-full max-w-2xl rounded-3xl p-12 flex flex-col items-center mb-16">
-        <h1 className="text-5xl font-extrabold text-center mb-4 leading-tight drop-shadow-xl">
+      <section className="w-full max-w-2xl rounded-3xl p-8 sm:p-12 flex flex-col items-center mb-16">
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-center mb-4 leading-tight drop-shadow-xl">
           Analysez et <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">sécurisez</span><br />
           votre système
         </h1>
