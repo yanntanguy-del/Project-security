@@ -23,7 +23,18 @@ export default function Home() {
     // Détecter si on est dans Electron (via window.electronAPI exposé par preload.js)
     if (typeof window !== "undefined" && window.electronAPI) {
       // Rediriger vers la page de l'application si on est dans Electron
-      router.push("/findings");
+      const redirect = async () => {
+        try {
+          await router.push("/findings");
+        } catch (err: any) {
+          console.error("Erreur de redirection:", err);
+          // En cas d'erreur, essayer avec window.location
+          if (typeof window !== "undefined") {
+            window.location.href = "/findings";
+          }
+        }
+      };
+      redirect();
     }
   }, [router]);
 
@@ -39,7 +50,7 @@ export default function Home() {
       <div className="flex flex-col items-center mb-8">
         <div className="flex items-center gap-3 mb-2">
           <div className="bg-[#2d225a] rounded-2xl p-3 shadow-2xl shadow-violet-900/40">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#6c47ff"/><path d="M12 7l4 2v2c0 2.5-1.5 4.5-4 6-2.5-1.5-4-3.5-4-6V9l4-2z" fill="#fff"/></svg>
+            <img src="/security-logo.svg" alt="Security Scanner Logo" width="40" height="40" />
           </div>
           <div className="flex flex-col">
             <span className="text-3xl font-extrabold bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-lg">Security Scanner</span>
