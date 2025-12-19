@@ -503,8 +503,8 @@
       "method": "MpPreference",
       "methodArgument": "DisableIOAVProtection",
       "severity": "Medium",
-      "defaultValue": "0",
-      "recommendedValue": "0",
+      "defaultValue": "false",
+      "recommendedValue": "false",
       "operator": "=",
       "description": "Analyser tous les fichiers téléchargés et pièces jointes",
       "remediation": {
@@ -517,9 +517,9 @@
       "name": "Microsoft Defender Antivirus: Real-time Protection: Turn off real-time protection",
       "method": "MpPreference",
       "methodArgument": "DisableRealtimeMonitoring",
-      "severity": "Medium",
-      "defaultValue": "0",
-      "recommendedValue": "0",
+      "severity": "High",
+      "defaultValue": "false",
+      "recommendedValue": "false",
       "operator": "=",
       "description": "Ne pas désactiver la protection en temps réel",
       "remediation": {

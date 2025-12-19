@@ -923,8 +923,8 @@
       "method": "MpPreference",
       "methodArgument": "DisableIOAVProtection",
       "severity": "Medium",
-      "defaultValue": "0",
-      "recommendedValue": "0",
+      "defaultValue": "false",
+      "recommendedValue": "false",
       "operator": "=",
       "description": "Analyser tous les fichiers téléchargés et pièces jointes. La valeur 0 (False) signifie que la protection est ACTIVÉE.",
       "remediation": {
@@ -938,8 +938,8 @@
       "method": "MpPreference",
       "methodArgument": "DisableRealtimeMonitoring",
       "severity": "High",
-      "defaultValue": "0",
-      "recommendedValue": "0",
+      "defaultValue": "false",
+      "recommendedValue": "false",
       "operator": "=",
       "description": "Ne pas désactiver la protection en temps réel. La valeur 0 (False) signifie que la protection est ACTIVÉE.",
       "remediation": {
