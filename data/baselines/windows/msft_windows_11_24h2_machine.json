@@ -757,45 +757,10 @@
       "registryPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System",
       "registryItem": "EnableSmartScreen",
       "severity": "Medium",
-      "defaultValue": "1",
-      "recommendedValue": "1",
-      "operator": "=",
       "description": "SmartScreen vérifie les fichiers téléchargés et les programmes exécutés en les comparant à  une liste de menaces connues dans le cloud Microsoft.",
       "risk": "Sans SmartScreen, vous pouvez exécuter des fichiers dangereux sans avertissement. SmartScreen bloque les virus connus et vous avertit des fichiers suspects avant qu'ils ne s'exécutent.",
       "remediation": {
         "default": "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System' -Name 'EnableSmartScreen' -Value 1 -Type DWord"
-      }
-    },
-    {
-      "id": "10972",
-      "category": "Administrative Templates: Windows Components",
-      "name": "Microsoft Defender Antivirus: Configure detection for PUA",
-      "method": "MpPreference",
-      "methodArgument": "PUAProtection",
-      "severity": "Medium",
-      "defaultValue": "0",
-      "recommendedValue": "1",
-      "operator": ">=",
-      "description": "Les PUA (Applications Potentiellement Indésirables) sont des programmes pas vraiment malveillants mais ennuyeux : barres d'outils, logiciels publicitaires, 'optimiseurs' inutiles...",
-      "risk": "Ces programmes ralentissent votre PC, affichent des pubs, collectent vos données et sont souvent installés sans votre consentement clair. Activer cette protection les bloque avant installation.",
-      "remediation": {
-        "default": "Set-MpPreference -PUAProtection Enabled"
-      }
-    },
-    {
-      "id": "10973",
-      "category": "Administrative Templates: Windows Components",
-      "name": "Microsoft Defender Antivirus: MAPS: Join Microsoft MAPS",
-      "method": "MpPreference",
-      "methodArgument": "MAPSReporting",
-      "severity": "Medium",
-      "defaultValue": "0",
-      "recommendedValue": "2",
-      "operator": "=",
-      "description": "MAPS (Microsoft Active Protection Service) envoie des infos sur les fichiers suspects à  Microsoft pour analyse en temps réel. En retour, vous recevez une protection contre les nouvelles menaces en quelques secondes.",
-      "risk": "Sans MAPS, Defender dépend uniquement des mises à  jour téléchargées. Avec MAPS, un nouveau virus détecté n'importe où dans le monde peut être bloqué chez vous en quelques minutes.",
-      "remediation": {
-        "default": "Set-MpPreference -MAPSReporting Advanced"
       }
     },
     {
@@ -805,7 +770,7 @@
       "method": "MpPreference",
       "methodArgument": "EnableNetworkProtection",
       "severity": "Medium",
-      "defaultValue": "0",
+      "defaultValue": "false",
       "recommendedValue": "1",
       "operator": "=",
       "description": "La protection réseau bloque les connexions vers des sites web dangereux connus pour héberger des virus (malwares) ou des arnaques (phishing).",
@@ -923,8 +888,8 @@
       "method": "MpPreference",
       "methodArgument": "DisableIOAVProtection",
       "severity": "Medium",
-      "defaultValue": "0",
-      "recommendedValue": "0",
+      "defaultValue": "false",
+      "recommendedValue": "false",
       "operator": "=",
       "description": "Analyser tous les fichiers téléchargés et pièces jointes. La valeur 0 (False) signifie que la protection est ACTIVÉE.",
       "remediation": {
@@ -938,8 +903,8 @@
       "method": "MpPreference",
       "methodArgument": "DisableRealtimeMonitoring",
       "severity": "High",
-      "defaultValue": "0",
-      "recommendedValue": "0",
+      "defaultValue": "false",
+      "recommendedValue": "false",
       "operator": "=",
       "description": "Ne pas désactiver la protection en temps réel. La valeur 0 (False) signifie que la protection est ACTIVÉE.",
       "remediation": {

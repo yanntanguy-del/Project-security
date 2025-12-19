@@ -385,14 +385,16 @@
     {
       "id": "MAC10005",
       "category": "User Account Security",
-      "name": "Touch ID / Face ID",
+      "name": "Time Machine Encryption",
       "method": "command",
-      "command": "bioutil -rs 2>/dev/null | grep -c 'enrolled' || echo '0'",
-      "severity": "Info",
-      "recommendedValue": "enrolled",
-      "description": "Touch ID ou Face ID configuré pour une authentification plus sécurisée",
+      "command": "tmutil destinationinfo 2>/dev/null | grep -c 'Encrypted: true' || echo '0'",
+      "severity": "High",
+      "defaultValue": "0",
+      "recommendedValue": "1",
+      "operator": ">=",
+      "description": "La sauvegarde Time Machine doit être chiffrée",
       "remediation": {
-        "gui": "Réglages Système > Touch ID & Mot de passe"
+        "gui": "Réglages Système > Time Machine > Sélectionner le disque > Chiffrer les sauvegardes"
       }
     },
     {
