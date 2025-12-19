@@ -17,7 +17,6 @@ node --version
 
 ---
 
-## 🚀 Installation (étape par étape)
 
 ### 📥 Étape 1 : Télécharger le projet
 
@@ -27,7 +26,7 @@ node --version
 
 **Note** : Vous téléchargez le code source du projet. Il faudra installer les dépendances et lancer l'application (voir les étapes suivantes).
 
-### 📁 Étape 2 : Ouvrir le projet dans VS Code
+### 📁 Étape 2 : Ouvrir le projet dans VS Code (ou votre éditeur de code préféré)
 
 1. **Ouvrez Visual Studio Code** (ou votre éditeur de code préféré)
 
@@ -71,7 +70,7 @@ added 762 packages, and audited 763 packages in 60s
 
 ⚠️ Les avertissements `npm warn deprecated` sont normaux, vous pouvez les ignorer.
 
-### 🚀 Étape 5 : Lancer l'application
+### Étape 5 : Lancer l'application
 
 ```bash
 npm run dev
@@ -83,7 +82,6 @@ L'application Electron s'ouvre automatiquement et affiche directement l'interfac
 
 **Important** : 
 - Dans l'application Electron, vous verrez directement la page d'analyse (pas la page d'accueil web)
-- Si l'application ne s'ouvre pas automatiquement, allez sur http://localhost:3000 dans votre navigateur (vous verrez la page de téléchargement)
 
 ---
 
